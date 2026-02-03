@@ -1,0 +1,130 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr "Project-Id-Version: PACKAGE VERSION\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-02-03 09:45+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: \nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n"
+
+#: l10n_lint.py:245
+#, python-brace-format
+msgid "Could not read file: {error}"
+msgstr "无法读取文件： {error}"
+
+#: l10n_lint.py:262
+#, python-brace-format
+msgid "Unknown file format: {ext}"
+msgstr "未知文件格式： {ext}"
+
+#: l10n_lint.py:289
+msgid "Missing translation (empty msgstr)"
+msgstr "缺少翻译（空msgstr ）"
+
+#: l10n_lint.py:300
+msgid "Fuzzy translation needs review"
+msgstr "模糊翻译需要审核"
+
+#: l10n_lint.py:319
+#, python-brace-format
+msgid "Duplicate msgid (first seen at line {line})"
+msgstr "重复的msgid （首次出现在第{line}行）"
+
+#: l10n_lint.py:342
+msgid "Unfinished/missing translation"
+msgstr "未完成/缺少翻译"
+
+#: l10n_lint.py:353
+msgid "Vanished translation (source removed)"
+msgstr "已消失的翻译（源已删除）"
+
+#: l10n_lint.py:382
+#, python-brace-format
+msgid "Placeholder mismatch ({name}): source has {source}, translation has {trans}"
+msgstr "占位符不匹配（ {name} ） ：源有{source} ，翻译有{trans}"
+
+#: l10n_lint.py:396
+#, python-brace-format
+msgid "Translation is very long ({length} chars, max {max})"
+msgstr "翻译很长（ {length}个字符，最大{max} ）"
+
+#: l10n_lint.py:408
+#, python-brace-format
+msgid "Translation is {ratio:.1f}x longer than source"
+msgstr "翻译比源翻译长{ratio: .1f}倍"
+
+#: l10n_lint.py:489
+#, python-brace-format
+msgid "Warning: Could not fetch {path}: {error}"
+msgstr "Warning: Could not fetch {path}: {error}"
+
+#: l10n_lint.py:512
+#, python-brace-format
+msgid "✅ {count} file(s) checked, no issues found."
+msgstr "✅ {count} file(s) checked, no issues found."
+
+#: l10n_lint.py:523
+#, python-brace-format
+msgid "  {icon} Line {line}: [{rule}] {message}"
+msgstr "  {icon} Line {line}: [{rule}] {message}"
+
+#: l10n_lint.py:527
+#, python-brace-format
+msgid "     Context: \"{context}...\""
+msgstr "     Context: \"{context}...\""
+
+#: l10n_lint.py:529
+#, python-brace-format
+msgid "\n📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
+msgstr "\n📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
+
+#: l10n_lint.py:537
+msgid "l10n-lint - Linter for localization files (.po, .ts)"
+msgstr "l10n-lint - Linter for localization files (.po, .ts)"
+
+#: l10n_lint.py:539
+msgid "\nExamples:\n  l10n-lint ./translations/           # Lint local directory\n  l10n-lint file.po                   # Lint single file\n  l10n-lint --github owner/repo       # Lint GitHub repository\n  l10n-lint --github https://github.com/owner/repo --path resources/language/\n        "
+msgstr "\nExamples:\n  l10n-lint ./translations/           # Lint local directory\n  l10n-lint file.po                   # Lint single file\n  l10n-lint --github owner/repo       # Lint GitHub repository\n  l10n-lint --github https://github.com/owner/repo --path resources/language/\n        "
+
+#: l10n_lint.py:548
+msgid "Files or directories to lint"
+msgstr "Files or directories to lint"
+
+#: l10n_lint.py:549
+msgid "GitHub repository (owner/repo or URL)"
+msgstr "GitHub repository (owner/repo or URL)"
+
+#: l10n_lint.py:550
+msgid "Path filter for GitHub repos"
+msgstr "Path filter for GitHub repos"
+
+#: l10n_lint.py:551
+msgid "Output format"
+msgstr "Output format"
+
+#: l10n_lint.py:552
+msgid "Max translation length (default: 500)"
+msgstr "Max translation length (default: 500)"
+
+#: l10n_lint.py:553
+msgid "Don't search subdirectories"
+msgstr "Don't search subdirectories"
+
+#: l10n_lint.py:554
+msgid "Treat warnings as errors"
+msgstr "Treat warnings as errors"
+
+#: l10n_lint.py:571
+#, python-brace-format
+msgid "🔍 Fetching from GitHub: {repo}"
+msgstr "🔍 Fetching from GitHub: {repo}"
+
+#: l10n_lint.py:574
+#, python-brace-format
+msgid "  Checking: {path}"
+msgstr "  Checking: {path}"
+
+#: l10n_lint.py:579
+#, python-brace-format
+msgid "❌ GitHub error: {error}"
+msgstr "❌ GitHub error: {error}"

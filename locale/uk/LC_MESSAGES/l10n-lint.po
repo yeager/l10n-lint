@@ -1,0 +1,130 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr "Project-Id-Version: PACKAGE VERSION\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-02-03 09:45+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: \nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n"
+
+#: l10n_lint.py:245
+#, python-brace-format
+msgid "Could not read file: {error}"
+msgstr "Не вдалося прочитати файл: {error}"
+
+#: l10n_lint.py:262
+#, python-brace-format
+msgid "Unknown file format: {ext}"
+msgstr "Невідомий формат файлу: {ext}"
+
+#: l10n_lint.py:289
+msgid "Missing translation (empty msgstr)"
+msgstr "Відсутній переклад (порожній msgstr)"
+
+#: l10n_lint.py:300
+msgid "Fuzzy translation needs review"
+msgstr "Необхідно переглянути нечіткий переклад"
+
+#: l10n_lint.py:319
+#, python-brace-format
+msgid "Duplicate msgid (first seen at line {line})"
+msgstr "Дублікат msgid (вперше видно в рядку {line})"
+
+#: l10n_lint.py:342
+msgid "Unfinished/missing translation"
+msgstr "Незакінчений/відсутній переклад"
+
+#: l10n_lint.py:353
+msgid "Vanished translation (source removed)"
+msgstr "Переклад зник (джерело видалено)"
+
+#: l10n_lint.py:382
+#, python-brace-format
+msgid "Placeholder mismatch ({name}): source has {source}, translation has {trans}"
+msgstr "Невідповідність заповнювача ({name}): джерело має {source}, переклад має {trans}"
+
+#: l10n_lint.py:396
+#, python-brace-format
+msgid "Translation is very long ({length} chars, max {max})"
+msgstr "Переклад дуже довгий ({length} символів, макс. {max})"
+
+#: l10n_lint.py:408
+#, python-brace-format
+msgid "Translation is {ratio:.1f}x longer than source"
+msgstr "Переклад {ratio:.1f}x довше, ніж джерело"
+
+#: l10n_lint.py:489
+#, python-brace-format
+msgid "Warning: Could not fetch {path}: {error}"
+msgstr "Попередження: Не вдалося отримати {path}: {error}"
+
+#: l10n_lint.py:512
+#, python-brace-format
+msgid "✅ {count} file(s) checked, no issues found."
+msgstr "Перевірено ✅ {count} файлів, проблем не знайдено."
+
+#: l10n_lint.py:523
+#, python-brace-format
+msgid "  {icon} Line {line}: [{rule}] {message}"
+msgstr "{icon} Рядок {line}: [{rule}] {message}"
+
+#: l10n_lint.py:527
+#, python-brace-format
+msgid "     Context: \"{context}...\""
+msgstr "Context: \"{context}...\""
+
+#: l10n_lint.py:529
+#, python-brace-format
+msgid "\n📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
+msgstr "📊 Підсумок: файлів: {files}, помилок: {errors}, попереджень: {warnings}"
+
+#: l10n_lint.py:537
+msgid "l10n-lint - Linter for localization files (.po, .ts)"
+msgstr "l10n-lint - LINTER для файлів локалізації (.po, .ts)"
+
+#: l10n_lint.py:539
+msgid "\nExamples:\n  l10n-lint ./translations/           # Lint local directory\n  l10n-lint file.po                   # Lint single file\n  l10n-lint --github owner/repo       # Lint GitHub repository\n  l10n-lint --github https://github.com/owner/repo --path resources/language/\n        "
+msgstr "Приклади:\n  l10n-lint ./translations/           # Локальний каталог Lint\n  l10n-lint file.po                   # Один файл Lint\n  l10n-lint --github owner/repo       # Сховище Lint GitHub\n  l10n-lint --github https://github.com/owner/repo --path resources/language/"
+
+#: l10n_lint.py:548
+msgid "Files or directories to lint"
+msgstr "Файли або каталоги для ворсу"
+
+#: l10n_lint.py:549
+msgid "GitHub repository (owner/repo or URL)"
+msgstr "Репозиторій GitHub (власник/репозиторій або URL-адреса)"
+
+#: l10n_lint.py:550
+msgid "Path filter for GitHub repos"
+msgstr "Фільтр шляхів для репозиторіїв GitHub"
+
+#: l10n_lint.py:551
+msgid "Output format"
+msgstr "Формат виводу"
+
+#: l10n_lint.py:552
+msgid "Max translation length (default: 500)"
+msgstr "Максимальна довжина перекладу (за замовчуванням: 500)"
+
+#: l10n_lint.py:553
+msgid "Don't search subdirectories"
+msgstr "Не шукати в підкаталогах"
+
+#: l10n_lint.py:554
+msgid "Treat warnings as errors"
+msgstr "Розглядати попередження як помилки"
+
+#: l10n_lint.py:571
+#, python-brace-format
+msgid "🔍 Fetching from GitHub: {repo}"
+msgstr "🔍 Отримання з GitHub: {repo}"
+
+#: l10n_lint.py:574
+#, python-brace-format
+msgid "  Checking: {path}"
+msgstr "Перевірка: {path}"
+
+#: l10n_lint.py:579
+#, python-brace-format
+msgid "❌ GitHub error: {error}"
+msgstr "Помилка ❌ GitHub: {error}"

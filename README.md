@@ -12,41 +12,41 @@ Check your translation files for common issues like missing translations, fuzzy 
 - **Length warnings** – Catch translations that are suspiciously long
 - **Duplicate entries** – Find repeated `msgid` entries
 - **GitHub support** – Lint repos directly without cloning
-- **Localized output** – Available in English, Swedish (contributions welcome!)
+- **Localized output** – Available in 45+ languages including English, Swedish, German, French, Spanish, Japanese, Chinese, Arabic, and more
 
 ## Installation
 
 ### Debian/Ubuntu
 
 ```bash
-wget https://github.com/yeager/l10n-lint/releases/download/v1.1.0/l10n-lint_1.1.0_all.deb
-sudo dpkg -i l10n-lint_1.1.0_all.deb
+wget https://github.com/yeager/l10n-lint/releases/download/v1.2.0/l10n-lint_1.2.0_all.deb
+sudo dpkg -i l10n-lint_1.2.0_all.deb
 ```
 
 ### Fedora/RHEL/openSUSE
 
 ```bash
-wget https://github.com/yeager/l10n-lint/releases/download/v1.1.0/l10n-lint-1.1.0-1.noarch.rpm
-sudo rpm -i l10n-lint-1.1.0-1.noarch.rpm
+wget https://github.com/yeager/l10n-lint/releases/download/v1.2.0/l10n-lint-1.2.0-1.noarch.rpm
+sudo rpm -i l10n-lint-1.2.0-1.noarch.rpm
 ```
 
 ### Arch Linux
 
 ```bash
-wget https://github.com/yeager/l10n-lint/releases/download/v1.1.0/l10n-lint-1.1.0.pkg.tar.zst
-sudo pacman -U l10n-lint-1.1.0.pkg.tar.zst
+wget https://github.com/yeager/l10n-lint/releases/download/v1.2.0/l10n-lint-1.2.0.pkg.tar.zst
+sudo pacman -U l10n-lint-1.2.0.pkg.tar.zst
 ```
 
 ### Universal (tar.gz)
 
 ```bash
-wget https://github.com/yeager/l10n-lint/releases/download/v1.1.0/l10n-lint-1.1.0.tar.gz
-tar xzf l10n-lint-1.1.0.tar.gz -C /usr/local
+wget https://github.com/yeager/l10n-lint/releases/download/v1.2.0/l10n-lint-1.2.0.tar.gz
+tar xzf l10n-lint-1.2.0.tar.gz -C /usr/local
 ```
 
 ### Windows/macOS (zip)
 
-Download [l10n-lint-1.1.0.zip](https://github.com/yeager/l10n-lint/releases/download/v1.1.0/l10n-lint-1.1.0.zip), extract, and add to PATH.
+Download [l10n-lint-1.2.0.zip](https://github.com/yeager/l10n-lint/releases/download/v1.2.0/l10n-lint-1.2.0.zip), extract, and add to PATH.
 
 ### From source
 

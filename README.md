@@ -133,7 +133,7 @@ l10n-lint --format json ./po/ | jq '.issues[] | select(.severity == "error")'
 
 ## License
 
-MIT
+GPL-3.0
 
 ## Author
 

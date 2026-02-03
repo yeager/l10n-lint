@@ -76,7 +76,7 @@ msgstr "Context: \"{context}...\""
 #: l10n_lint.py:529
 #, python-brace-format
 msgid "\n📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
-msgstr "📊 요약: 파일 {files} 개, 오류 {errors} 개, 경고 {warnings} 개"
+msgstr "\n📊 요약: 파일 {files} 개, 오류 {errors} 개, 경고 {warnings} 개"
 
 #: l10n_lint.py:537
 msgid "l10n-lint - Linter for localization files (.po, .ts)"
@@ -84,7 +84,7 @@ msgstr "l10n-lint - 현지화 파일용 린터 (.po, .ts)"
 
 #: l10n_lint.py:539
 msgid "\nExamples:\n  l10n-lint ./translations/           # Lint local directory\n  l10n-lint file.po                   # Lint single file\n  l10n-lint --github owner/repo       # Lint GitHub repository\n  l10n-lint --github https://github.com/owner/repo --path resources/language/\n        "
-msgstr "예시:\n  l10n-lint./translations/# Lint 로컬 디렉토리\n  l10n-lint file.po # Lint 단일 파일\n  l10n-lint --github owner/repo # Lint GitHub 저장소\n  l10n-lint --github https://github.com/owner/repo --path resources/language/"
+msgstr "\n예시:\n  l10n-lint./translations/# Lint 로컬 디렉토리\n  l10n-lint file.po # Lint 단일 파일\n  l10n-lint --github owner/repo # Lint GitHub 저장소\n  l10n-lint --github https://github.com/owner/repo --path resources/language/"
 
 #: l10n_lint.py:548
 msgid "Files or directories to lint"

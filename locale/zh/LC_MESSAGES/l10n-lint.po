@@ -3,7 +3,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr "Project-Id-Version: PACKAGE VERSION\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-02-03 09:45+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: \nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n"
 
@@ -80,7 +79,7 @@ msgstr "\n📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s
 
 #: l10n_lint.py:537
 msgid "l10n-lint - Linter for localization files (.po, .ts)"
-msgstr "l10n-lint - Linter for localization files (.po, .ts)"
+msgstr "l10n-lint - 本地化文件检查器 (.po, .ts)"
 
 #: l10n_lint.py:539
 msgid "\nExamples:\n  l10n-lint ./translations/           # Lint local directory\n  l10n-lint file.po                   # Lint single file\n  l10n-lint --github owner/repo       # Lint GitHub repository\n  l10n-lint --github https://github.com/owner/repo --path resources/language/\n        "
@@ -88,11 +87,11 @@ msgstr "\nExamples:\n  l10n-lint ./translations/           # Lint local director
 
 #: l10n_lint.py:548
 msgid "Files or directories to lint"
-msgstr "Files or directories to lint"
+msgstr "要检查的文件或目录"
 
 #: l10n_lint.py:549
 msgid "GitHub repository (owner/repo or URL)"
-msgstr "GitHub repository (owner/repo or URL)"
+msgstr "GitHub仓库 (owner/repo 或 URL)"
 
 #: l10n_lint.py:550
 msgid "Path filter for GitHub repos"
@@ -100,19 +99,19 @@ msgstr "Path filter for GitHub repos"
 
 #: l10n_lint.py:551
 msgid "Output format"
-msgstr "Output format"
+msgstr "输出格式"
 
 #: l10n_lint.py:552
 msgid "Max translation length (default: 500)"
-msgstr "Max translation length (default: 500)"
+msgstr "最大翻译长度 (默认: 500)"
 
 #: l10n_lint.py:553
 msgid "Don't search subdirectories"
-msgstr "Don't search subdirectories"
+msgstr "不搜索子目录"
 
 #: l10n_lint.py:554
 msgid "Treat warnings as errors"
-msgstr "Treat warnings as errors"
+msgstr "将警告视为错误"
 
 #: l10n_lint.py:571
 #, python-brace-format

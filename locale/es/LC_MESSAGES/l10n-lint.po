@@ -76,7 +76,7 @@ msgstr "Context context);"
 #: l10n_lint.py:529
 #, python-brace-format
 msgid "\n📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
-msgstr "📊 Resumen: {files} archivo(s), {errors} error(es), {warnings} advertencia(s)"
+msgstr "\n📊 Resumen: {files} archivo(s), {errors} error(es), {warnings} advertencia(s)"
 
 #: l10n_lint.py:537
 msgid "l10n-lint - Linter for localization files (.po, .ts)"
@@ -84,7 +84,7 @@ msgstr "l10n-lint - Linter para archivos de localización (.po, .ts)"
 
 #: l10n_lint.py:539
 msgid "\nExamples:\n  l10n-lint ./translations/           # Lint local directory\n  l10n-lint file.po                   # Lint single file\n  l10n-lint --github owner/repo       # Lint GitHub repository\n  l10n-lint --github https://github.com/owner/repo --path resources/language/\n        "
-msgstr "Ejemplos:\n  l10n-lint ./translations/           # Directorio local de pelusa\n  l10n-lint file.po                   # Archivo único de pelusa\n  l10n-lint --github owner/repo       # Repositorio de GitHub de Lint\n  l10n-lint --github https://github.com/owner/repo --path recursos/idioma/"
+msgstr "\nEjemplos:\n  l10n-lint ./translations/           # Verificar directorio local\n  l10n-lint file.po                   # Verificar archivo único\n  l10n-lint --github owner/repo       # Verificar repositorio GitHub\n  l10n-lint --github https://github.com/owner/repo --path resources/language/\n        "
 
 #: l10n_lint.py:548
 msgid "Files or directories to lint"

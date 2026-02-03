@@ -15,15 +15,26 @@ Check your translation files for common issues like missing translations, fuzzy 
 
 ## Installation
 
+### Debian/Ubuntu (.deb)
+
 ```bash
-# Clone the repo
+wget https://github.com/yeager/l10n-lint/releases/download/v1.0.0/l10n-lint_1.0.0_all.deb
+sudo dpkg -i l10n-lint_1.0.0_all.deb
+```
+
+### Fedora/RHEL (.rpm)
+
+```bash
+wget https://github.com/yeager/l10n-lint/releases/download/v1.0.0/l10n-lint-1.0.0-1.noarch.rpm
+sudo rpm -i l10n-lint-1.0.0-1.noarch.rpm
+```
+
+### From source
+
+```bash
 git clone https://github.com/yeager/l10n-lint.git
 cd l10n-lint
-
-# Make executable
 chmod +x l10n_lint.py
-
-# Optional: symlink to PATH
 ln -s $(pwd)/l10n_lint.py /usr/local/bin/l10n-lint
 ```
 

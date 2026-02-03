@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: GPL-3.0-or-later
+# l10n-lint - Linter for localization files
+# Copyright (C) 2026 Daniel Nylander <daniel@danielnylander.se>
 """
 l10n-lint - Linter for localization files (.po, .ts)
 
@@ -13,7 +16,9 @@ Checks for:
 """
 
 import argparse
+import gettext
 import json
+import locale
 import os
 import re
 import sys
@@ -23,6 +28,36 @@ from enum import Enum
 from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
+
+__version__ = "1.1.0"
+
+# Translation setup
+DOMAIN = "l10n-lint"
+
+# Look for locale in multiple places
+_possible_locale_dirs = [
+    Path(__file__).parent / "locale",  # Development
+    Path("/usr/share/l10n-lint/locale"),  # System install
+    Path("/usr/local/share/l10n-lint/locale"),  # Local install
+]
+LOCALE_DIR = None
+for _dir in _possible_locale_dirs:
+    if _dir.exists():
+        LOCALE_DIR = _dir
+        break
+
+# Initialize gettext - detect language
+_system_lang = locale.getlocale()[0] or os.environ.get("LANG", "en")
+_lang_code = _system_lang.split("_")[0].split(".")[0] if _system_lang else "en"
+
+try:
+    if LOCALE_DIR:
+        translation = gettext.translation(DOMAIN, LOCALE_DIR, languages=[_lang_code], fallback=True)
+    else:
+        translation = gettext.NullTranslations()
+    _ = translation.gettext
+except Exception:
+    def _(s): return s
 
 
 class Severity(Enum):
@@ -207,7 +242,7 @@ class L10nLinter:
                     line=0,
                     severity=Severity.ERROR,
                     rule="file-read-error",
-                    message=f"Could not read file: {e}"
+                    message=_("Could not read file: {error}").format(error=e)
                 ))
                 return result
         
@@ -224,7 +259,7 @@ class L10nLinter:
                 line=0,
                 severity=Severity.WARNING,
                 rule="unknown-format",
-                message=f"Unknown file format: {ext}"
+                message=_("Unknown file format: {ext}").format(ext=ext)
             ))
         
         return result
@@ -251,7 +286,7 @@ class L10nLinter:
                     line=line,
                     severity=Severity.ERROR,
                     rule="missing-translation",
-                    message="Missing translation (empty msgstr)",
+                    message=_("Missing translation (empty msgstr)"),
                     context=msgid[:50]
                 ))
             
@@ -262,7 +297,7 @@ class L10nLinter:
                     line=line,
                     severity=Severity.WARNING,
                     rule="fuzzy",
-                    message="Fuzzy translation needs review",
+                    message=_("Fuzzy translation needs review"),
                     context=msgid[:50]
                 ))
             
@@ -281,7 +316,7 @@ class L10nLinter:
                     line=line,
                     severity=Severity.WARNING,
                     rule="duplicate",
-                    message=f"Duplicate msgid (first seen at line {seen_msgids[msgid]})",
+                    message=_("Duplicate msgid (first seen at line {line})").format(line=seen_msgids[msgid]),
                     context=msgid[:50]
                 ))
             else:
@@ -304,7 +339,7 @@ class L10nLinter:
                     line=line,
                     severity=Severity.ERROR,
                     rule="missing-translation",
-                    message="Unfinished/missing translation",
+                    message=_("Unfinished/missing translation"),
                     context=source[:50]
                 ))
             
@@ -315,7 +350,7 @@ class L10nLinter:
                     line=line,
                     severity=Severity.INFO,
                     rule="vanished",
-                    message="Vanished translation (source removed)",
+                    message=_("Vanished translation (source removed)"),
                     context=source[:50]
                 ))
             
@@ -344,7 +379,9 @@ class L10nLinter:
                     line=line,
                     severity=Severity.ERROR,
                     rule="placeholder-mismatch",
-                    message=f"Placeholder mismatch ({name}): source has {source_matches}, translation has {trans_matches}",
+                    message=_("Placeholder mismatch ({name}): source has {source}, translation has {trans}").format(
+                        name=name, source=source_matches, trans=trans_matches
+                    ),
                     context=source[:50]
                 ))
     
@@ -356,7 +393,9 @@ class L10nLinter:
                 line=line,
                 severity=Severity.WARNING,
                 rule="too-long",
-                message=f"Translation is very long ({len(translation)} chars, max {self.max_length})",
+                message=_("Translation is very long ({length} chars, max {max})").format(
+                    length=len(translation), max=self.max_length
+                ),
                 context=source[:50]
             ))
         
@@ -366,7 +405,9 @@ class L10nLinter:
                 line=line,
                 severity=Severity.INFO,
                 rule="length-ratio",
-                message=f"Translation is {len(translation)/len(source):.1f}x longer than source",
+                message=_("Translation is {ratio:.1f}x longer than source").format(
+                    ratio=len(translation)/len(source)
+                ),
                 context=source[:50]
             ))
 
@@ -445,7 +486,7 @@ def fetch_github_files(repo_url: str, path_filter: str = "") -> Generator[tuple[
             content = content_response.read().decode('utf-8')
             yield (filepath, content)
         except Exception as e:
-            print(f"Warning: Could not fetch {filepath}: {e}", file=sys.stderr)
+            print(_("Warning: Could not fetch {path}: {error}").format(path=filepath, error=e), file=sys.stderr)
 
 
 def format_output(result: LintResult, format_type: str = "text") -> str:
@@ -468,7 +509,7 @@ def format_output(result: LintResult, format_type: str = "text") -> str:
     
     else:  # text
         if not result.issues:
-            return f"✅ {result.files_checked} file(s) checked, no issues found."
+            return _("✅ {count} file(s) checked, no issues found.").format(count=result.files_checked)
         
         lines = []
         current_file = None
@@ -479,34 +520,39 @@ def format_output(result: LintResult, format_type: str = "text") -> str:
                 lines.append(f"\n📁 {current_file}")
             
             icon = "❌" if issue.severity == Severity.ERROR else "⚠️" if issue.severity == Severity.WARNING else "ℹ️"
-            lines.append(f"  {icon} Line {issue.line}: [{issue.rule}] {issue.message}")
+            lines.append(_("  {icon} Line {line}: [{rule}] {message}").format(
+                icon=icon, line=issue.line, rule=issue.rule, message=issue.message
+            ))
             if issue.context:
-                lines.append(f"     Context: \"{issue.context}...\"")
+                lines.append(_("     Context: \"{context}...\"").format(context=issue.context))
         
-        lines.append(f"\n📊 Summary: {result.files_checked} file(s), {result.error_count} error(s), {result.warning_count} warning(s)")
+        lines.append(_("\n📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)").format(
+            files=result.files_checked, errors=result.error_count, warnings=result.warning_count
+        ))
         return '\n'.join(lines)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='l10n-lint - Linter for localization files (.po, .ts)',
+        description=_('l10n-lint - Linter for localization files (.po, .ts)'),
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+        epilog=_("""
 Examples:
   l10n-lint ./translations/           # Lint local directory
   l10n-lint file.po                   # Lint single file
   l10n-lint --github owner/repo       # Lint GitHub repository
   l10n-lint --github https://github.com/owner/repo --path resources/language/
-        """
+        """)
     )
     
-    parser.add_argument('paths', nargs='*', help='Files or directories to lint')
-    parser.add_argument('--github', '-g', metavar='REPO', help='GitHub repository (owner/repo or URL)')
-    parser.add_argument('--path', '-p', metavar='PATH', default='', help='Path filter for GitHub repos')
-    parser.add_argument('--format', '-f', choices=['text', 'json', 'github'], default='text', help='Output format')
-    parser.add_argument('--max-length', type=int, default=500, help='Max translation length (default: 500)')
-    parser.add_argument('--no-recursive', action='store_true', help='Don\'t search subdirectories')
-    parser.add_argument('--strict', action='store_true', help='Treat warnings as errors')
+    parser.add_argument('paths', nargs='*', help=_('Files or directories to lint'))
+    parser.add_argument('--github', '-g', metavar='REPO', help=_('GitHub repository (owner/repo or URL)'))
+    parser.add_argument('--path', '-p', metavar='PATH', default='', help=_('Path filter for GitHub repos'))
+    parser.add_argument('--format', '-f', choices=['text', 'json', 'github'], default='text', help=_('Output format'))
+    parser.add_argument('--max-length', type=int, default=500, help=_('Max translation length (default: 500)'))
+    parser.add_argument('--no-recursive', action='store_true', help=_("Don't search subdirectories"))
+    parser.add_argument('--strict', action='store_true', help=_('Treat warnings as errors'))
+    parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}')
     
     args = parser.parse_args()
     
@@ -522,15 +568,15 @@ Examples:
     
     # Lint GitHub repo
     if args.github:
-        print(f"🔍 Fetching from GitHub: {args.github}", file=sys.stderr)
+        print(_("🔍 Fetching from GitHub: {repo}").format(repo=args.github), file=sys.stderr)
         try:
             for filepath, content in fetch_github_files(args.github, args.path):
-                print(f"  Checking: {filepath}", file=sys.stderr)
+                print(_("  Checking: {path}").format(path=filepath), file=sys.stderr)
                 file_result = linter.lint_file(filepath, content)
                 result.files_checked += file_result.files_checked
                 result.issues.extend(file_result.issues)
         except Exception as e:
-            print(f"❌ GitHub error: {e}", file=sys.stderr)
+            print(_("❌ GitHub error: {error}").format(error=e), file=sys.stderr)
             sys.exit(1)
     
     # Lint local files

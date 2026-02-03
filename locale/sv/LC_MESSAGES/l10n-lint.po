@@ -1,0 +1,115 @@
+# Swedish translation for l10n-lint
+# Copyright (C) 2026 Daniel Nylander
+# This file is distributed under the GPL-3.0-or-later license.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: l10n-lint 1.1.0\n"
+"Report-Msgid-Bugs-To: daniel@danielnylander.se\n"
+"POT-Creation-Date: 2026-02-03 09:45+0100\n"
+"PO-Revision-Date: 2026-02-03 09:45+0100\n"
+"Last-Translator: Daniel Nylander <daniel@danielnylander.se>\n"
+"Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Could not read file: {error}"
+msgstr "Kunde inte läsa filen: {error}"
+
+msgid "Unknown file format: {ext}"
+msgstr "Okänt filformat: {ext}"
+
+msgid "Missing translation (empty msgstr)"
+msgstr "Översättning saknas (tom msgstr)"
+
+msgid "Fuzzy translation needs review"
+msgstr "Fuzzy-översättning behöver granskas"
+
+msgid "Duplicate msgid (first seen at line {line})"
+msgstr "Duplicerad msgid (först sedd på rad {line})"
+
+msgid "Unfinished/missing translation"
+msgstr "Oavslutad/saknad översättning"
+
+msgid "Vanished translation (source removed)"
+msgstr "Försvunnen översättning (källan borttagen)"
+
+msgid "Placeholder mismatch ({name}): source has {source}, translation has {trans}"
+msgstr "Platshållare stämmer inte ({name}): källan har {source}, översättningen har {trans}"
+
+msgid "Translation is very long ({length} chars, max {max})"
+msgstr "Översättningen är mycket lång ({length} tecken, max {max})"
+
+msgid "Translation is {ratio:.1f}x longer than source"
+msgstr "Översättningen är {ratio:.1f}x längre än källan"
+
+msgid "✅ {count} file(s) checked, no issues found."
+msgstr "✅ {count} fil(er) granskade, inga problem hittades."
+
+msgid "  {icon} Line {line}: [{rule}] {message}"
+msgstr "  {icon} Rad {line}: [{rule}] {message}"
+
+msgid "     Context: \"{context}...\""
+msgstr "     Kontext: \"{context}...\""
+
+msgid ""
+"\n"
+"📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
+msgstr ""
+"\n"
+"📊 Sammanfattning: {files} fil(er), {errors} fel, {warnings} varning(ar)"
+
+msgid "l10n-lint - Linter for localization files (.po, .ts)"
+msgstr "l10n-lint - Linter för lokaliseringsfiler (.po, .ts)"
+
+msgid ""
+"\n"
+"Examples:\n"
+"  l10n-lint ./translations/           # Lint local directory\n"
+"  l10n-lint file.po                   # Lint single file\n"
+"  l10n-lint --github owner/repo       # Lint GitHub repository\n"
+"  l10n-lint --github https://github.com/owner/repo --path resources/language/\n"
+"        "
+msgstr ""
+"\n"
+"Exempel:\n"
+"  l10n-lint ./translations/           # Granska lokal katalog\n"
+"  l10n-lint fil.po                    # Granska enskild fil\n"
+"  l10n-lint --github ägare/repo       # Granska GitHub-arkiv\n"
+"  l10n-lint --github https://github.com/ägare/repo --path resources/language/\n"
+"        "
+
+msgid "Files or directories to lint"
+msgstr "Filer eller kataloger att granska"
+
+msgid "GitHub repository (owner/repo or URL)"
+msgstr "GitHub-arkiv (ägare/repo eller URL)"
+
+msgid "Path filter for GitHub repos"
+msgstr "Sökvägsfilter för GitHub-arkiv"
+
+msgid "Output format"
+msgstr "Utdataformat"
+
+msgid "Max translation length (default: 500)"
+msgstr "Max översättningslängd (standard: 500)"
+
+msgid "Don't search subdirectories"
+msgstr "Sök inte i underkataloger"
+
+msgid "Treat warnings as errors"
+msgstr "Behandla varningar som fel"
+
+msgid "🔍 Fetching from GitHub: {repo}"
+msgstr "🔍 Hämtar från GitHub: {repo}"
+
+msgid "  Checking: {path}"
+msgstr "  Granskar: {path}"
+
+msgid "❌ GitHub error: {error}"
+msgstr "❌ GitHub-fel: {error}"
+
+msgid "Warning: Could not fetch {path}: {error}"
+msgstr "Varning: Kunde inte hämta {path}: {error}"

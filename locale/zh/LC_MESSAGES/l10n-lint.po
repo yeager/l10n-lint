@@ -50,7 +50,7 @@ msgstr "翻译很长（ {length}个字符，最大{max} ）"
 #: l10n_lint.py:408
 #, python-brace-format
 msgid "Translation is {ratio:.1f}x longer than source"
-msgstr "翻译比源翻译长{ratio: .1f}倍"
+msgstr "翻译比源翻译长{ratio:.1f}倍"
 
 #: l10n_lint.py:489
 #, python-brace-format

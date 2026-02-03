@@ -51,7 +51,7 @@ msgstr "번역이 매우 깁니다 ({length} 자, 최대 {max})"
 #: l10n_lint.py:408
 #, python-brace-format
 msgid "Translation is {ratio:.1f}x longer than source"
-msgstr "번역은 소스보다 {ratio: .1f} 배 더 깁니다"
+msgstr "번역은 소스보다 {ratio:.1f} 배 더 깁니다"
 
 #: l10n_lint.py:489
 #, python-brace-format

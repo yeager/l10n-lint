@@ -83,7 +83,7 @@ msgstr "l10n-lint - ローカライズファイル用リンター (.po, .ts)"
 
 #: l10n_lint.py:539
 msgid "\nExamples:\n  l10n-lint ./translations/           # Lint local directory\n  l10n-lint file.po                   # Lint single file\n  l10n-lint --github owner/repo       # Lint GitHub repository\n  l10n-lint --github https://github.com/owner/repo --path resources/language/\n        "
-msgstr "\n例：\n  l 10 n - lint ./ translations /# Lintローカルディレクトリ\n  l10n-lint file.po # Lintシングルファイル\n  l 10 n - lint -- github owner/repo # Lint GitHubリポジトリ\n  l 10 n - lint -- github https://github.com/owner/repo -- path resources/language/"
+msgstr "\n例：\n  l10n-lint ./translations/# Lintローカルディレクトリ\n  l10n-lint file.po # Lintシングルファイル\n  l10n-lint -- github owner/repo # Lint GitHubリポジトリ\n  l10n-lint -- github https://github.com/owner/repo -- path resources/language/"
 
 #: l10n_lint.py:548
 msgid "Files or directories to lint"

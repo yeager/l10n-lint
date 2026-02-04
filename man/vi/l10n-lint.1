@@ -1,14 +1,14 @@
 .TH L10N-LINT 1 "February 2026" "l10n-lint 1.3.2" "User Commands"
-.SH NAMN
+.SH TÊN
 l10n-lint \- linter for localization files
-.SH SYNOPSIS
+.SH TÓM TẮT
 .B l10n-lint
 [\fIOPTIONS\fR] \fIPATH\fR...
-.SH BESKRIVNING
+.SH MÔ TẢ
 .B l10n-lint
 checks gettext .po and Qt .ts localization files for common issues:
 missing translations, fuzzy entries, placeholder mismatches, and length problems.
-.SH FLAGGOR
+.SH TÙY CHỌN
 .TP
 .BR \-h ", " \-\-help
 Show help message and exit.
@@ -34,14 +34,14 @@ Maximum translation/source length ratio (default: 3.0)
 .TP
 .BR \-\-max\-length " " \fIN\fR
 Maximum translation length in characters (default: 500)
-.SH SLUTSTATUS
+.SH TRẠNG THÁI THOÁT
 .TP
 .B 0
 No issues found.
 .TP
 .B 1
 Issues found or error occurred.
-.SH EXEMPEL
+.SH VÍ DỤ
 .TP
 Check all .po files in current directory:
 .B l10n-lint .
@@ -51,12 +51,12 @@ Check specific file with JSON output:
 .TP
 Skip fuzzy check:
 .B l10n-lint \-\-skip fuzzy locale/
-.SH UPPHOVSMAN
+.SH TÁC GIẢ
 Daniel Nylander <daniel@danielnylander.se>
-.SH SE ÄVEN
+.SH XEM THÊM
 .BR msgfmt (1),
 .BR msginit (1),
 .BR tp-lint (1),
 .BR po-translate (1)
-.SH BUGGAR
+.SH LỖI
 Report bugs at: https://github.com/yeager/l10n-lint/issues

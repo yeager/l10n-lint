@@ -1,0 +1,161 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-04 08:43+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: l10n_lint.py:253
+#, python-brace-format
+msgid "Could not read file: {error}"
+msgstr "파일을 읽을 수 없음: {error}"
+
+#: l10n_lint.py:270
+#, python-brace-format
+msgid "Unknown file format: {ext}"
+msgstr "알 수 없는 파일 형식: {ext}"
+
+#: l10n_lint.py:305 l10n_lint.py:316
+msgid "Missing translation (empty msgstr)"
+msgstr "번역 누락 (빈 msgstr)"
+
+#: l10n_lint.py:327
+msgid "Fuzzy translation needs review"
+msgstr "퍼지 번역 검토 필요"
+
+#: l10n_lint.py:346
+#, python-brace-format
+msgid "Duplicate msgid (first seen at line {line})"
+msgstr "중복 msgid (라인 {line} 에서 처음 표시됨)"
+
+#: l10n_lint.py:369
+msgid "Unfinished/missing translation"
+msgstr "미완료/번역 누락"
+
+#: l10n_lint.py:380
+msgid "Vanished translation (source removed)"
+msgstr "사라진 번역 (소스 제거됨)"
+
+#: l10n_lint.py:409
+#, python-brace-format
+msgid ""
+"Placeholder mismatch ({name}): source has {source}, translation has {trans}"
+msgstr ""
+"자리 표시자 불일치 ({name}): 소스에는 {source} 이 (가) 있고 번역에는 {trans} "
+"이 (가) 있습니다"
+
+#: l10n_lint.py:424
+#, python-brace-format
+msgid "Translation is very long ({length} chars, max {max})"
+msgstr "번역이 매우 깁니다 ({length} 자, 최대 {max})"
+
+#: l10n_lint.py:436
+#, python-brace-format
+msgid "Translation is {ratio:.1f}x longer than source"
+msgstr "번역은 소스보다 {ratio:.1f} 배 더 깁니다"
+
+#: l10n_lint.py:517
+#, python-brace-format
+msgid "Warning: Could not fetch {path}: {error}"
+msgstr "경고: {path} 을 (를) 가져올 수 없습니다: {error}"
+
+#: l10n_lint.py:540
+#, python-brace-format
+msgid "✅ {count} file(s) checked, no issues found."
+msgstr "파일 ✅ {count} 개를 확인했으나 문제가 없습니다."
+
+#: l10n_lint.py:551
+#, python-brace-format
+msgid "  {icon} Line {line}: [{rule}] {message}"
+msgstr "{icon} 라인 {line}: [{rule}] {message}"
+
+#: l10n_lint.py:555
+#, python-brace-format
+msgid "     Context: \"{context}...\""
+msgstr "Context: \"{context}...\""
+
+#: l10n_lint.py:557
+#, python-brace-format
+msgid ""
+"\n"
+"📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
+msgstr ""
+"\n"
+"📊 요약: 파일 {files} 개, 오류 {errors} 개, 경고 {warnings} 개"
+
+#: l10n_lint.py:565
+msgid "l10n-lint - Linter for localization files (.po, .ts)"
+msgstr "l10n-lint - 현지화 파일용 린터 (.po, .ts)"
+
+#: l10n_lint.py:567
+msgid ""
+"\n"
+"Examples:\n"
+"  l10n-lint ./translations/           # Lint local directory\n"
+"  l10n-lint file.po                   # Lint single file\n"
+"  l10n-lint --github owner/repo       # Lint GitHub repository\n"
+"  l10n-lint --github https://github.com/owner/repo --path resources/"
+"language/\n"
+"        "
+msgstr ""
+"\n"
+"예시:\n"
+"  l10n-lint./translations/# Lint 로컬 디렉토리\n"
+"  l10n-lint file.po # Lint 단일 파일\n"
+"  l10n-lint --github owner/repo # Lint GitHub 저장소\n"
+"  l10n-lint --github https://github.com/owner/repo --path resources/language/"
+
+#: l10n_lint.py:576
+msgid "Files or directories to lint"
+msgstr "LINT에 대한 파일 또는 디렉터리"
+
+#: l10n_lint.py:577
+msgid "GitHub repository (owner/repo or URL)"
+msgstr "GitHub 저장소 (소유자/저장소 또는 URL)"
+
+#: l10n_lint.py:578
+msgid "Path filter for GitHub repos"
+msgstr "GitHub 저장소의 경로 필터"
+
+#: l10n_lint.py:579
+msgid "Output format"
+msgstr "출력 포맷"
+
+#: l10n_lint.py:580
+msgid "Max translation length (default: 500)"
+msgstr "최대 번역 길이 (기본값: 500)"
+
+#: l10n_lint.py:581
+msgid "Don't search subdirectories"
+msgstr "하위 디렉토리 검색 안 함"
+
+#: l10n_lint.py:582
+msgid "Treat warnings as errors"
+msgstr "경고를 오류로 처리"
+
+#: l10n_lint.py:599
+#, python-brace-format
+msgid "🔍 Fetching from GitHub: {repo}"
+msgstr "GitHub에서 🔍 가져오는 중: {repo}"
+
+#: l10n_lint.py:602
+#, python-brace-format
+msgid "  Checking: {path}"
+msgstr "확인 중: {path}"
+
+#: l10n_lint.py:607
+#, python-brace-format
+msgid "❌ GitHub error: {error}"
+msgstr "❌ GitHub 오류: {error}"

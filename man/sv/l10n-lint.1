@@ -1,55 +1,55 @@
-.TH L10N-LINT 1 "February 2026" "l10n-lint 1.3.2" "User Commands"
+.TH L10N-LINT 1 "Februari 2026" "l10n-lint 1.3.4" "Användarkommandon"
 .SH NAMN
-l10n-lint \- linter for localization files
+l10n-lint \- granskare för lokaliseringsfiler
 .SH SYNOPSIS
 .B l10n-lint
-[\fIOPTIONS\fR] \fIPATH\fR...
+[\fIFLAGGOR\fR] \fISOKVÄG\fR...
 .SH BESKRIVNING
 .B l10n-lint
-checks gettext .po and Qt .ts localization files for common issues:
-missing translations, fuzzy entries, placeholder mismatches, and length problems.
+kontrollerar gettext .po- och Qt .ts-lokaliseringsfiler för vanliga problem:
+saknade översättningar, luddiga poster, platshållarmatchningar och längdproblem.
 .SH FLAGGOR
 .TP
 .BR \-h ", " \-\-help
-Show help message and exit.
+Visa hjälpmeddelande och avsluta.
 .TP
 .BR \-v ", " \-\-version
-Show version number and exit.
+Visa versionsnummer och avsluta.
 .TP
 .BR \-\-no\-recursive
-Do not search subdirectories.
+Sök inte i underkataloger.
 .TP
-.BR \-\-check " " \fICHECK\fR
-Enable specific check (can be repeated).
-Available: missing, fuzzy, placeholders, length-ratio, too-long
+.BR \-\-check " " \fIKONTROLL\fR
+Aktivera specifik kontroll (kan upprepas).
+Tillgängliga: missing, fuzzy, placeholders, length-ratio, too-long
 .TP
-.BR \-\-skip " " \fICHECK\fR
-Skip specific check (can be repeated).
+.BR \-\-skip " " \fIKONTROLL\fR
+Hoppa över specifik kontroll (kan upprepas).
 .TP
 .BR \-\-format " " \fIFORMAT\fR
-Output format: text (default), json, github
+Utdataformat: text (standard), json, github
 .TP
 .BR \-\-length\-ratio " " \fIN\fR
-Maximum translation/source length ratio (default: 3.0)
+Maximal översättning/källa-längdkvot (standard: 3.0)
 .TP
 .BR \-\-max\-length " " \fIN\fR
-Maximum translation length in characters (default: 500)
+Maximal översättningslängd i tecken (standard: 500)
 .SH SLUTSTATUS
 .TP
 .B 0
-No issues found.
+Inga problem hittades.
 .TP
 .B 1
-Issues found or error occurred.
+Problem hittades eller fel uppstod.
 .SH EXEMPEL
 .TP
-Check all .po files in current directory:
+Kontrollera alla .po-filer i aktuell katalog:
 .B l10n-lint .
 .TP
-Check specific file with JSON output:
+Kontrollera specifik fil med JSON-utdata:
 .B l10n-lint \-\-format json messages.po
 .TP
-Skip fuzzy check:
+Hoppa över luddig-kontroll:
 .B l10n-lint \-\-skip fuzzy locale/
 .SH UPPHOVSMAN
 Daniel Nylander <daniel@danielnylander.se>
@@ -59,4 +59,4 @@ Daniel Nylander <daniel@danielnylander.se>
 .BR tp-lint (1),
 .BR po-translate (1)
 .SH BUGGAR
-Report bugs at: https://github.com/yeager/l10n-lint/issues
+Rapportera buggar på: https://github.com/yeager/l10n-lint/issues

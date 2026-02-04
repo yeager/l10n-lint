@@ -4,126 +4,157 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: PACKAGE VERSION\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-02-03 09:45+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: \nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n"
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-04 08:43+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 
-#: l10n_lint.py:245
+#: l10n_lint.py:253
 #, python-brace-format
 msgid "Could not read file: {error}"
 msgstr "无法读取文件： {error}"
 
-#: l10n_lint.py:262
+#: l10n_lint.py:270
 #, python-brace-format
 msgid "Unknown file format: {ext}"
 msgstr "未知文件格式： {ext}"
 
-#: l10n_lint.py:289
+#: l10n_lint.py:305 l10n_lint.py:316
 msgid "Missing translation (empty msgstr)"
 msgstr "缺少翻译（空msgstr ）"
 
-#: l10n_lint.py:300
+#: l10n_lint.py:327
 msgid "Fuzzy translation needs review"
 msgstr "模糊翻译需要审核"
 
-#: l10n_lint.py:319
+#: l10n_lint.py:346
 #, python-brace-format
 msgid "Duplicate msgid (first seen at line {line})"
 msgstr "重复的msgid （首次出现在第{line}行）"
 
-#: l10n_lint.py:342
+#: l10n_lint.py:369
 msgid "Unfinished/missing translation"
 msgstr "未完成/缺少翻译"
 
-#: l10n_lint.py:353
+#: l10n_lint.py:380
 msgid "Vanished translation (source removed)"
 msgstr "已消失的翻译（源已删除）"
 
-#: l10n_lint.py:382
+#: l10n_lint.py:409
 #, python-brace-format
-msgid "Placeholder mismatch ({name}): source has {source}, translation has {trans}"
+msgid ""
+"Placeholder mismatch ({name}): source has {source}, translation has {trans}"
 msgstr "占位符不匹配（ {name} ） ：源有{source} ，翻译有{trans}"
 
-#: l10n_lint.py:396
+#: l10n_lint.py:424
 #, python-brace-format
 msgid "Translation is very long ({length} chars, max {max})"
 msgstr "翻译很长（ {length}个字符，最大{max} ）"
 
-#: l10n_lint.py:408
+#: l10n_lint.py:436
 #, python-brace-format
 msgid "Translation is {ratio:.1f}x longer than source"
 msgstr "翻译比源翻译长{ratio:.1f}倍"
 
-#: l10n_lint.py:489
+#: l10n_lint.py:517
 #, python-brace-format
 msgid "Warning: Could not fetch {path}: {error}"
 msgstr "Warning: Could not fetch {path}: {error}"
 
-#: l10n_lint.py:512
+#: l10n_lint.py:540
 #, python-brace-format
 msgid "✅ {count} file(s) checked, no issues found."
 msgstr "✅ {count} file(s) checked, no issues found."
 
-#: l10n_lint.py:523
+#: l10n_lint.py:551
 #, python-brace-format
 msgid "  {icon} Line {line}: [{rule}] {message}"
 msgstr "  {icon} Line {line}: [{rule}] {message}"
 
-#: l10n_lint.py:527
+#: l10n_lint.py:555
 #, python-brace-format
 msgid "     Context: \"{context}...\""
 msgstr "     Context: \"{context}...\""
 
-#: l10n_lint.py:529
+#: l10n_lint.py:557
 #, python-brace-format
-msgid "\n📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
-msgstr "\n📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
+msgid ""
+"\n"
+"📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
+msgstr ""
+"\n"
+"📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
 
-#: l10n_lint.py:537
+#: l10n_lint.py:565
 msgid "l10n-lint - Linter for localization files (.po, .ts)"
 msgstr "l10n-lint - 本地化文件检查器 (.po, .ts)"
 
-#: l10n_lint.py:539
-msgid "\nExamples:\n  l10n-lint ./translations/           # Lint local directory\n  l10n-lint file.po                   # Lint single file\n  l10n-lint --github owner/repo       # Lint GitHub repository\n  l10n-lint --github https://github.com/owner/repo --path resources/language/\n        "
-msgstr "\nExamples:\n  l10n-lint ./translations/           # Lint local directory\n  l10n-lint file.po                   # Lint single file\n  l10n-lint --github owner/repo       # Lint GitHub repository\n  l10n-lint --github https://github.com/owner/repo --path resources/language/\n        "
+#: l10n_lint.py:567
+msgid ""
+"\n"
+"Examples:\n"
+"  l10n-lint ./translations/           # Lint local directory\n"
+"  l10n-lint file.po                   # Lint single file\n"
+"  l10n-lint --github owner/repo       # Lint GitHub repository\n"
+"  l10n-lint --github https://github.com/owner/repo --path resources/"
+"language/\n"
+"        "
+msgstr ""
+"\n"
+"Examples:\n"
+"  l10n-lint ./translations/           # Lint local directory\n"
+"  l10n-lint file.po                   # Lint single file\n"
+"  l10n-lint --github owner/repo       # Lint GitHub repository\n"
+"  l10n-lint --github https://github.com/owner/repo --path resources/"
+"language/\n"
+"        "
 
-#: l10n_lint.py:548
+#: l10n_lint.py:576
 msgid "Files or directories to lint"
 msgstr "要检查的文件或目录"
 
-#: l10n_lint.py:549
+#: l10n_lint.py:577
 msgid "GitHub repository (owner/repo or URL)"
 msgstr "GitHub仓库 (owner/repo 或 URL)"
 
-#: l10n_lint.py:550
+#: l10n_lint.py:578
 msgid "Path filter for GitHub repos"
 msgstr "Path filter for GitHub repos"
 
-#: l10n_lint.py:551
+#: l10n_lint.py:579
 msgid "Output format"
 msgstr "输出格式"
 
-#: l10n_lint.py:552
+#: l10n_lint.py:580
 msgid "Max translation length (default: 500)"
 msgstr "最大翻译长度 (默认: 500)"
 
-#: l10n_lint.py:553
+#: l10n_lint.py:581
 msgid "Don't search subdirectories"
 msgstr "不搜索子目录"
 
-#: l10n_lint.py:554
+#: l10n_lint.py:582
 msgid "Treat warnings as errors"
 msgstr "将警告视为错误"
 
-#: l10n_lint.py:571
+#: l10n_lint.py:599
 #, python-brace-format
 msgid "🔍 Fetching from GitHub: {repo}"
 msgstr "🔍 Fetching from GitHub: {repo}"
 
-#: l10n_lint.py:574
+#: l10n_lint.py:602
 #, python-brace-format
 msgid "  Checking: {path}"
 msgstr "  Checking: {path}"
 
-#: l10n_lint.py:579
+#: l10n_lint.py:607
 #, python-brace-format
 msgid "❌ GitHub error: {error}"
 msgstr "❌ GitHub error: {error}"

@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: l10n-lint 1.1.0\n"
-"Report-Msgid-Bugs-To: daniel@danielnylander.se\n"
-"POT-Creation-Date: 2026-02-03 09:45+0100\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-04 08:43+0100\n"
 "PO-Revision-Date: 2026-02-03 09:45+0100\n"
 "Last-Translator: Daniel Nylander <daniel@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -15,45 +15,77 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: l10n_lint.py:253
+#, python-brace-format
 msgid "Could not read file: {error}"
 msgstr "Kunde inte läsa filen: {error}"
 
+#: l10n_lint.py:270
+#, python-brace-format
 msgid "Unknown file format: {ext}"
 msgstr "Okänt filformat: {ext}"
 
+#: l10n_lint.py:305 l10n_lint.py:316
 msgid "Missing translation (empty msgstr)"
 msgstr "Översättning saknas (tom msgstr)"
 
+#: l10n_lint.py:327
 msgid "Fuzzy translation needs review"
 msgstr "Fuzzy-översättning behöver granskas"
 
+#: l10n_lint.py:346
+#, python-brace-format
 msgid "Duplicate msgid (first seen at line {line})"
 msgstr "Duplicerad msgid (först sedd på rad {line})"
 
+#: l10n_lint.py:369
 msgid "Unfinished/missing translation"
 msgstr "Oavslutad/saknad översättning"
 
+#: l10n_lint.py:380
 msgid "Vanished translation (source removed)"
 msgstr "Försvunnen översättning (källan borttagen)"
 
-msgid "Placeholder mismatch ({name}): source has {source}, translation has {trans}"
-msgstr "Platshållare stämmer inte ({name}): källan har {source}, översättningen har {trans}"
+#: l10n_lint.py:409
+#, python-brace-format
+msgid ""
+"Placeholder mismatch ({name}): source has {source}, translation has {trans}"
+msgstr ""
+"Platshållare stämmer inte ({name}): källan har {source}, översättningen har "
+"{trans}"
 
+#: l10n_lint.py:424
+#, python-brace-format
 msgid "Translation is very long ({length} chars, max {max})"
 msgstr "Översättningen är mycket lång ({length} tecken, max {max})"
 
+#: l10n_lint.py:436
+#, python-brace-format
 msgid "Translation is {ratio:.1f}x longer than source"
 msgstr "Översättningen är {ratio:.1f}x längre än källan"
 
+#: l10n_lint.py:517
+#, python-brace-format
+msgid "Warning: Could not fetch {path}: {error}"
+msgstr "Varning: Kunde inte hämta {path}: {error}"
+
+#: l10n_lint.py:540
+#, python-brace-format
 msgid "✅ {count} file(s) checked, no issues found."
 msgstr "✅ {count} fil(er) granskade, inga problem hittades."
 
+#: l10n_lint.py:551
+#, python-brace-format
 msgid "  {icon} Line {line}: [{rule}] {message}"
 msgstr "  {icon} Rad {line}: [{rule}] {message}"
 
+#: l10n_lint.py:555
+#, python-brace-format
 msgid "     Context: \"{context}...\""
 msgstr "     Kontext: \"{context}...\""
 
+#: l10n_lint.py:557
+#, python-brace-format
 msgid ""
 "\n"
 "📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
@@ -61,16 +93,19 @@ msgstr ""
 "\n"
 "📊 Sammanfattning: {files} fil(er), {errors} fel, {warnings} varning(ar)"
 
+#: l10n_lint.py:565
 msgid "l10n-lint - Linter for localization files (.po, .ts)"
 msgstr "l10n-lint - Linter för lokaliseringsfiler (.po, .ts)"
 
+#: l10n_lint.py:567
 msgid ""
 "\n"
 "Examples:\n"
 "  l10n-lint ./translations/           # Lint local directory\n"
 "  l10n-lint file.po                   # Lint single file\n"
 "  l10n-lint --github owner/repo       # Lint GitHub repository\n"
-"  l10n-lint --github https://github.com/owner/repo --path resources/language/\n"
+"  l10n-lint --github https://github.com/owner/repo --path resources/"
+"language/\n"
 "        "
 msgstr ""
 "\n"
@@ -78,38 +113,49 @@ msgstr ""
 "  l10n-lint ./translations/           # Granska lokal katalog\n"
 "  l10n-lint fil.po                    # Granska enskild fil\n"
 "  l10n-lint --github ägare/repo       # Granska GitHub-arkiv\n"
-"  l10n-lint --github https://github.com/ägare/repo --path resources/language/\n"
+"  l10n-lint --github https://github.com/ägare/repo --path resources/"
+"language/\n"
 "        "
 
+#: l10n_lint.py:576
 msgid "Files or directories to lint"
 msgstr "Filer eller kataloger att granska"
 
+#: l10n_lint.py:577
 msgid "GitHub repository (owner/repo or URL)"
 msgstr "GitHub-arkiv (ägare/repo eller URL)"
 
+#: l10n_lint.py:578
 msgid "Path filter for GitHub repos"
 msgstr "Sökvägsfilter för GitHub-arkiv"
 
+#: l10n_lint.py:579
 msgid "Output format"
 msgstr "Utdataformat"
 
+#: l10n_lint.py:580
 msgid "Max translation length (default: 500)"
 msgstr "Max översättningslängd (standard: 500)"
 
+#: l10n_lint.py:581
 msgid "Don't search subdirectories"
 msgstr "Sök inte i underkataloger"
 
+#: l10n_lint.py:582
 msgid "Treat warnings as errors"
 msgstr "Behandla varningar som fel"
 
+#: l10n_lint.py:599
+#, python-brace-format
 msgid "🔍 Fetching from GitHub: {repo}"
 msgstr "🔍 Hämtar från GitHub: {repo}"
 
+#: l10n_lint.py:602
+#, python-brace-format
 msgid "  Checking: {path}"
 msgstr "  Granskar: {path}"
 
+#: l10n_lint.py:607
+#, python-brace-format
 msgid "❌ GitHub error: {error}"
 msgstr "❌ GitHub-fel: {error}"
-
-msgid "Warning: Could not fetch {path}: {error}"
-msgstr "Varning: Kunde inte hämta {path}: {error}"

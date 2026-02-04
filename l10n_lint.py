@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.7.0"
+__version__ = "1.8.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -241,13 +241,29 @@ class L10nLinter:
     ESCAPE_PATTERN = re.compile(r'\\[nrt\\"]')
     
     # Common English words (for untranslated detection)
-    COMMON_ENGLISH = {'the', 'and', 'or', 'is', 'are', 'was', 'were', 'have', 'has', 
-                      'been', 'will', 'would', 'could', 'should', 'can', 'may', 'might',
-                      'this', 'that', 'these', 'those', 'with', 'from', 'for', 'not',
-                      'your', 'you', 'they', 'their', 'there', 'here', 'when', 'where',
-                      'what', 'which', 'who', 'how', 'why', 'all', 'each', 'every',
-                      'both', 'few', 'more', 'most', 'other', 'some', 'such', 'than',
-                      'too', 'very', 'just', 'also', 'only', 'into', 'over', 'after'}
+    COMMON_ENGLISH = {
+        # Articles and prepositions
+        'the', 'a', 'an', 'and', 'or', 'of', 'to', 'in', 'on', 'at', 'by', 'for',
+        'with', 'from', 'into', 'over', 'after', 'before', 'between', 'under',
+        # Pronouns
+        'you', 'your', 'they', 'their', 'there', 'here', 'this', 'that', 'these', 'those',
+        'it', 'its', 'we', 'our', 'he', 'she', 'him', 'her', 'them',
+        # Verbs (common)
+        'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had',
+        'do', 'does', 'did', 'will', 'would', 'could', 'should', 'can', 'may', 'might',
+        # Question words
+        'when', 'where', 'what', 'which', 'who', 'how', 'why',
+        # Adjectives/Adverbs
+        'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some',
+        'such', 'than', 'too', 'very', 'just', 'also', 'only', 'not', 'no', 'yes',
+        # Common UI words (often left untranslated by mistake)
+        'click', 'button', 'file', 'open', 'save', 'close', 'new', 'edit', 'view',
+        'help', 'window', 'menu', 'options', 'settings', 'please', 'continue',
+        'cancel', 'ok', 'error', 'warning', 'select', 'selected', 'delete',
+        'remove', 'add', 'create', 'update', 'enable', 'disable', 'loading',
+        'failed', 'success', 'download', 'upload', 'search', 'find', 'copy', 'paste',
+        'undo', 'redo', 'print', 'exit', 'quit', 'about', 'preferences',
+    }
     
     # Swedish special characters that shouldn't be accelerators
     NORDIC_CHARS = set('åäöÅÄÖæøÆØ')
@@ -634,20 +650,31 @@ class L10nLinter:
             ))
     
     def _check_escapes(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
-        """Check for escaped character mismatches."""
-        source_escapes = sorted(self.ESCAPE_PATTERN.findall(source))
-        trans_escapes = sorted(self.ESCAPE_PATTERN.findall(translation))
+        """Check for escaped character mismatches (newlines, tabs, etc.)."""
+        # Count actual escape characters (after unescape has been applied)
+        escape_chars = {'\n': '\\n', '\t': '\\t', '\r': '\\r'}
         
-        if source_escapes != trans_escapes and source_escapes:
+        source_counts = {char: source.count(char) for char in escape_chars}
+        trans_counts = {char: translation.count(char) for char in escape_chars}
+        
+        # Find mismatches
+        mismatches = []
+        for char, name in escape_chars.items():
+            src_count = source_counts[char]
+            trans_count = trans_counts[char]
+            if src_count != trans_count and src_count > 0:
+                mismatches.append(f"{name}: {src_count}→{trans_count}")
+        
+        if mismatches:
             result.add(LintIssue(
                 file=filepath,
                 line=line,
                 severity=Severity.ERROR,
                 rule="escaped-chars-mismatch",
-                message=_("Escaped characters mismatch: source has {source}, translation has {trans}").format(
-                    source=source_escapes, trans=trans_escapes
+                message=_("Escape character count mismatch: {details}").format(
+                    details=", ".join(mismatches)
                 ),
-                context=source[:50]
+                context=source[:50].replace('\n', '\\n')
             ))
     
     def _check_accelerators(self, filepath: str, line: int, source: str, translation: str, result: LintResult):

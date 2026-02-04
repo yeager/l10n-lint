@@ -1,0 +1,104 @@
+# Test file for all l10n-lint rules
+# Each entry tests a specific rule
+
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: sv\n"
+
+# Rule: missing-translation (empty msgstr)
+msgid "This is not translated"
+msgstr ""
+
+# Rule: fuzzy
+#, fuzzy
+msgid "This is fuzzy"
+msgstr "Detta är luddigt"
+
+# Rule: duplicate (same msgid twice - second entry)
+msgid "Duplicate entry"
+msgstr "Dublett post"
+
+msgid "Duplicate entry"
+msgstr "Annan översättning"
+
+# Rule: placeholder-mismatch ({name} missing in translation)
+msgid "Hello {name}, you have {count} messages"
+msgstr "Hej, du har meddelanden"
+
+# Rule: too-long (translation > 500 chars AND > 1.5x source)
+msgid "This is a moderately long source text that will be translated"
+msgstr "Detta är en mycket lång svensk översättning som är över femhundra tecken lång och som dessutom är mycket längre än källtexten. Vi fyller på med mer text för att säkerställa att vi kommer över gränsen på femhundra tecken. Här kommer ännu mer text som behövs för att nå målet. Vi fortsätter att skriva och skriva tills vi har tillräckligt många tecken. Nu borde vi vara nära. Lite till. Och lite till. Nu måste vi vara över femhundra tecken. Ja, det är vi nog nu. Extra text för att komma över 500 tecken totalt så att regeln triggas."
+
+# Rule: length-ratio (3x+ longer)
+msgid "Hi"
+msgstr "Hejsan på dig min vän"
+
+# Rule: suspicious-length (translation < 20% of source length)
+msgid "This is a long source text that should have a proper translation but instead has very little"
+msgstr "Kort"
+
+# Rule: inconsistent-punctuation (source has period, translation doesn't)
+msgid "Save the file."
+msgstr "Spara filen"
+
+# Rule: inconsistent-punctuation (source has no period, translation has)
+msgid "Save file"
+msgstr "Spara fil."
+
+# Rule: inconsistent-capitalization (source starts upper, translation lower)
+msgid "Welcome to the app"
+msgstr "välkommen till appen"
+
+# Rule: trailing-whitespace
+msgid "No trailing space"
+msgstr "Har blanksteg i slutet   "
+
+# Rule: double-spaces
+msgid "Single spaces only"
+msgstr "Dubbla  mellanslag  här"
+
+# Rule: mixed-quotes ("smart" and "straight")
+msgid "Use quotes"
+msgstr "Använd "citattecken" och 'apostrofer'"
+
+# Rule: html-tag-mismatch (missing </b>)
+msgid "This is <b>bold</b> text"
+msgstr "Detta är <b>fet text"
+
+# Rule: escaped-chars-mismatch (different newline count)
+msgid ""
+"Line one\n"
+"Line two\n"
+"Line three"
+msgstr ""
+"Rad ett\n"
+"Rad två"
+
+# Rule: keyboard-shortcut-missing (& missing in translation)
+msgid "&File"
+msgstr "Arkiv"
+
+# Rule: nordic-accelerator (å/ä/ö as accelerator)
+msgid "&Open"
+msgstr "&Öppna"
+
+# Rule: numeric-mismatch (different numbers)
+msgid "Version 2.5.0"
+msgstr "Version 3.0.0"
+
+# Rule: untranslated-words (source must contain the/and/is/are, translation has extra English)
+msgid "Enable the feature"
+msgstr "Please click the button to enable funktionen"
+
+# Rule: repeated-words
+msgid "The message"
+msgstr "Meddelandet meddelandet"
+
+# Rule: source-equals-translation
+msgid "Hello World"
+msgstr "Hello World"
+
+# Rule: option-value-missing (FILE placeholder missing)
+msgid "Load configuration from --config FILE"
+msgstr "Ladda konfiguration från --config fil"

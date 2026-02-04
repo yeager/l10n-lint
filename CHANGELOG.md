@@ -2,6 +2,17 @@
 
 All notable changes to l10n-lint will be documented in this file.
 
+## [1.3.2] - 2026-02-04
+
+### Changed
+- **Debian policy compliance**: Packages now follow Debian packaging guidelines
+  - Locale files installed to `/usr/share/l10n-lint/locale/`
+  - Added `/usr/share/doc/l10n-lint/copyright`
+  - Fixed locale lookup path in script
+
+### Fixed
+- **Debian package**: Rebuilt with correct ar format and structure
+
 ## [1.3.1] - 2026-02-04
 
 ### Fixed

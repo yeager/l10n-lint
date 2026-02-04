@@ -2,6 +2,12 @@
 
 All notable changes to l10n-lint will be documented in this file.
 
+## [1.3.1] - 2026-02-04
+
+### Fixed
+- **Debian package**: Rebuilt with correct ar format (was using macOS BSD format)
+  - Package now installs correctly on Debian/Ubuntu systems
+
 ## [1.3.0] - 2026-02-04
 
 ### Fixed

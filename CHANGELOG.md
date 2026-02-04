@@ -2,6 +2,21 @@
 
 All notable changes to l10n-lint will be documented in this file.
 
+## [1.3.6] - 2026-02-04
+
+### Added
+- **Enhanced verbose mode** (`--verbose` / `-V`):
+  - Timing information for each file and total elapsed time
+  - File size display
+  - Detailed issue breakdown (fuzzy, missing, placeholder mismatches)
+  - Locale detection info (shows detected language and locale directory)
+  - Scan timing for directory operations
+  - Per-file parsing time
+
+### Fixed
+- **fuzzy_count bug**: Fixed reference to undefined `result.fuzzy_count` 
+  (now correctly uses local variable and matches by rule name)
+
 ## [1.3.4] - 2026-02-04
 
 ### Added

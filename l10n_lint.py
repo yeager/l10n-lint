@@ -23,13 +23,14 @@ import os
 import re
 import sys
 import tempfile
+import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.3.4"
+__version__ = "1.3.6"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -580,6 +581,7 @@ Examples:
     parser.add_argument('--max-length', type=int, default=500, help=_('Max translation length (default: 500)'))
     parser.add_argument('--no-recursive', action='store_true', help=_("Don't search subdirectories"))
     parser.add_argument('--strict', action='store_true', help=_('Treat warnings as errors'))
+    parser.add_argument('--verbose', '-V', action='store_true', help=_('Show detailed progress'))
     parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}')
     
     args = parser.parse_args()
@@ -587,6 +589,32 @@ Examples:
     if not args.paths and not args.github:
         parser.print_help()
         sys.exit(1)
+    
+    verbose = args.verbose
+    start_time = time.time()
+    
+    def vprint(msg):
+        """Print if verbose mode is enabled."""
+        if verbose:
+            print(msg, file=sys.stderr)
+    
+    def vprint_elapsed():
+        """Print elapsed time."""
+        elapsed = time.time() - start_time
+        vprint(_("⏱️  Elapsed time: {elapsed:.2f}s").format(elapsed=elapsed))
+    
+    vprint(_("🔧 l10n-lint {version} starting...").format(version=__version__))
+    vprint(_("   Max length: {max}").format(max=args.max_length))
+    vprint(_("   Length ratio: {ratio}x").format(ratio=3.0))
+    vprint(_("   Strict mode: {strict}").format(strict=args.strict))
+    vprint(_("   Output format: {fmt}").format(fmt=args.format))
+    vprint(_("   Recursive: {rec}").format(rec=not args.no_recursive))
+    if LOCALE_DIR:
+        vprint(_("   Locale dir: {dir}").format(dir=LOCALE_DIR))
+        vprint(_("   Language: {lang}").format(lang=_lang_code))
+    else:
+        vprint(_("   Locale: not found (using English)"))
+    vprint("")
     
     linter = L10nLinter(config={
         'max_length': args.max_length,
@@ -596,23 +624,79 @@ Examples:
     
     # Lint GitHub repo
     if args.github:
+        vprint(_("🌐 GitHub mode"))
         print(_("🔍 Fetching from GitHub: {repo}").format(repo=args.github), file=sys.stderr)
+        if args.path:
+            vprint(_("   Path filter: {path}").format(path=args.path))
         try:
+            fetch_start = time.time()
+            vprint(_("   Connecting to GitHub API..."))
+            files_found = 0
             for filepath, content in fetch_github_files(args.github, args.path):
-                print(_("  Checking: {path}").format(path=filepath), file=sys.stderr)
+                files_found += 1
+                file_start = time.time()
+                vprint(_("  [{n}] {path}").format(n=files_found, path=filepath))
+                vprint(_("       Size: {size} bytes").format(size=len(content)))
                 file_result = linter.lint_file(filepath, content)
+                file_elapsed = time.time() - file_start
                 result.files_checked += file_result.files_checked
                 result.issues.extend(file_result.issues)
+                vprint(_("       Parsed in {elapsed:.3f}s").format(elapsed=file_elapsed))
+                if file_result.issues:
+                    vprint(_("       ⚠️  Found {count} issue(s)").format(count=len(file_result.issues)))
+                else:
+                    vprint(_("       ✓ No issues"))
+            fetch_elapsed = time.time() - fetch_start
+            vprint(_("   Fetched {count} file(s) in {elapsed:.2f}s").format(
+                count=files_found, elapsed=fetch_elapsed))
         except Exception as e:
             print(_("❌ GitHub error: {error}").format(error=e), file=sys.stderr)
             sys.exit(1)
     
     # Lint local files
-    for path in args.paths:
-        for filepath in find_l10n_files(path, recursive=not args.no_recursive):
-            file_result = linter.lint_file(filepath)
-            result.files_checked += file_result.files_checked
-            result.issues.extend(file_result.issues)
+    if args.paths:
+        vprint(_("📁 Local mode"))
+        local_files = 0
+        for path in args.paths:
+            vprint(_("📂 Scanning: {path}").format(path=path))
+            scan_start = time.time()
+            path_files = list(find_l10n_files(path, recursive=not args.no_recursive))
+            scan_elapsed = time.time() - scan_start
+            vprint(_("   Found {count} file(s) in {elapsed:.3f}s").format(
+                count=len(path_files), elapsed=scan_elapsed))
+            
+            for filepath in path_files:
+                local_files += 1
+                file_start = time.time()
+                file_size = Path(filepath).stat().st_size
+                vprint(_("  [{n}] {path}").format(n=local_files, path=filepath))
+                vprint(_("       Size: {size} bytes").format(size=file_size))
+                file_result = linter.lint_file(filepath)
+                file_elapsed = time.time() - file_start
+                result.files_checked += file_result.files_checked
+                result.issues.extend(file_result.issues)
+                vprint(_("       Parsed in {elapsed:.3f}s").format(elapsed=file_elapsed))
+                if file_result.issues:
+                    vprint(_("       ⚠️  Found {count} issue(s)").format(count=len(file_result.issues)))
+                else:
+                    vprint(_("       ✓ No issues"))
+        
+        vprint(_("   Total local files: {count}").format(count=local_files))
+    
+    # Verbose summary
+    vprint("")
+    vprint(_("📊 Summary:"))
+    vprint(_("   Files checked: {count}").format(count=result.files_checked))
+    vprint(_("   Errors: {count}").format(count=result.error_count))
+    vprint(_("   Warnings: {count}").format(count=result.warning_count))
+    fuzzy_count = sum(1 for i in result.issues if i.rule == 'fuzzy')
+    vprint(_("   Fuzzy: {count}").format(count=fuzzy_count))
+    missing_count = sum(1 for i in result.issues if i.rule == 'missing-translation')
+    vprint(_("   Missing: {count}").format(count=missing_count))
+    placeholder_count = sum(1 for i in result.issues if i.rule == 'placeholder-mismatch')
+    vprint(_("   Placeholder mismatches: {count}").format(count=placeholder_count))
+    vprint_elapsed()
+    vprint("")
     
     # Output
     print(format_output(result, args.format))

@@ -2,6 +2,12 @@
 
 All notable changes to l10n-lint will be documented in this file.
 
+## [1.3.3] - 2026-02-04
+
+### Added
+- **Man page**: `man l10n-lint` now available
+  - Installed to `/usr/share/man/man1/l10n-lint.1.gz`
+
 ## [1.3.2] - 2026-02-04
 
 ### Changed

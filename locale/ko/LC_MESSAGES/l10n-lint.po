@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 20:03+0100\n"
+"POT-Creation-Date: 2026-02-04 20:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -150,22 +150,22 @@ msgstr ""
 msgid "Warning: Could not fetch {path}: {error}"
 msgstr "경고: {path} 을 (를) 가져올 수 없습니다: {error}"
 
-#: l10n_lint.py:881
+#: l10n_lint.py:1062
 #, python-brace-format
 msgid "✅ {count} file(s) checked, no issues found."
 msgstr "파일 ✅ {count} 개를 확인했으나 문제가 없습니다."
 
-#: l10n_lint.py:892
+#: l10n_lint.py:1073
 #, python-brace-format
 msgid "  {icon} Line {line}: [{rule}] {message}"
 msgstr "{icon} 라인 {line}: [{rule}] {message}"
 
-#: l10n_lint.py:896
+#: l10n_lint.py:1077
 #, python-brace-format
 msgid "     Context: \"{context}...\""
 msgstr "Context: \"{context}...\""
 
-#: l10n_lint.py:898
+#: l10n_lint.py:1079
 #, python-brace-format
 msgid ""
 "\n"
@@ -174,27 +174,28 @@ msgstr ""
 "\n"
 "📊 요약: 파일 {files} 개, 오류 {errors} 개, 경고 {warnings} 개"
 
-#: l10n_lint.py:910
+#: l10n_lint.py:1091
 msgid "positional arguments"
 msgstr ""
 
-#: l10n_lint.py:911 l10n_lint.py:912
+#: l10n_lint.py:1092 l10n_lint.py:1093
 msgid "options"
 msgstr ""
 
-#: l10n_lint.py:920
+#: l10n_lint.py:1101
 msgid "l10n-lint - Linter for localization files (.po, .ts)"
 msgstr "l10n-lint - 현지화 파일용 린터 (.po, .ts)"
 
-#: l10n_lint.py:923
+#: l10n_lint.py:1104
+#, fuzzy
 msgid ""
 "\n"
 "Examples:\n"
 "  l10n-lint ./translations/           # Lint local directory\n"
 "  l10n-lint file.po                   # Lint single file\n"
 "  l10n-lint --github owner/repo       # Lint GitHub repository\n"
-"  l10n-lint --github https://github.com/owner/repo --path resources/"
-"language/\n"
+"  l10n-lint -f html -o report.html .  # Generate HTML report\n"
+"  l10n-lint -f json -o results.json . # Generate JSON report\n"
 "        "
 msgstr ""
 "\n"
@@ -204,215 +205,224 @@ msgstr ""
 "  l10n-lint --github owner/repo # Lint GitHub 저장소\n"
 "  l10n-lint --github https://github.com/owner/repo --path resources/language/"
 
-#: l10n_lint.py:932
+#: l10n_lint.py:1114
 msgid "Files or directories to lint"
 msgstr "LINT에 대한 파일 또는 디렉터리"
 
-#: l10n_lint.py:933
+#: l10n_lint.py:1115
 msgid "GitHub repository (owner/repo or URL)"
 msgstr "GitHub 저장소 (소유자/저장소 또는 URL)"
 
-#: l10n_lint.py:934
+#: l10n_lint.py:1116
 msgid "Path filter for GitHub repos"
 msgstr "GitHub 저장소의 경로 필터"
 
-#: l10n_lint.py:935
+#: l10n_lint.py:1117
 msgid "Output format"
 msgstr "출력 포맷"
 
-#: l10n_lint.py:936
+#: l10n_lint.py:1118
+msgid "Save report to file"
+msgstr ""
+
+#: l10n_lint.py:1119
 msgid "Max translation length (default: 500)"
 msgstr "최대 번역 길이 (기본값: 500)"
 
-#: l10n_lint.py:937
+#: l10n_lint.py:1120
 msgid "Don't search subdirectories"
 msgstr "하위 디렉토리 검색 안 함"
 
-#: l10n_lint.py:938
+#: l10n_lint.py:1121
 msgid "Treat warnings as errors"
 msgstr "경고를 오류로 처리"
 
-#: l10n_lint.py:939
+#: l10n_lint.py:1122
 msgid "Show only summary"
 msgstr ""
 
-#: l10n_lint.py:940
+#: l10n_lint.py:1123
 msgid "Exit code only, no output (for CI)"
 msgstr ""
 
-#: l10n_lint.py:941
+#: l10n_lint.py:1124
 msgid "Ignore fuzzy warnings"
 msgstr ""
 
-#: l10n_lint.py:942
+#: l10n_lint.py:1125
 msgid "Show detailed progress"
 msgstr ""
 
-#: l10n_lint.py:943
+#: l10n_lint.py:1126
 msgid "Show this help message and exit"
 msgstr ""
 
-#: l10n_lint.py:945
+#: l10n_lint.py:1128
 msgid "Show version number and exit"
 msgstr ""
 
-#: l10n_lint.py:964
+#: l10n_lint.py:1147
 #, python-brace-format
 msgid "⏱️  Elapsed time: {elapsed:.2f}s"
 msgstr ""
 
-#: l10n_lint.py:966
+#: l10n_lint.py:1149
 #, python-brace-format
 msgid "🔧 l10n-lint {version} starting..."
 msgstr ""
 
-#: l10n_lint.py:967
+#: l10n_lint.py:1150
 #, python-brace-format
 msgid "   Max length: {max}"
 msgstr ""
 
-#: l10n_lint.py:968
+#: l10n_lint.py:1151
 #, python-brace-format
 msgid "   Length ratio: {ratio}x"
 msgstr ""
 
-#: l10n_lint.py:969
+#: l10n_lint.py:1152
 #, python-brace-format
 msgid "   Strict mode: {strict}"
 msgstr ""
 
-#: l10n_lint.py:970
+#: l10n_lint.py:1153
 #, fuzzy, python-brace-format
 msgid "   Output format: {fmt}"
 msgstr "출력 포맷"
 
-#: l10n_lint.py:971
+#: l10n_lint.py:1154
 #, python-brace-format
 msgid "   Recursive: {rec}"
 msgstr ""
 
-#: l10n_lint.py:973
+#: l10n_lint.py:1156
 #, python-brace-format
 msgid "   Locale dir: {dir}"
 msgstr ""
 
-#: l10n_lint.py:974
+#: l10n_lint.py:1157
 #, python-brace-format
 msgid "   Language: {lang}"
 msgstr ""
 
-#: l10n_lint.py:976
+#: l10n_lint.py:1159
 msgid "   Locale: not found (using English)"
 msgstr ""
 
-#: l10n_lint.py:987
+#: l10n_lint.py:1170
 msgid "🌐 GitHub mode"
 msgstr ""
 
-#: l10n_lint.py:988
+#: l10n_lint.py:1171
 #, python-brace-format
 msgid "🔍 Fetching from GitHub: {repo}"
 msgstr "GitHub에서 🔍 가져오는 중: {repo}"
 
-#: l10n_lint.py:990
+#: l10n_lint.py:1173
 #, fuzzy, python-brace-format
 msgid "   Path filter: {path}"
 msgstr "확인 중: {path}"
 
-#: l10n_lint.py:993
+#: l10n_lint.py:1176
 msgid "   Connecting to GitHub API..."
 msgstr ""
 
-#: l10n_lint.py:998 l10n_lint.py:1032
+#: l10n_lint.py:1181 l10n_lint.py:1215
 #, fuzzy, python-brace-format
 msgid "  [{n}] {path}"
 msgstr "확인 중: {path}"
 
-#: l10n_lint.py:999 l10n_lint.py:1033
+#: l10n_lint.py:1182 l10n_lint.py:1216
 #, python-brace-format
 msgid "       Size: {size} bytes"
 msgstr ""
 
-#: l10n_lint.py:1004 l10n_lint.py:1038
+#: l10n_lint.py:1187 l10n_lint.py:1221
 #, python-brace-format
 msgid "       Parsed in {elapsed:.3f}s"
 msgstr ""
 
-#: l10n_lint.py:1006 l10n_lint.py:1040
+#: l10n_lint.py:1189 l10n_lint.py:1223
 #, python-brace-format
 msgid "       ⚠️  Found {count} issue(s)"
 msgstr ""
 
-#: l10n_lint.py:1008 l10n_lint.py:1042
+#: l10n_lint.py:1191 l10n_lint.py:1225
 msgid "       ✓ No issues"
 msgstr ""
 
-#: l10n_lint.py:1010
+#: l10n_lint.py:1193
 #, python-brace-format
 msgid "   Fetched {count} file(s) in {elapsed:.2f}s"
 msgstr ""
 
-#: l10n_lint.py:1013
+#: l10n_lint.py:1196
 #, python-brace-format
 msgid "❌ GitHub error: {error}"
 msgstr "❌ GitHub 오류: {error}"
 
-#: l10n_lint.py:1018
+#: l10n_lint.py:1201
 msgid "📁 Local mode"
 msgstr ""
 
-#: l10n_lint.py:1021
+#: l10n_lint.py:1204
 #, fuzzy, python-brace-format
 msgid "📂 Scanning: {path}"
 msgstr "확인 중: {path}"
 
-#: l10n_lint.py:1025
+#: l10n_lint.py:1208
 #, python-brace-format
 msgid "   Found {count} file(s) in {elapsed:.3f}s"
 msgstr ""
 
-#: l10n_lint.py:1044
+#: l10n_lint.py:1227
 #, python-brace-format
 msgid "   Total local files: {count}"
 msgstr ""
 
-#: l10n_lint.py:1052
+#: l10n_lint.py:1235
 msgid "📊 Summary:"
 msgstr ""
 
-#: l10n_lint.py:1053
+#: l10n_lint.py:1236
 #, python-brace-format
 msgid "   Files checked: {count}"
 msgstr ""
 
-#: l10n_lint.py:1054
+#: l10n_lint.py:1237
 #, python-brace-format
 msgid "   Errors: {count}"
 msgstr ""
 
-#: l10n_lint.py:1055
+#: l10n_lint.py:1238
 #, python-brace-format
 msgid "   Warnings: {count}"
 msgstr ""
 
-#: l10n_lint.py:1057
+#: l10n_lint.py:1240
 #, python-brace-format
 msgid "   Fuzzy: {count}"
 msgstr ""
 
-#: l10n_lint.py:1059
+#: l10n_lint.py:1242
 #, python-brace-format
 msgid "   Missing: {count}"
 msgstr ""
 
-#: l10n_lint.py:1061
+#: l10n_lint.py:1244
 #, python-brace-format
 msgid "   Placeholder mismatches: {count}"
 msgstr ""
 
-#: l10n_lint.py:1069
+#: l10n_lint.py:1252
 #, fuzzy, python-brace-format
 msgid "📊 {files} file(s), {errors} error(s), {warnings} warning(s)"
 msgstr ""
 "\n"
 "📊 요약: 파일 {files} 개, 오류 {errors} 개, 경고 {warnings} 개"
+
+#: l10n_lint.py:1259
+#, python-brace-format
+msgid "📄 Report saved to: {file}"
+msgstr ""

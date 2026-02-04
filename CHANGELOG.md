@@ -3,6 +3,13 @@
 All notable changes to l10n-lint will be documented in this file.
 
 ## [1.5.0] - 2026-02-04
+## [1.7.0] - 2026-02-04
+
+### Added
+- **HTML reports** - Generate detailed HTML reports with `-f html`
+- **JSON reports** - Export results as JSON with `-f json`
+- **`-o/--output FILE`** - Save report to file
+
 ## [1.6.0] - 2026-02-04
 
 ### Added

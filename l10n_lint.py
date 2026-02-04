@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.6.0"
+__version__ = "1.7.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -858,6 +858,184 @@ def fetch_github_files(repo_url: str, path_filter: str = "") -> Generator[tuple[
             print(_("Warning: Could not fetch {path}: {error}").format(path=filepath, error=e), file=sys.stderr)
 
 
+def generate_html_report(result: LintResult, title: str = "l10n-lint Report") -> str:
+    """Generate a detailed HTML report."""
+    # Count issues by rule
+    rule_counts = {}
+    for issue in result.issues:
+        rule_counts[issue.rule] = rule_counts.get(issue.rule, 0) + 1
+    
+    # Count issues by file
+    file_counts = {}
+    for issue in result.issues:
+        file_counts[issue.file] = file_counts.get(issue.file, 0) + 1
+    
+    # Count by severity
+    errors = result.error_count
+    warnings = result.warning_count
+    info = sum(1 for i in result.issues if i.severity == Severity.INFO)
+    
+    html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <style>
+        :root {{
+            --bg: #1a1a2e;
+            --card: #16213e;
+            --text: #eee;
+            --error: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --success: #2ecc71;
+        }}
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }}
+        .container {{ max-width: 1200px; margin: 0 auto; }}
+        h1 {{ color: var(--text); border-bottom: 2px solid var(--info); padding-bottom: 10px; }}
+        h2 {{ color: var(--info); margin-top: 30px; }}
+        .summary {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }}
+        .stat {{
+            background: var(--card);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }}
+        .stat-value {{ font-size: 2em; font-weight: bold; }}
+        .stat-label {{ opacity: 0.8; font-size: 0.9em; }}
+        .stat.error .stat-value {{ color: var(--error); }}
+        .stat.warning .stat-value {{ color: var(--warning); }}
+        .stat.info .stat-value {{ color: var(--info); }}
+        .stat.success .stat-value {{ color: var(--success); }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: var(--card);
+            border-radius: 10px;
+            overflow: hidden;
+        }}
+        th, td {{ padding: 12px 15px; text-align: left; }}
+        th {{ background: rgba(52, 152, 219, 0.2); }}
+        tr:nth-child(even) {{ background: rgba(255,255,255,0.05); }}
+        .severity-error {{ color: var(--error); }}
+        .severity-warning {{ color: var(--warning); }}
+        .severity-info {{ color: var(--info); }}
+        .issue-context {{
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }}
+        .chart {{ margin: 20px 0; }}
+        .bar {{
+            height: 25px;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 0.9em;
+        }}
+        .bar-error {{ background: var(--error); }}
+        .bar-warning {{ background: var(--warning); }}
+        .bar-info {{ background: var(--info); }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 {title}</h1>
+        <p>Generated: {time.strftime("%Y-%m-%d %H:%M")}</p>
+        
+        <div class="summary">
+            <div class="stat success">
+                <div class="stat-value">{result.files_checked}</div>
+                <div class="stat-label">Files checked</div>
+            </div>
+            <div class="stat error">
+                <div class="stat-value">{errors}</div>
+                <div class="stat-label">Errors</div>
+            </div>
+            <div class="stat warning">
+                <div class="stat-value">{warnings}</div>
+                <div class="stat-label">Warnings</div>
+            </div>
+            <div class="stat info">
+                <div class="stat-value">{info}</div>
+                <div class="stat-label">Info</div>
+            </div>
+        </div>
+'''
+    
+    # Issues by rule
+    if rule_counts:
+        html += '''
+        <h2>📊 Issues by Rule</h2>
+        <table>
+            <tr><th>Rule</th><th>Count</th><th>%</th></tr>
+'''
+        total = len(result.issues)
+        for rule, count in sorted(rule_counts.items(), key=lambda x: -x[1]):
+            pct = (count / total * 100) if total > 0 else 0
+            html += f'            <tr><td>{rule}</td><td>{count}</td><td>{pct:.1f}%</td></tr>\n'
+        html += '        </table>\n'
+    
+    # Issues by file
+    if file_counts:
+        html += '''
+        <h2>📁 Issues by File</h2>
+        <table>
+            <tr><th>File</th><th>Issues</th></tr>
+'''
+        for filepath, count in sorted(file_counts.items(), key=lambda x: -x[1])[:20]:
+            html += f'            <tr><td>{filepath}</td><td>{count}</td></tr>\n'
+        html += '        </table>\n'
+    
+    # All issues
+    if result.issues:
+        html += '''
+        <h2>📋 All Issues</h2>
+        <table>
+            <tr><th>File</th><th>Line</th><th>Severity</th><th>Rule</th><th>Message</th></tr>
+'''
+        for issue in sorted(result.issues, key=lambda x: (x.file, x.line)):
+            sev_class = f"severity-{issue.severity.value}"
+            sev_icon = "❌" if issue.severity == Severity.ERROR else "⚠️" if issue.severity == Severity.WARNING else "ℹ️"
+            ctx = f'<br><span class="issue-context">{issue.context}...</span>' if issue.context else ''
+            html += f'''            <tr>
+                <td>{issue.file}</td>
+                <td>{issue.line}</td>
+                <td class="{sev_class}">{sev_icon} {issue.severity.value}</td>
+                <td>{issue.rule}</td>
+                <td>{issue.message}{ctx}</td>
+            </tr>
+'''
+        html += '        </table>\n'
+    else:
+        html += '<p style="color: var(--success); font-size: 1.2em;">✅ No issues found!</p>\n'
+    
+    html += '''
+    </div>
+</body>
+</html>'''
+    
+    return html
+
+
 def format_output(result: LintResult, format_type: str = "text") -> str:
     """Format lint results."""
     if format_type == "json":
@@ -867,6 +1045,9 @@ def format_output(result: LintResult, format_type: str = "text") -> str:
             "warnings": result.warning_count,
             "issues": [i.to_dict() for i in result.issues]
         }, indent=2)
+    
+    elif format_type == "html":
+        return generate_html_report(result)
     
     elif format_type == "github":
         # GitHub Actions annotation format
@@ -925,14 +1106,16 @@ Examples:
   l10n-lint ./translations/           # Lint local directory
   l10n-lint file.po                   # Lint single file
   l10n-lint --github owner/repo       # Lint GitHub repository
-  l10n-lint --github https://github.com/owner/repo --path resources/language/
+  l10n-lint -f html -o report.html .  # Generate HTML report
+  l10n-lint -f json -o results.json . # Generate JSON report
         """)
     )
     
     parser.add_argument('paths', nargs='*', help=_('Files or directories to lint'))
     parser.add_argument('--github', '-g', metavar='REPO', help=_('GitHub repository (owner/repo or URL)'))
     parser.add_argument('--path', '-p', metavar='PATH', default='', help=_('Path filter for GitHub repos'))
-    parser.add_argument('--format', '-f', choices=['text', 'json', 'github'], default='text', help=_('Output format'))
+    parser.add_argument('--format', '-f', choices=['text', 'json', 'html', 'github'], default='text', help=_('Output format'))
+    parser.add_argument('--output', '-o', metavar='FILE', help=_('Save report to file'))
     parser.add_argument('--max-length', type=int, default=500, help=_('Max translation length (default: 500)'))
     parser.add_argument('--no-recursive', action='store_true', help=_("Don't search subdirectories"))
     parser.add_argument('--strict', action='store_true', help=_('Treat warnings as errors'))
@@ -1069,7 +1252,13 @@ Examples:
             print(_("📊 {files} file(s), {errors} error(s), {warnings} warning(s)").format(
                 files=result.files_checked, errors=result.error_count, warnings=result.warning_count))
         else:
-            print(format_output(result, args.format))
+            output = format_output(result, args.format)
+            if args.output:
+                with open(args.output, 'w', encoding='utf-8') as f:
+                    f.write(output)
+                print(_("📄 Report saved to: {file}").format(file=args.output))
+            else:
+                print(output)
     
     # Exit code
     if args.strict:

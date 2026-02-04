@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.5.0"
+__version__ = "1.6.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -252,6 +252,9 @@ class L10nLinter:
     # Swedish special characters that shouldn't be accelerators
     NORDIC_CHARS = set('åäöÅÄÖæøÆØ')
     
+    # Option value pattern (--option=VALUE or --option VALUE)
+    OPTION_VALUE_PATTERN = re.compile(r'--?\w+[=\s]([A-Z][A-Z0-9_]+)')
+    
     def __init__(self, config: Optional[dict] = None):
         self.config = config or {}
         self.max_length = self.config.get('max_length', 500)
@@ -401,6 +404,10 @@ class L10nLinter:
             # Check: Source equals translation
             if msgstr:
                 self._check_source_equals_translation(filepath, line, msgid, msgstr, result)
+            
+            # Check: Option value consistency
+            if msgstr:
+                self._check_option_values(filepath, line, msgid, msgstr, result)
             
             # Check: Duplicates
             if msgid in seen_msgids:
@@ -743,6 +750,35 @@ class L10nLinter:
                 message=_("Translation is identical to source (possibly untranslated)"),
                 context=source[:50]
             ))
+    
+    def _check_option_values(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for inconsistent option value placeholders."""
+        # Find option values like --option=VALUE or --option VALUE
+        source_values = set(self.OPTION_VALUE_PATTERN.findall(source))
+        
+        if not source_values:
+            return
+        
+        # Check if these values appear in translation
+        for value in source_values:
+            # Value should either be kept as-is or translated consistently
+            # Check if the value is missing entirely (not even translated)
+            value_lower = value.lower()
+            trans_lower = translation.lower()
+            
+            # Look for the value in translation (case-insensitive)
+            if value not in translation and value_lower not in trans_lower:
+                # Check if there's a similar uppercase word that might be the translation
+                trans_upper_words = re.findall(r'\b[A-ZÅÄÖ][A-ZÅÄÖ0-9_]+\b', translation)
+                if not trans_upper_words:
+                    result.add(LintIssue(
+                        file=filepath,
+                        line=line,
+                        severity=Severity.WARNING,
+                        rule="option-value-missing",
+                        message=_("Option value '{value}' from source not found in translation").format(value=value),
+                        context=source[:50]
+                    ))
 
 
 def find_l10n_files(path: str, recursive: bool = True) -> Generator[str, None, None]:
@@ -865,10 +901,25 @@ def format_output(result: LintResult, format_type: str = "text") -> str:
         return '\n'.join(lines)
 
 
+class TranslatedHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    """Custom formatter that translates argparse default strings."""
+    
+    def start_section(self, heading):
+        # Translate section headings
+        translations = {
+            'positional arguments': _('positional arguments'),
+            'options': _('options'),
+            'optional arguments': _('options'),
+        }
+        heading = translations.get(heading, heading)
+        super().start_section(heading)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description=_('l10n-lint - Linter for localization files (.po, .ts)'),
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=TranslatedHelpFormatter,
+        add_help=False,
         epilog=_("""
 Examples:
   l10n-lint ./translations/           # Lint local directory
@@ -889,7 +940,9 @@ Examples:
     parser.add_argument('--check', action='store_true', help=_('Exit code only, no output (for CI)'))
     parser.add_argument('--skip-fuzzy', action='store_true', help=_('Ignore fuzzy warnings'))
     parser.add_argument('--verbose', '-V', action='store_true', help=_('Show detailed progress'))
-    parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}')
+    parser.add_argument('-h', '--help', action='help', help=_('Show this help message and exit'))
+    parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}',
+                        help=_('Show version number and exit'))
     
     args = parser.parse_args()
     

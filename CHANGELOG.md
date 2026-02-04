@@ -3,6 +3,15 @@
 All notable changes to l10n-lint will be documented in this file.
 
 ## [1.5.0] - 2026-02-04
+## [1.6.0] - 2026-02-04
+
+### Added
+- **option-value-missing** - Check for inconsistent option value placeholders
+- Fully translated help text (positional arguments, options, -h, -v)
+
+### Changed
+- Custom TranslatedHelpFormatter for complete localization
+
 
 ### Added - 16 new lint rules!
 

@@ -2,6 +2,16 @@
 
 All notable changes to l10n-lint will be documented in this file.
 
+## [1.3.0] - 2026-02-04
+
+### Fixed
+- **Plural forms**: msgstr[0]/msgstr[1] now correctly detected as translations
+  - Parser was matching `msgid` before `msgid_plural` due to prefix matching
+- **length-ratio**: Increased default from 2x to 3x to avoid false positives
+  - Compound words like "Förhandsgranskning" for "Preview" no longer trigger warnings
+- **too-long**: Now compares with source length (only warns if >1.5x source AND >500 chars)
+  - Long translations matching long sources no longer trigger warnings
+
 ## [1.2.1] - 2026-02-03
 
 ### Fixed

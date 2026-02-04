@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.2.1"
+__version__ = "1.3.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -152,8 +152,8 @@ class POParser:
                     current_entry['_source'] = line_stripped[2:].strip()
                 continue
             
-            # msgctxt, msgid, msgstr
-            for key in ['msgctxt', 'msgid', 'msgid_plural', 'msgstr']:
+            # msgctxt, msgid, msgstr (check longer keys first to avoid prefix matching issues)
+            for key in ['msgctxt', 'msgid_plural', 'msgid', 'msgstr']:
                 if line_stripped.startswith(key):
                     if not current_entry:
                         entry_start_line = i
@@ -233,7 +233,7 @@ class L10nLinter:
     def __init__(self, config: Optional[dict] = None):
         self.config = config or {}
         self.max_length = self.config.get('max_length', 500)
-        self.length_ratio = self.config.get('length_ratio', 2.0)  # Translation shouldn't be 2x longer
+        self.length_ratio = self.config.get('length_ratio', 3.0)  # Translation shouldn't be 3x longer (compounds like "Förhandsgranskning")
     
     def lint_file(self, filepath: str, content: Optional[str] = None) -> LintResult:
         """Lint a single file."""
@@ -280,6 +280,7 @@ class L10nLinter:
         for entry in parser.entries:
             line = entry.get('_line', 0)
             msgid = entry.get('msgid', '')
+            msgid_plural = entry.get('msgid_plural', '')
             msgstr = entry.get('msgstr', '')
             flags = entry.get('_flags', [])
             
@@ -287,8 +288,26 @@ class L10nLinter:
             if not msgid:
                 continue
             
-            # Check: Missing translation
-            if not msgstr:
+            # Check: Missing translation (handle plural forms)
+            if msgid_plural:
+                # Plural form: check msgstr[0], msgstr[1], etc.
+                has_translation = False
+                for key in entry:
+                    if key.startswith('msgstr[') and entry[key]:
+                        has_translation = True
+                        break
+                if not has_translation:
+                    result.add(LintIssue(
+                        file=filepath,
+                        line=line,
+                        severity=Severity.ERROR,
+                        rule="missing-translation",
+                        message=_("Missing translation (empty msgstr)"),
+                        context=msgid[:50]
+                    ))
+                # Use msgstr[0] for further checks
+                msgstr = entry.get('msgstr[0]', '')
+            elif not msgstr:
                 result.add(LintIssue(
                     file=filepath,
                     line=line,
@@ -395,7 +414,8 @@ class L10nLinter:
     
     def _check_length(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for length issues."""
-        if len(translation) > self.max_length:
+        # Only warn about too-long if translation is significantly longer than source
+        if len(translation) > self.max_length and len(translation) > len(source) * 1.5:
             result.add(LintIssue(
                 file=filepath,
                 line=line,

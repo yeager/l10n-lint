@@ -1,4 +1,4 @@
-.TH L10N-LINT 1 "February 2026" "l10n-lint 1.4.0" "User Commands"
+.TH L10N-LINT 1 "February 2026" "l10n-lint 1.5.0" "User Commands"
 .SH NAME
 l10n-lint \- linter for localization files
 .SH SYNOPSIS
@@ -6,8 +6,18 @@ l10n-lint \- linter for localization files
 [\fIOPTIONS\fR] \fIPATH\fR...
 .SH DESCRIPTION
 .B l10n-lint
-checks gettext .po and Qt .ts localization files for common issues:
-missing translations, fuzzy entries, placeholder mismatches, and length problems.
+checks gettext .po and Qt .ts localization files for common issues.
+.SH CHECKS
+.SS Core
+missing-translation, fuzzy, placeholder-mismatch, duplicate
+.SS Typography
+inconsistent-punctuation, inconsistent-capitalization, trailing-whitespace,
+double-spaces, mixed-quotes
+.SS Technical
+html-tag-mismatch, escaped-chars-mismatch, keyboard-shortcut-missing,
+nordic-accelerator, numeric-mismatch
+.SS Quality
+untranslated-words, repeated-words, source-equals-translation, suspicious-length
 .SH OPTIONS
 .TP
 .BR \-h ", " \-\-help
@@ -18,9 +28,6 @@ Show version number and exit.
 .TP
 .BR \-g ", " \-\-github " " \fIREPO\fR
 Lint a GitHub repository (owner/repo or URL).
-.TP
-.BR \-p ", " \-\-path " " \fIPATH\fR
-Path filter for GitHub repos.
 .TP
 .BR \-f ", " \-\-format " " \fIFORMAT\fR
 Output format: text (default), json, github
@@ -36,22 +43,6 @@ Ignore fuzzy warnings.
 .TP
 .BR \-\-strict
 Treat warnings as errors.
-.TP
-.BR \-V ", " \-\-verbose
-Show detailed progress.
-.SH EXAMPLES
-.TP
-Check all .po files in current directory:
-.B l10n-lint .
-.TP
-Check specific file with JSON output:
-.B l10n-lint \-\-format json messages.po
-.TP
-Lint a GitHub repository:
-.B l10n-lint \-\-github owner/repo
-.TP
-CI mode (exit code only):
-.B l10n-lint \-\-check .
 .SH EXIT STATUS
 .TP
 .B 0
@@ -63,5 +54,4 @@ Issues found or error occurred.
 Daniel Nylander <daniel@danielnylander.se>
 .SH SEE ALSO
 .BR tp-lint (1),
-.BR po-translate (1),
-.BR msgfmt (1)
+.BR po-translate (1)

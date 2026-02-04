@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -231,10 +231,31 @@ class L10nLinter:
     PYTHON_FORMAT = re.compile(r'\{(\d+|[a-zA-Z_][a-zA-Z0-9_]*)?(?:![rsa])?(?::[^}]*)?\}')
     QT_PATTERN = re.compile(r'%\d+')
     
+    # HTML tag pattern
+    HTML_TAG_PATTERN = re.compile(r'<[^>]+>')
+    
+    # Keyboard accelerator patterns (&File, _File) - include unicode letters
+    ACCELERATOR_PATTERN = re.compile(r'[&_](\w)', re.UNICODE)
+    
+    # Escaped characters
+    ESCAPE_PATTERN = re.compile(r'\\[nrt\\"]')
+    
+    # Common English words (for untranslated detection)
+    COMMON_ENGLISH = {'the', 'and', 'or', 'is', 'are', 'was', 'were', 'have', 'has', 
+                      'been', 'will', 'would', 'could', 'should', 'can', 'may', 'might',
+                      'this', 'that', 'these', 'those', 'with', 'from', 'for', 'not',
+                      'your', 'you', 'they', 'their', 'there', 'here', 'when', 'where',
+                      'what', 'which', 'who', 'how', 'why', 'all', 'each', 'every',
+                      'both', 'few', 'more', 'most', 'other', 'some', 'such', 'than',
+                      'too', 'very', 'just', 'also', 'only', 'into', 'over', 'after'}
+    
+    # Swedish special characters that shouldn't be accelerators
+    NORDIC_CHARS = set('åäöÅÄÖæøÆØ')
+    
     def __init__(self, config: Optional[dict] = None):
         self.config = config or {}
         self.max_length = self.config.get('max_length', 500)
-        self.length_ratio = self.config.get('length_ratio', 3.0)  # Translation shouldn't be 3x longer (compounds like "Förhandsgranskning")
+        self.length_ratio = self.config.get('length_ratio', 3.0)  # Translation shouldn't be 3x longer
     
     def lint_file(self, filepath: str, content: Optional[str] = None) -> LintResult:
         """Lint a single file."""
@@ -337,6 +358,50 @@ class L10nLinter:
             if msgstr:
                 self._check_length(filepath, line, msgid, msgstr, result)
             
+            # Check: Punctuation
+            if msgstr:
+                self._check_punctuation(filepath, line, msgid, msgstr, result)
+            
+            # Check: Capitalization
+            if msgstr:
+                self._check_capitalization(filepath, line, msgid, msgstr, result)
+            
+            # Check: Whitespace issues
+            if msgstr:
+                self._check_whitespace(filepath, line, msgid, msgstr, result)
+            
+            # Check: Quote consistency
+            if msgstr:
+                self._check_quotes(filepath, line, msgid, msgstr, result)
+            
+            # Check: HTML tags
+            if msgstr:
+                self._check_html_tags(filepath, line, msgid, msgstr, result)
+            
+            # Check: Escaped characters
+            if msgstr:
+                self._check_escapes(filepath, line, msgid, msgstr, result)
+            
+            # Check: Keyboard accelerators
+            if msgstr:
+                self._check_accelerators(filepath, line, msgid, msgstr, result)
+            
+            # Check: Numeric values
+            if msgstr:
+                self._check_numerics(filepath, line, msgid, msgstr, result)
+            
+            # Check: Untranslated English words
+            if msgstr:
+                self._check_untranslated(filepath, line, msgid, msgstr, result)
+            
+            # Check: Repeated words
+            if msgstr:
+                self._check_repeated_words(filepath, line, msgid, msgstr, result)
+            
+            # Check: Source equals translation
+            if msgstr:
+                self._check_source_equals_translation(filepath, line, msgid, msgstr, result)
+            
             # Check: Duplicates
             if msgid in seen_msgids:
                 result.add(LintIssue(
@@ -437,6 +502,245 @@ class L10nLinter:
                 message=_("Translation is {ratio:.1f}x longer than source").format(
                     ratio=len(translation)/len(source)
                 ),
+                context=source[:50]
+            ))
+        
+        # Check for suspiciously short translation
+        if source and len(source) > 10 and len(translation) < len(source) * 0.2:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="suspicious-length",
+                message=_("Translation is suspiciously short ({ratio:.1f}x of source)").format(
+                    ratio=len(translation)/len(source)
+                ),
+                context=source[:50]
+            ))
+    
+    def _check_punctuation(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for punctuation mismatches."""
+        if not source or not translation:
+            return
+        
+        # Check ending punctuation
+        end_punct = '.!?:;'
+        source_end = source.rstrip()[-1] if source.rstrip() else ''
+        trans_end = translation.rstrip()[-1] if translation.rstrip() else ''
+        
+        if source_end in end_punct and trans_end not in end_punct:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="inconsistent-punctuation",
+                message=_("Missing ending punctuation (source ends with '{char}')").format(char=source_end),
+                context=source[:50]
+            ))
+        elif source_end not in end_punct and trans_end in end_punct:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.INFO,
+                rule="inconsistent-punctuation",
+                message=_("Extra ending punctuation (source has none)"),
+                context=source[:50]
+            ))
+    
+    def _check_capitalization(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for capitalization mismatches."""
+        if not source or not translation:
+            return
+        
+        # Get first letter of each
+        source_first = next((c for c in source if c.isalpha()), None)
+        trans_first = next((c for c in translation if c.isalpha()), None)
+        
+        if source_first and trans_first:
+            if source_first.isupper() and trans_first.islower():
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.WARNING,
+                    rule="inconsistent-capitalization",
+                    message=_("Source starts with uppercase, translation with lowercase"),
+                    context=source[:50]
+                ))
+    
+    def _check_whitespace(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for whitespace issues."""
+        # Trailing whitespace
+        if translation != translation.rstrip():
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="trailing-whitespace",
+                message=_("Translation has trailing whitespace"),
+                context=source[:50]
+            ))
+        
+        # Double spaces (but not at line breaks)
+        if '  ' in translation.replace('\n ', '\n'):
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.INFO,
+                rule="double-spaces",
+                message=_("Translation contains double spaces"),
+                context=source[:50]
+            ))
+    
+    def _check_quotes(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for quote consistency."""
+        # Detect mixed quote styles
+        straight_quotes = translation.count('"') + translation.count("'")
+        curly_quotes = translation.count('"') + translation.count('"') + translation.count(''') + translation.count(''')
+        german_quotes = translation.count('„') + translation.count('"')
+        
+        quote_styles = sum(1 for c in [straight_quotes, curly_quotes, german_quotes] if c > 0)
+        if quote_styles > 1:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.INFO,
+                rule="mixed-quotes",
+                message=_("Translation has mixed quote styles"),
+                context=source[:50]
+            ))
+    
+    def _check_html_tags(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for HTML tag mismatches."""
+        source_tags = sorted(self.HTML_TAG_PATTERN.findall(source))
+        trans_tags = sorted(self.HTML_TAG_PATTERN.findall(translation))
+        
+        if source_tags != trans_tags and source_tags:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.ERROR,
+                rule="html-tag-mismatch",
+                message=_("HTML tags mismatch: source has {source}, translation has {trans}").format(
+                    source=source_tags, trans=trans_tags
+                ),
+                context=source[:50]
+            ))
+    
+    def _check_escapes(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for escaped character mismatches."""
+        source_escapes = sorted(self.ESCAPE_PATTERN.findall(source))
+        trans_escapes = sorted(self.ESCAPE_PATTERN.findall(translation))
+        
+        if source_escapes != trans_escapes and source_escapes:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.ERROR,
+                rule="escaped-chars-mismatch",
+                message=_("Escaped characters mismatch: source has {source}, translation has {trans}").format(
+                    source=source_escapes, trans=trans_escapes
+                ),
+                context=source[:50]
+            ))
+    
+    def _check_accelerators(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check keyboard accelerator consistency."""
+        source_accels = self.ACCELERATOR_PATTERN.findall(source)
+        trans_accels = self.ACCELERATOR_PATTERN.findall(translation)
+        
+        # Check if accelerator exists in source but not translation
+        if source_accels and not trans_accels:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="keyboard-shortcut-missing",
+                message=_("Keyboard accelerator missing in translation"),
+                context=source[:50]
+            ))
+        
+        # Check for Nordic chars as accelerators
+        for accel in trans_accels:
+            if accel in self.NORDIC_CHARS:
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.ERROR,
+                    rule="nordic-accelerator",
+                    message=_("Nordic character '{char}' used as keyboard accelerator").format(char=accel),
+                    context=source[:50]
+                ))
+    
+    def _check_numerics(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check that numbers in source appear in translation."""
+        # Find all numbers in source
+        source_nums = set(re.findall(r'\b\d+(?:\.\d+)?\b', source))
+        trans_nums = set(re.findall(r'\b\d+(?:\.\d+)?\b', translation))
+        
+        # Numbers in source but not in translation
+        missing = source_nums - trans_nums
+        if missing and len(source_nums) <= 3:  # Only warn for few numbers
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="numeric-mismatch",
+                message=_("Numbers {nums} from source missing in translation").format(nums=missing),
+                context=source[:50]
+            ))
+    
+    def _check_untranslated(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for common English words left in translation."""
+        # Only check if source looks English
+        if not any(w in source.lower() for w in ['the', 'and', 'is', 'are']):
+            return
+        
+        trans_words = set(re.findall(r'\b[a-zA-Z]+\b', translation.lower()))
+        found_english = trans_words & self.COMMON_ENGLISH
+        
+        # Remove words that also appear in source (might be intentional)
+        source_words = set(re.findall(r'\b[a-zA-Z]+\b', source.lower()))
+        suspicious = found_english - source_words
+        
+        # Also check if translation contains source words
+        if len(suspicious) >= 3:  # Only warn if multiple common words
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="untranslated-words",
+                message=_("Translation may contain untranslated English: {words}").format(
+                    words=list(suspicious)[:5]
+                ),
+                context=source[:50]
+            ))
+    
+    def _check_repeated_words(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for repeated words."""
+        words = re.findall(r'\b(\w+)\s+\1\b', translation, re.IGNORECASE)
+        if words:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="repeated-words",
+                message=_("Repeated word: '{word}'").format(word=words[0]),
+                context=source[:50]
+            ))
+    
+    def _check_source_equals_translation(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check if translation is identical to source."""
+        # Skip short strings and strings with only special chars/numbers
+        if len(source) < 5 or not any(c.isalpha() for c in source):
+            return
+        
+        if source == translation:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.INFO,
+                rule="source-equals-translation",
+                message=_("Translation is identical to source (possibly untranslated)"),
                 context=source[:50]
             ))
 

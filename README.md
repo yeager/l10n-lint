@@ -6,47 +6,61 @@ Check your translation files for common issues like missing translations, fuzzy 
 
 ## Features
 
+### Core checks
 - **Missing translations** – Find empty `msgstr` entries
 - **Fuzzy entries** – Flag translations needing review
 - **Placeholder mismatches** – Detect `%s`, `{0}`, `%1` inconsistencies
-- **Length warnings** – Catch translations that are suspiciously long
 - **Duplicate entries** – Find repeated `msgid` entries
+
+### Typography & formatting
+- **Inconsistent punctuation** – Missing or mismatched ending punctuation
+- **Inconsistent capitalization** – First letter case mismatch
+- **Trailing whitespace** – Extra spaces at end of translation
+- **Double spaces** – Multiple spaces in translation
+- **Mixed quotes** – Inconsistent quote styles (`"` vs `"` vs `„`)
+
+### Technical
+- **HTML tag mismatch** – `<b>`, `<a href>` tags don't match
+- **Escaped chars mismatch** – `\n`, `\t`, `\\` inconsistencies
+- **Keyboard shortcut issues** – Missing accelerators (`&File`)
+- **Nordic accelerators** – å,ä,ö used as keyboard accelerators (error)
+- **Numeric mismatch** – Numbers from source missing in translation
+
+### Quality
+- **Untranslated words** – Common English words left in translation
+- **Repeated words** – "and and", "the the"
+- **Source equals translation** – Possibly forgotten to translate
+- **Suspicious length** – Translation too short or too long
+
+### Additional features
 - **GitHub support** – Lint repos directly without cloning
-- **Localized output** – Available in 45+ languages including English, Swedish, German, French, Spanish, Japanese, Chinese, Arabic, and more
+- **Localized output** – Available in 45+ languages
+- **CI mode** – Exit code only with `--check`
+- **Quiet mode** – Summary only with `-q`
 
 ## Installation
 
-### Debian/Ubuntu
+### From APT repository (recommended)
 
 ```bash
-wget https://github.com/yeager/l10n-lint/releases/download/v1.3.4/l10n-lint_1.3.4_all.deb
-sudo dpkg -i l10n-lint_1.3.4_all.deb
+# Add repository
+echo "deb [trusted=yes] https://yeager.github.io/debian-repo stable main" | sudo tee /etc/apt/sources.list.d/yeager.list
+sudo apt update
+sudo apt install l10n-lint
 ```
 
-### Fedora/RHEL/openSUSE
+### Fedora/RHEL (DNF repository)
 
 ```bash
-wget https://github.com/yeager/l10n-lint/releases/download/v1.3.4/l10n-lint-1.3.4-1.noarch.rpm
-sudo rpm -i l10n-lint-1.3.4-1.noarch.rpm
+sudo tee /etc/yum.repos.d/yeager.repo << 'EOF'
+[yeager]
+name=Yeager's Translation Tools
+baseurl=https://yeager.github.io/rpm-repo
+enabled=1
+gpgcheck=0
+EOF
+sudo dnf install l10n-lint
 ```
-
-### Arch Linux
-
-```bash
-wget https://github.com/yeager/l10n-lint/releases/download/v1.3.4/l10n-lint-1.3.4.pkg.tar.zst
-sudo pacman -U l10n-lint-1.3.4.pkg.tar.zst
-```
-
-### Universal (tar.gz)
-
-```bash
-wget https://github.com/yeager/l10n-lint/releases/download/v1.3.4/l10n-lint-1.3.4.tar.gz
-tar xzf l10n-lint-1.3.4.tar.gz -C /usr/local
-```
-
-### Windows/macOS (zip)
-
-Download [l10n-lint-1.3.4.zip](https://github.com/yeager/l10n-lint/releases/download/v1.3.4/l10n-lint-1.3.4.zip), extract, and add to PATH.
 
 ### From source
 

@@ -2,6 +2,30 @@
 
 All notable changes to l10n-lint will be documented in this file.
 
+## [1.5.0] - 2026-02-04
+
+### Added - 16 new lint rules!
+
+**Typography & formatting:**
+- **inconsistent-punctuation** - Ending punctuation missing or different from source
+- **inconsistent-capitalization** - First letter case doesn't match source
+- **trailing-whitespace** - Translation has trailing whitespace
+- **double-spaces** - Double spaces in translation
+- **mixed-quotes** - Mixed quote styles (`"` vs `"` vs `„`)
+
+**Technical:**
+- **html-tag-mismatch** - HTML tags don't match between source and translation
+- **escaped-chars-mismatch** - `\n`, `\t`, `\\` don't match
+- **keyboard-shortcut-missing** - Accelerator (`&File`) missing in translation
+- **nordic-accelerator** - Nordic characters (å,ä,ö) used as keyboard accelerator
+- **numeric-mismatch** - Numbers from source missing in translation
+
+**Quality:**
+- **untranslated-words** - Common English words left in translation
+- **repeated-words** - Repeated words like "and and"
+- **source-equals-translation** - Translation identical to source
+- **suspicious-length** - Translation is very short compared to source (<0.2x)
+
 ## [1.4.0] - 2026-02-04
 
 ### Added

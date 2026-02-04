@@ -1,0 +1,62 @@
+.TH L10N-LINT 1 "Februari 2026" "l10n-lint 1.3.3" "Användarkommandon"
+.SH NAMN
+l10n-lint \- granskare för lokaliseringsfiler
+.SH SYNOPSIS
+.B l10n-lint
+[\fIFLAGGOR\fR] \fISOKVÄG\fR...
+.SH BESKRIVNING
+.B l10n-lint
+kontrollerar gettext .po- och Qt .ts-lokaliseringsfiler för vanliga problem:
+saknade översättningar, luddiga poster, platshållarmatchningar och längdproblem.
+.SH FLAGGOR
+.TP
+.BR \-h ", " \-\-help
+Visa hjälpmeddelande och avsluta.
+.TP
+.BR \-v ", " \-\-version
+Visa versionsnummer och avsluta.
+.TP
+.BR \-\-no\-recursive
+Sök inte i underkataloger.
+.TP
+.BR \-\-check " " \fIKONTROLL\fR
+Aktivera specifik kontroll (kan upprepas).
+Tillgängliga: missing, fuzzy, placeholders, length-ratio, too-long
+.TP
+.BR \-\-skip " " \fIKONTROLL\fR
+Hoppa över specifik kontroll (kan upprepas).
+.TP
+.BR \-\-format " " \fIFORMAT\fR
+Utdataformat: text (standard), json, github
+.TP
+.BR \-\-length\-ratio " " \fIN\fR
+Maximal översättning/källa-längdkvot (standard: 3.0)
+.TP
+.BR \-\-max\-length " " \fIN\fR
+Maximal översättningslängd i tecken (standard: 500)
+.SH SLUTSTATUS
+.TP
+.B 0
+Inga problem hittades.
+.TP
+.B 1
+Problem hittades eller fel uppstod.
+.SH EXEMPEL
+.TP
+Kontrollera alla .po-filer i aktuell katalog:
+.B l10n-lint .
+.TP
+Kontrollera specifik fil med JSON-utdata:
+.B l10n-lint \-\-format json messages.po
+.TP
+Hoppa över luddig-kontroll:
+.B l10n-lint \-\-skip fuzzy locale/
+.SH UPPHOVSMAN
+Daniel Nylander <daniel@danielnylander.se>
+.SH SE ÄVEN
+.BR msgfmt (1),
+.BR msginit (1),
+.BR tp-lint (1),
+.BR po-translate (1)
+.SH BUGGAR
+Rapportera buggar på: https://github.com/yeager/l10n-lint/issues

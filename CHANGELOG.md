@@ -2,6 +2,13 @@
 
 All notable changes to l10n-lint will be documented in this file.
 
+## [1.4.0] - 2026-02-04
+
+### Added
+- **`-q/--quiet`**: Show only summary line (for large projects)
+- **`--check`**: Exit code only, no output (for CI/pre-commit hooks)
+- **`--skip-fuzzy`**: Ignore fuzzy warnings
+
 ## [1.3.6] - 2026-02-04
 
 ### Added

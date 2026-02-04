@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 16:11+0100\n"
+"POT-Creation-Date: 2026-02-04 19:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -146,159 +146,178 @@ msgid "Treat warnings as errors"
 msgstr "Considera gli avvisi come errori"
 
 #: l10n_lint.py:584
+msgid "Show only summary"
+msgstr ""
+
+#: l10n_lint.py:585
+msgid "Exit code only, no output (for CI)"
+msgstr ""
+
+#: l10n_lint.py:586
+msgid "Ignore fuzzy warnings"
+msgstr ""
+
+#: l10n_lint.py:587
 msgid "Show detailed progress"
-msgstr ""
-
-#: l10n_lint.py:604
-#, python-brace-format
-msgid "⏱️  Elapsed time: {elapsed:.2f}s"
-msgstr ""
-
-#: l10n_lint.py:606
-#, python-brace-format
-msgid "🔧 l10n-lint {version} starting..."
 msgstr ""
 
 #: l10n_lint.py:607
 #, python-brace-format
-msgid "   Max length: {max}"
-msgstr ""
-
-#: l10n_lint.py:608
-#, python-brace-format
-msgid "   Length ratio: {ratio}x"
+msgid "⏱️  Elapsed time: {elapsed:.2f}s"
 msgstr ""
 
 #: l10n_lint.py:609
 #, python-brace-format
-msgid "   Strict mode: {strict}"
+msgid "🔧 l10n-lint {version} starting..."
 msgstr ""
 
 #: l10n_lint.py:610
+#, python-brace-format
+msgid "   Max length: {max}"
+msgstr ""
+
+#: l10n_lint.py:611
+#, python-brace-format
+msgid "   Length ratio: {ratio}x"
+msgstr ""
+
+#: l10n_lint.py:612
+#, python-brace-format
+msgid "   Strict mode: {strict}"
+msgstr ""
+
+#: l10n_lint.py:613
 #, fuzzy, python-brace-format
 msgid "   Output format: {fmt}"
 msgstr "Formato output"
 
-#: l10n_lint.py:611
+#: l10n_lint.py:614
 #, python-brace-format
 msgid "   Recursive: {rec}"
 msgstr ""
 
-#: l10n_lint.py:613
+#: l10n_lint.py:616
 #, python-brace-format
 msgid "   Locale dir: {dir}"
 msgstr ""
 
-#: l10n_lint.py:614
+#: l10n_lint.py:617
 #, python-brace-format
 msgid "   Language: {lang}"
 msgstr ""
 
-#: l10n_lint.py:616
+#: l10n_lint.py:619
 msgid "   Locale: not found (using English)"
 msgstr ""
 
-#: l10n_lint.py:627
+#: l10n_lint.py:630
 msgid "🌐 GitHub mode"
 msgstr ""
 
-#: l10n_lint.py:628
+#: l10n_lint.py:631
 #, python-brace-format
 msgid "🔍 Fetching from GitHub: {repo}"
 msgstr "🔍 Recupero da GitHub: {repo}"
 
-#: l10n_lint.py:630
+#: l10n_lint.py:633
 #, fuzzy, python-brace-format
 msgid "   Path filter: {path}"
 msgstr "Controllo: {path}"
 
-#: l10n_lint.py:633
+#: l10n_lint.py:636
 msgid "   Connecting to GitHub API..."
 msgstr ""
 
-#: l10n_lint.py:638 l10n_lint.py:672
+#: l10n_lint.py:641 l10n_lint.py:675
 #, fuzzy, python-brace-format
 msgid "  [{n}] {path}"
 msgstr "Controllo: {path}"
 
-#: l10n_lint.py:639 l10n_lint.py:673
+#: l10n_lint.py:642 l10n_lint.py:676
 #, python-brace-format
 msgid "       Size: {size} bytes"
 msgstr ""
 
-#: l10n_lint.py:644 l10n_lint.py:678
+#: l10n_lint.py:647 l10n_lint.py:681
 #, python-brace-format
 msgid "       Parsed in {elapsed:.3f}s"
 msgstr ""
 
-#: l10n_lint.py:646 l10n_lint.py:680
+#: l10n_lint.py:649 l10n_lint.py:683
 #, python-brace-format
 msgid "       ⚠️  Found {count} issue(s)"
 msgstr ""
 
-#: l10n_lint.py:648 l10n_lint.py:682
+#: l10n_lint.py:651 l10n_lint.py:685
 msgid "       ✓ No issues"
-msgstr ""
-
-#: l10n_lint.py:650
-#, python-brace-format
-msgid "   Fetched {count} file(s) in {elapsed:.2f}s"
 msgstr ""
 
 #: l10n_lint.py:653
 #, python-brace-format
+msgid "   Fetched {count} file(s) in {elapsed:.2f}s"
+msgstr ""
+
+#: l10n_lint.py:656
+#, python-brace-format
 msgid "❌ GitHub error: {error}"
 msgstr "Errore di ❌ GitHub: {error}"
 
-#: l10n_lint.py:658
+#: l10n_lint.py:661
 msgid "📁 Local mode"
 msgstr ""
 
-#: l10n_lint.py:661
+#: l10n_lint.py:664
 #, fuzzy, python-brace-format
 msgid "📂 Scanning: {path}"
 msgstr "Controllo: {path}"
 
-#: l10n_lint.py:665
+#: l10n_lint.py:668
 #, python-brace-format
 msgid "   Found {count} file(s) in {elapsed:.3f}s"
 msgstr ""
 
-#: l10n_lint.py:684
+#: l10n_lint.py:687
 #, python-brace-format
 msgid "   Total local files: {count}"
 msgstr ""
 
-#: l10n_lint.py:688
+#: l10n_lint.py:695
 msgid "📊 Summary:"
 msgstr ""
 
-#: l10n_lint.py:689
+#: l10n_lint.py:696
 #, python-brace-format
 msgid "   Files checked: {count}"
 msgstr ""
 
-#: l10n_lint.py:690
+#: l10n_lint.py:697
 #, python-brace-format
 msgid "   Errors: {count}"
 msgstr ""
 
-#: l10n_lint.py:691
+#: l10n_lint.py:698
 #, python-brace-format
 msgid "   Warnings: {count}"
 msgstr ""
 
-#: l10n_lint.py:693
+#: l10n_lint.py:700
 #, python-brace-format
 msgid "   Fuzzy: {count}"
 msgstr ""
 
-#: l10n_lint.py:695
+#: l10n_lint.py:702
 #, python-brace-format
 msgid "   Missing: {count}"
 msgstr ""
 
-#: l10n_lint.py:697
+#: l10n_lint.py:704
 #, python-brace-format
 msgid "   Placeholder mismatches: {count}"
 msgstr ""
+
+#: l10n_lint.py:712
+#, fuzzy, python-brace-format
+msgid "📊 {files} file(s), {errors} error(s), {warnings} warning(s)"
+msgstr ""
+"\n"
+"📊 Riepilogo: {files} file, {errors} errori, {warnings} avvisi"

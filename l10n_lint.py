@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.3.6"
+__version__ = "1.4.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -581,6 +581,9 @@ Examples:
     parser.add_argument('--max-length', type=int, default=500, help=_('Max translation length (default: 500)'))
     parser.add_argument('--no-recursive', action='store_true', help=_("Don't search subdirectories"))
     parser.add_argument('--strict', action='store_true', help=_('Treat warnings as errors'))
+    parser.add_argument('--quiet', '-q', action='store_true', help=_('Show only summary'))
+    parser.add_argument('--check', action='store_true', help=_('Exit code only, no output (for CI)'))
+    parser.add_argument('--skip-fuzzy', action='store_true', help=_('Ignore fuzzy warnings'))
     parser.add_argument('--verbose', '-V', action='store_true', help=_('Show detailed progress'))
     parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}')
     
@@ -683,6 +686,10 @@ Examples:
         
         vprint(_("   Total local files: {count}").format(count=local_files))
     
+    # Filter out fuzzy if requested
+    if args.skip_fuzzy:
+        result.issues = [i for i in result.issues if i.rule != 'fuzzy']
+    
     # Verbose summary
     vprint("")
     vprint(_("📊 Summary:"))
@@ -698,8 +705,14 @@ Examples:
     vprint_elapsed()
     vprint("")
     
-    # Output
-    print(format_output(result, args.format))
+    # Output (unless --check mode)
+    if not args.check:
+        if args.quiet:
+            # Just summary line
+            print(_("📊 {files} file(s), {errors} error(s), {warnings} warning(s)").format(
+                files=result.files_checked, errors=result.error_count, warnings=result.warning_count))
+        else:
+            print(format_output(result, args.format))
     
     # Exit code
     if args.strict:

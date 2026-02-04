@@ -1,4 +1,4 @@
-.TH L10N-LINT 1 "February 2026" "l10n-lint 1.3.6" "User Commands"
+.TH L10N-LINT 1 "February 2026" "l10n-lint 1.4.0" "User Commands"
 .SH NAME
 l10n-lint \- linter for localization files
 .SH SYNOPSIS
@@ -16,31 +16,29 @@ Show help message and exit.
 .BR \-v ", " \-\-version
 Show version number and exit.
 .TP
-.BR \-\-no\-recursive
-Do not search subdirectories.
+.BR \-g ", " \-\-github " " \fIREPO\fR
+Lint a GitHub repository (owner/repo or URL).
 .TP
-.BR \-\-check " " \fICHECK\fR
-Enable specific check (can be repeated).
-Available: missing, fuzzy, placeholders, length-ratio, too-long
+.BR \-p ", " \-\-path " " \fIPATH\fR
+Path filter for GitHub repos.
 .TP
-.BR \-\-skip " " \fICHECK\fR
-Skip specific check (can be repeated).
-.TP
-.BR \-\-format " " \fIFORMAT\fR
+.BR \-f ", " \-\-format " " \fIFORMAT\fR
 Output format: text (default), json, github
 .TP
-.BR \-\-length\-ratio " " \fIN\fR
-Maximum translation/source length ratio (default: 3.0)
+.BR \-q ", " \-\-quiet
+Show only summary line.
 .TP
-.BR \-\-max\-length " " \fIN\fR
-Maximum translation length in characters (default: 500)
-.SH EXIT STATUS
+.BR \-\-check
+Exit code only, no output (for CI).
 .TP
-.B 0
-No issues found.
+.BR \-\-skip\-fuzzy
+Ignore fuzzy warnings.
 .TP
-.B 1
-Issues found or error occurred.
+.BR \-\-strict
+Treat warnings as errors.
+.TP
+.BR \-V ", " \-\-verbose
+Show detailed progress.
 .SH EXAMPLES
 .TP
 Check all .po files in current directory:
@@ -49,14 +47,21 @@ Check all .po files in current directory:
 Check specific file with JSON output:
 .B l10n-lint \-\-format json messages.po
 .TP
-Skip fuzzy check:
-.B l10n-lint \-\-skip fuzzy locale/
+Lint a GitHub repository:
+.B l10n-lint \-\-github owner/repo
+.TP
+CI mode (exit code only):
+.B l10n-lint \-\-check .
+.SH EXIT STATUS
+.TP
+.B 0
+No issues found.
+.TP
+.B 1
+Issues found or error occurred.
 .SH AUTHOR
 Daniel Nylander <daniel@danielnylander.se>
 .SH SEE ALSO
-.BR msgfmt (1),
-.BR msginit (1),
 .BR tp-lint (1),
-.BR po-translate (1)
-.SH BUGS
-Report bugs at: https://github.com/yeager/l10n-lint/issues
+.BR po-translate (1),
+.BR msgfmt (1)

@@ -147,44 +147,44 @@ msgstr "Behandla varningar som fel"
 
 #: l10n_lint.py:584
 msgid "Show only summary"
-msgstr ""
+msgstr "Visa endast sammanfattning"
 
 #: l10n_lint.py:585
 msgid "Exit code only, no output (for CI)"
-msgstr ""
+msgstr "Endast returkod, ingen utdata (för CI)"
 
 #: l10n_lint.py:586
 msgid "Ignore fuzzy warnings"
-msgstr ""
+msgstr "Ignorera luddiga varningar"
 
 #: l10n_lint.py:587
 msgid "Show detailed progress"
-msgstr ""
+msgstr "Visa detaljerad förlopp"
 
 #: l10n_lint.py:607
 #, python-brace-format
 msgid "⏱️  Elapsed time: {elapsed:.2f}s"
-msgstr ""
+msgstr "⏱️  Förfluten tid: {elapsed:.2f}s"
 
 #: l10n_lint.py:609
 #, python-brace-format
 msgid "🔧 l10n-lint {version} starting..."
-msgstr ""
+msgstr "🔧 l10n-lint {version} startar..."
 
 #: l10n_lint.py:610
 #, python-brace-format
 msgid "   Max length: {max}"
-msgstr ""
+msgstr "   Max längd: {max}"
 
 #: l10n_lint.py:611
 #, python-brace-format
 msgid "   Length ratio: {ratio}x"
-msgstr ""
+msgstr "   Längdförhållande: {ratio}x"
 
 #: l10n_lint.py:612
 #, python-brace-format
 msgid "   Strict mode: {strict}"
-msgstr ""
+msgstr "   Strikt läge: {strict}"
 
 #: l10n_lint.py:613
 #, fuzzy, python-brace-format
@@ -194,25 +194,25 @@ msgstr "Utdataformat"
 #: l10n_lint.py:614
 #, python-brace-format
 msgid "   Recursive: {rec}"
-msgstr ""
+msgstr "   Rekursiv: {rec}"
 
 #: l10n_lint.py:616
 #, python-brace-format
 msgid "   Locale dir: {dir}"
-msgstr ""
+msgstr "   Lokalkatalog: {dir}"
 
 #: l10n_lint.py:617
 #, python-brace-format
 msgid "   Language: {lang}"
-msgstr ""
+msgstr "   Språk: {lang}"
 
 #: l10n_lint.py:619
 msgid "   Locale: not found (using English)"
-msgstr ""
+msgstr "   Lokal: hittades inte (använder engelska)"
 
 #: l10n_lint.py:630
 msgid "🌐 GitHub mode"
-msgstr ""
+msgstr "🌐 GitHub-läge"
 
 #: l10n_lint.py:631
 #, python-brace-format
@@ -226,7 +226,7 @@ msgstr "  Granskar: {path}"
 
 #: l10n_lint.py:636
 msgid "   Connecting to GitHub API..."
-msgstr ""
+msgstr "   Ansluter till GitHub API..."
 
 #: l10n_lint.py:641 l10n_lint.py:675
 #, fuzzy, python-brace-format
@@ -236,26 +236,26 @@ msgstr "  Granskar: {path}"
 #: l10n_lint.py:642 l10n_lint.py:676
 #, python-brace-format
 msgid "       Size: {size} bytes"
-msgstr ""
+msgstr "       Storlek: {size} byte"
 
 #: l10n_lint.py:647 l10n_lint.py:681
 #, python-brace-format
 msgid "       Parsed in {elapsed:.3f}s"
-msgstr ""
+msgstr "       Tolkad på {elapsed:.3f}s"
 
 #: l10n_lint.py:649 l10n_lint.py:683
 #, python-brace-format
 msgid "       ⚠️  Found {count} issue(s)"
-msgstr ""
+msgstr "       ⚠️  Hittade {count} problem"
 
 #: l10n_lint.py:651 l10n_lint.py:685
 msgid "       ✓ No issues"
-msgstr ""
+msgstr "       ✓ Inga problem"
 
 #: l10n_lint.py:653
 #, python-brace-format
 msgid "   Fetched {count} file(s) in {elapsed:.2f}s"
-msgstr ""
+msgstr "   Hämtade {count} fil(er) på {elapsed:.2f}s"
 
 #: l10n_lint.py:656
 #, python-brace-format
@@ -264,7 +264,7 @@ msgstr "❌ GitHub-fel: {error}"
 
 #: l10n_lint.py:661
 msgid "📁 Local mode"
-msgstr ""
+msgstr "📁 Lokalt läge"
 
 #: l10n_lint.py:664
 #, fuzzy, python-brace-format
@@ -274,50 +274,50 @@ msgstr "  Granskar: {path}"
 #: l10n_lint.py:668
 #, python-brace-format
 msgid "   Found {count} file(s) in {elapsed:.3f}s"
-msgstr ""
+msgstr "   Hittade {count} fil(er) på {elapsed:.3f}s"
 
 #: l10n_lint.py:687
 #, python-brace-format
 msgid "   Total local files: {count}"
-msgstr ""
+msgstr "   Totalt lokala filer: {count}"
 
 #: l10n_lint.py:695
 msgid "📊 Summary:"
-msgstr ""
+msgstr "📊 Sammanfattning:"
 
 #: l10n_lint.py:696
 #, python-brace-format
 msgid "   Files checked: {count}"
-msgstr ""
+msgstr "   Granskade filer: {count}"
 
 #: l10n_lint.py:697
 #, python-brace-format
 msgid "   Errors: {count}"
-msgstr ""
+msgstr "   Fel: {count}"
 
 #: l10n_lint.py:698
 #, python-brace-format
 msgid "   Warnings: {count}"
-msgstr ""
+msgstr "   Varningar: {count}"
 
 #: l10n_lint.py:700
 #, python-brace-format
 msgid "   Fuzzy: {count}"
-msgstr ""
+msgstr "   Fuzzy: {count}"
 
 #: l10n_lint.py:702
 #, python-brace-format
 msgid "   Missing: {count}"
-msgstr ""
+msgstr "   Saknade: {count}"
 
 #: l10n_lint.py:704
 #, python-brace-format
 msgid "   Placeholder mismatches: {count}"
-msgstr ""
+msgstr "   Platshållarmissmatch: {count}"
 
 #: l10n_lint.py:712
 #, fuzzy, python-brace-format
 msgid "📊 {files} file(s), {errors} error(s), {warnings} warning(s)"
-msgstr ""
+msgstr "📊 {files} fil(er), {errors} fel, {warnings} varning(ar)"
 "\n"
 "📊 Sammanfattning: {files} fil(er), {errors} fel, {warnings} varning(ar)"

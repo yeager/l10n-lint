@@ -37,8 +37,7 @@ DOMAIN = "l10n-lint"
 # Look for locale in multiple places
 _possible_locale_dirs = [
     Path(__file__).parent / "locale",  # Development
-    Path("/usr/share/l10n-lint/locale"),  # System install
-    Path("/usr/local/share/l10n-lint/locale"),  # Local install
+    Path("/usr/share/l10n-lint/locale"),  # System install (Debian)
 ]
 LOCALE_DIR = None
 for _dir in _possible_locale_dirs:

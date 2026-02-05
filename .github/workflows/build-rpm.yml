@@ -1,0 +1,85 @@
+name: Build RPM
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build-rpm:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install RPM tools
+        run: sudo apt-get update && sudo apt-get install -y rpm
+      
+      - name: Get version
+        id: version
+        run: echo "version=$(grep -oP '__version__ = "\K[^"]+' l10n_lint.py)" >> $GITHUB_OUTPUT
+      
+      - name: Setup RPM build
+        run: |
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          
+          # Create tarball
+          mkdir -p l10n-lint-${{ steps.version.outputs.version }}
+          cp l10n_lint.py l10n-lint-${{ steps.version.outputs.version }}/
+          cp -r locale l10n-lint-${{ steps.version.outputs.version }}/
+          cp -r man l10n-lint-${{ steps.version.outputs.version }}/
+          tar czf ~/rpmbuild/SOURCES/l10n-lint-${{ steps.version.outputs.version }}.tar.gz l10n-lint-${{ steps.version.outputs.version }}
+      
+      - name: Create spec file
+        run: |
+          cat > ~/rpmbuild/SPECS/l10n-lint.spec << 'EOF'
+          Name:           l10n-lint
+          Version:        ${{ steps.version.outputs.version }}
+          Release:        1%{?dist}
+          Summary:        Linter for localization files (.po, .ts)
+          License:        GPL-3.0-or-later
+          URL:            https://github.com/yeager/l10n-lint
+          Source0:        %{name}-%{version}.tar.gz
+          BuildArch:      noarch
+          Requires:       python3 >= 3.9
+
+          %description
+          l10n-lint checks gettext .po and Qt .ts localization files for
+          common issues: missing translations, fuzzy entries, placeholder
+          mismatches, and more. Supports local files, URLs, and GitHub repos.
+
+          %prep
+          %setup -q
+
+          %install
+          mkdir -p %{buildroot}%{_bindir}
+          mkdir -p %{buildroot}%{_datadir}/l10n-lint/locale
+          mkdir -p %{buildroot}%{_mandir}/man1
+          mkdir -p %{buildroot}%{_mandir}/sv/man1
+
+          install -m 755 l10n_lint.py %{buildroot}%{_bindir}/l10n-lint
+          cp -r locale/* %{buildroot}%{_datadir}/l10n-lint/locale/
+          install -m 644 man/en/l10n-lint.1 %{buildroot}%{_mandir}/man1/
+          install -m 644 man/sv/l10n-lint.1 %{buildroot}%{_mandir}/sv/man1/
+
+          %files
+          %{_bindir}/l10n-lint
+          %{_datadir}/l10n-lint/
+          %{_mandir}/man1/l10n-lint.1*
+          %{_mandir}/sv/man1/l10n-lint.1*
+
+          %changelog
+          * $(date "+%a %b %d %Y") Daniel Nylander <daniel@danielnylander.se> - ${{ steps.version.outputs.version }}-1
+          - URL support for linting remote files
+          EOF
+      
+      - name: Build RPM
+        run: rpmbuild -ba ~/rpmbuild/SPECS/l10n-lint.spec
+      
+      - name: Upload RPM to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload v${{ steps.version.outputs.version }} \
+            ~/rpmbuild/RPMS/noarch/l10n-lint-${{ steps.version.outputs.version }}-1.noarch.rpm \
+            --clobber

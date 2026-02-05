@@ -1,0 +1,44 @@
+.TH L10N-LINT-GTK 1 "February 2026" "l10n-lint-gtk 1.2.0" "User Commands"
+.SH NAME
+l10n-lint-gtk \- GTK graphical interface for l10n-lint
+.SH SYNOPSIS
+.B l10n-lint-gtk
+[\fIFILE\fR...]
+.SH DESCRIPTION
+.B l10n-lint-gtk
+is a modern GTK4/libadwaita graphical frontend for the l10n-lint localization
+file linter. It provides a user-friendly interface for checking gettext .po
+and Qt .ts files for common issues.
+.SH FEATURES
+.TP
+.B Sidebar history
+Recent files are saved and can be quickly accessed from the sidebar.
+.TP
+.B Filter bar
+Filter issues by severity (error, warning, info) or search text.
+.TP
+.B Statistics panel
+View translation statistics: files, entries, translated, untranslated, fuzzy.
+.TP
+.B Export reports
+Export lint results as HTML, JSON, or plain text.
+.TP
+.B Preferences
+Configure linting options like maximum length and strict mode.
+.SH KEYBOARD SHORTCUTS
+.TP
+.B Ctrl+O
+Open file
+.TP
+.B Ctrl+Return
+Run linter
+.TP
+.B Ctrl+E
+Export report
+.TP
+.B Ctrl+Q
+Quit
+.SH SEE ALSO
+.BR l10n-lint (1)
+.SH AUTHOR
+Daniel Nylander <daniel@danielnylander.se>

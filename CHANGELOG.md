@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.10.0] - 2026-02-05
+
+### Added
+- **URL support**: Lint files directly from HTTP(S) URLs
+  - Auto-detects URLs in path arguments
+  - Supports both `.po` and `.ts` files
+  - Example: `l10n-lint https://example.com/locale/sv.po`
+- Verbose mode shows fetch timing for URL files
+
 ## [1.9.0] - 2026-02-05
 
 ### Added

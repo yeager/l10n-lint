@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.9.0"
+__version__ = "1.10.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -906,6 +906,48 @@ def fetch_github_files(repo_url: str, path_filter: str = "") -> Generator[tuple[
             print(_("Warning: Could not fetch {path}: {error}").format(path=filepath, error=e), file=sys.stderr)
 
 
+def fetch_url_file(url: str) -> tuple[str, str]:
+    """
+    Fetch a single l10n file from a URL.
+    
+    Args:
+        url: HTTP(S) URL to a .po or .ts file
+    
+    Returns:
+        (filename, content) tuple
+    """
+    import urllib.request
+    
+    # Validate URL
+    parsed = urlparse(url)
+    if parsed.scheme not in ('http', 'https'):
+        raise ValueError(_("Invalid URL scheme: {scheme}").format(scheme=parsed.scheme))
+    
+    # Get filename from URL
+    filename = Path(parsed.path).name or "remote.po"
+    
+    # Validate file extension
+    ext = Path(filename).suffix.lower()
+    if ext not in ('.po', '.ts'):
+        raise ValueError(_("URL must point to a .po or .ts file, got: {ext}").format(ext=ext))
+    
+    # Fetch content
+    req = urllib.request.Request(url, headers={
+        'User-Agent': f'l10n-lint/{__version__}',
+        'Accept': 'text/plain, application/octet-stream, */*',
+    })
+    
+    response = urllib.request.urlopen(req, timeout=30)
+    content = response.read().decode('utf-8')
+    
+    return (filename, content)
+
+
+def is_url(path: str) -> bool:
+    """Check if a path is an HTTP(S) URL."""
+    return path.startswith('http://') or path.startswith('https://')
+
+
 def generate_html_report(result: LintResult, title: str = "l10n-lint Report") -> str:
     """Generate a detailed HTML report."""
     # Count issues by rule
@@ -1153,6 +1195,7 @@ def main():
 Examples:
   l10n-lint ./translations/           # Lint local directory
   l10n-lint file.po                   # Lint single file
+  l10n-lint https://example.com/sv.po # Lint file from URL
   l10n-lint --github owner/repo       # Lint GitHub repository
   l10n-lint -f html -o report.html .  # Generate HTML report
   l10n-lint -f json -o results.json . # Generate JSON report
@@ -1246,37 +1289,82 @@ Examples:
             print(_("❌ GitHub error: {error}").format(error=e), file=sys.stderr)
             sys.exit(1)
     
-    # Lint local files
+    # Lint local files and URLs
     if args.paths:
-        vprint(_("📁 Local mode"))
-        local_files = 0
-        for path in args.paths:
-            vprint(_("📂 Scanning: {path}").format(path=path))
-            scan_start = time.time()
-            path_files = list(find_l10n_files(path, recursive=not args.no_recursive))
-            scan_elapsed = time.time() - scan_start
-            vprint(_("   Found {count} file(s) in {elapsed:.3f}s").format(
-                count=len(path_files), elapsed=scan_elapsed))
-            
-            for filepath in path_files:
-                local_files += 1
-                file_start = time.time()
-                file_size = Path(filepath).stat().st_size
-                vprint(_("  [{n}] {path}").format(n=local_files, path=filepath))
-                vprint(_("       Size: {size} bytes").format(size=file_size))
-                file_result = linter.lint_file(filepath)
-                file_elapsed = time.time() - file_start
-                result.files_checked += file_result.files_checked
-                result.entries_checked += file_result.entries_checked
-                result.issues.extend(file_result.issues)
-                vprint(_("       Entries: {count}").format(count=file_result.entries_checked))
-                vprint(_("       Parsed in {elapsed:.3f}s").format(elapsed=file_elapsed))
-                if file_result.issues:
-                    vprint(_("       ⚠️  Found {count} issue(s)").format(count=len(file_result.issues)))
-                else:
-                    vprint(_("       ✓ No issues"))
+        # Separate URLs from local paths
+        url_paths = [p for p in args.paths if is_url(p)]
+        local_paths = [p for p in args.paths if not is_url(p)]
         
-        vprint(_("   Total local files: {count}").format(count=local_files))
+        # Process URLs
+        if url_paths:
+            vprint(_("🌐 URL mode"))
+            url_files = 0
+            for url in url_paths:
+                url_files += 1
+                file_start = time.time()
+                vprint(_("  [{n}] {url}").format(n=url_files, url=url))
+                try:
+                    filename, content = fetch_url_file(url)
+                    fetch_elapsed = time.time() - file_start
+                    vprint(_("       Fetched: {name} ({size} bytes) in {elapsed:.3f}s").format(
+                        name=filename, size=len(content), elapsed=fetch_elapsed))
+                    
+                    lint_start = time.time()
+                    file_result = linter.lint_file(filename, content)
+                    lint_elapsed = time.time() - lint_start
+                    result.files_checked += file_result.files_checked
+                    result.entries_checked += file_result.entries_checked
+                    result.issues.extend(file_result.issues)
+                    vprint(_("       Entries: {count}").format(count=file_result.entries_checked))
+                    vprint(_("       Parsed in {elapsed:.3f}s").format(elapsed=lint_elapsed))
+                    if file_result.issues:
+                        vprint(_("       ⚠️  Found {count} issue(s)").format(count=len(file_result.issues)))
+                    else:
+                        vprint(_("       ✓ No issues"))
+                except Exception as e:
+                    print(_("❌ URL error for {url}: {error}").format(url=url, error=e), file=sys.stderr)
+                    result.add(LintIssue(
+                        file=url,
+                        line=0,
+                        severity=Severity.ERROR,
+                        rule="url-fetch-error",
+                        message=_("Could not fetch URL: {error}").format(error=e)
+                    ))
+                    result.files_checked += 1
+            
+            vprint(_("   Total URL files: {count}").format(count=url_files))
+        
+        # Process local paths
+        if local_paths:
+            vprint(_("📁 Local mode"))
+            local_files = 0
+            for path in local_paths:
+                vprint(_("📂 Scanning: {path}").format(path=path))
+                scan_start = time.time()
+                path_files = list(find_l10n_files(path, recursive=not args.no_recursive))
+                scan_elapsed = time.time() - scan_start
+                vprint(_("   Found {count} file(s) in {elapsed:.3f}s").format(
+                    count=len(path_files), elapsed=scan_elapsed))
+                
+                for filepath in path_files:
+                    local_files += 1
+                    file_start = time.time()
+                    file_size = Path(filepath).stat().st_size
+                    vprint(_("  [{n}] {path}").format(n=local_files, path=filepath))
+                    vprint(_("       Size: {size} bytes").format(size=file_size))
+                    file_result = linter.lint_file(filepath)
+                    file_elapsed = time.time() - file_start
+                    result.files_checked += file_result.files_checked
+                    result.entries_checked += file_result.entries_checked
+                    result.issues.extend(file_result.issues)
+                    vprint(_("       Entries: {count}").format(count=file_result.entries_checked))
+                    vprint(_("       Parsed in {elapsed:.3f}s").format(elapsed=file_elapsed))
+                    if file_result.issues:
+                        vprint(_("       ⚠️  Found {count} issue(s)").format(count=len(file_result.issues)))
+                    else:
+                        vprint(_("       ✓ No issues"))
+            
+            vprint(_("   Total local files: {count}").format(count=local_files))
     
     # Filter out fuzzy if requested
     if args.skip_fuzzy:

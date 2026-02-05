@@ -1,4 +1,4 @@
-.TH L10N-LINT 1 "Februari 2026" "l10n-lint 1.9.0" "Användarkommandon"
+.TH L10N-LINT 1 "Februari 2026" "l10n-lint 1.10.0" "Användarkommandon"
 .SH NAMN
 l10n-lint \- granskare för lokaliseringsfiler
 .SH SYNOPSIS
@@ -6,8 +6,8 @@ l10n-lint \- granskare för lokaliseringsfiler
 [\fIFLAGGOR\fR] \fISOKVÄG\fR...
 .SH BESKRIVNING
 .B l10n-lint
-kontrollerar gettext .po- och Qt .ts-lokaliseringsfiler för vanliga problem:
-saknade översättningar, luddiga poster, platshållarmatchningar och längdproblem.
+kontrollerar gettext .po- och Qt .ts-lokaliseringsfiler för vanliga problem.
+Stöder lokala filer, kataloger, URL:er och GitHub-arkiv.
 .SH FLAGGOR
 .TP
 .BR \-h ", " \-\-help
@@ -46,11 +46,14 @@ Problem hittades eller fel uppstod.
 Kontrollera alla .po-filer i aktuell katalog:
 .B l10n-lint .
 .TP
-Kontrollera specifik fil med JSON-utdata:
-.B l10n-lint \-\-format json messages.po
+Kontrollera en fil från URL:
+.B l10n-lint https://example.com/locale/sv.po
+.TP
+Kontrollera ett GitHub-arkiv:
+.B l10n-lint \-\-github ägare/repo
 .TP
 Hoppa över luddig-kontroll:
-.B l10n-lint \-\-skip fuzzy locale/
+.B l10n-lint \-\-skip\-fuzzy locale/
 .SH UPPHOVSMAN
 Daniel Nylander <daniel@danielnylander.se>
 .SH SE ÄVEN

@@ -1,4 +1,4 @@
-.TH L10N-LINT 1 "February 2026" "l10n-lint 1.9.0" "User Commands"
+.TH L10N-LINT 1 "February 2026" "l10n-lint 1.10.0" "User Commands"
 .SH NAME
 l10n-lint \- linter for localization files
 .SH SYNOPSIS
@@ -7,6 +7,7 @@ l10n-lint \- linter for localization files
 .SH DESCRIPTION
 .B l10n-lint
 checks gettext .po and Qt .ts localization files for common issues.
+Supports local files, directories, URLs, and GitHub repositories.
 .SH CHECKS
 .SS Core
 missing-translation, fuzzy, placeholder-mismatch, duplicate
@@ -43,6 +44,16 @@ Ignore fuzzy warnings.
 .TP
 .BR \-\-strict
 Treat warnings as errors.
+.SH EXAMPLES
+.TP
+.B l10n-lint ./translations/
+Lint all .po and .ts files in the translations directory.
+.TP
+.B l10n-lint https://example.com/locale/sv.po
+Lint a file from a URL.
+.TP
+.B l10n-lint \-\-github owner/repo
+Lint all localization files in a GitHub repository.
 .SH EXIT STATUS
 .TP
 .B 0

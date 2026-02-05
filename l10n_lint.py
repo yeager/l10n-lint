@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.12.0"
+__version__ = "1.13.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -1214,11 +1214,40 @@ Examples:
     parser.add_argument('--check', action='store_true', help=_('Exit code only, no output (for CI)'))
     parser.add_argument('--skip-fuzzy', action='store_true', help=_('Ignore fuzzy warnings'))
     parser.add_argument('--verbose', '-V', action='store_true', help=_('Show detailed progress'))
+    parser.add_argument('--gtk', '-G', action='store_true', help=_('Launch GTK graphical interface'))
     parser.add_argument('-h', '--help', action='help', help=_('Show this help message and exit'))
     parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}',
                         help=_('Show version number and exit'))
     
     args = parser.parse_args()
+    
+    # Launch GTK interface if requested
+    if args.gtk:
+        try:
+            # Try to import and run GTK interface
+            gtk_script = Path(__file__).parent / "l10n_lint_gtk.py"
+            if gtk_script.exists():
+                import subprocess
+                cmd = [sys.executable, str(gtk_script)]
+                if args.paths:
+                    cmd.extend(args.paths)
+                sys.exit(subprocess.call(cmd))
+            else:
+                # Try system-installed version
+                import shutil
+                gtk_cmd = shutil.which("l10n-lint-gtk")
+                if gtk_cmd:
+                    import subprocess
+                    cmd = [gtk_cmd]
+                    if args.paths:
+                        cmd.extend(args.paths)
+                    sys.exit(subprocess.call(cmd))
+                else:
+                    print(_("Error: GTK interface not found. Install l10n-lint-gtk or run from source directory."), file=sys.stderr)
+                    sys.exit(1)
+        except Exception as e:
+            print(_("Error launching GTK interface: {error}").format(error=e), file=sys.stderr)
+            sys.exit(1)
     
     if not args.paths and not args.github:
         parser.print_help()

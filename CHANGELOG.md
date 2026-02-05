@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.13.0] - 2026-02-05
+
+### Added
+- **GTK launch flag** (`-G/--gtk`): Launch graphical interface from CLI
+  - `l10n-lint -G` starts the GTK interface
+  - `l10n-lint -G file.po` starts GTK with file pre-loaded
+  - Works with both local dev and system-installed versions
+
 ## [1.12.0] - 2026-02-05
 
 ### Added

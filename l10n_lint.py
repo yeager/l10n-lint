@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.8.0"
+__version__ = "1.9.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -99,6 +99,7 @@ class LintIssue:
 class LintResult:
     issues: list = field(default_factory=list)
     files_checked: int = 0
+    entries_checked: int = 0
     
     @property
     def error_count(self):
@@ -107,6 +108,17 @@ class LintResult:
     @property
     def warning_count(self):
         return sum(1 for i in self.issues if i.severity == Severity.WARNING)
+    
+    @property
+    def info_count(self):
+        return sum(1 for i in self.issues if i.severity == Severity.INFO)
+    
+    def issues_by_rule(self) -> dict:
+        """Group issues by rule name."""
+        by_rule = {}
+        for issue in self.issues:
+            by_rule[issue.rule] = by_rule.get(issue.rule, 0) + 1
+        return dict(sorted(by_rule.items(), key=lambda x: -x[1]))
     
     def add(self, issue: LintIssue):
         self.issues.append(issue)
@@ -317,6 +329,7 @@ class L10nLinter:
         """Lint a .po file."""
         parser = POParser(content, filepath)
         seen_msgids = {}
+        entries_count = 0
         
         for entry in parser.entries:
             line = entry.get('_line', 0)
@@ -328,6 +341,8 @@ class L10nLinter:
             # Skip header entry
             if not msgid:
                 continue
+            
+            entries_count += 1
             
             # Check: Missing translation (handle plural forms)
             if msgid_plural:
@@ -437,12 +452,16 @@ class L10nLinter:
                 ))
             else:
                 seen_msgids[msgid] = line
+        
+        result.entries_checked += entries_count
     
     def _lint_ts(self, filepath: str, content: str, result: LintResult):
         """Lint a .ts file."""
         parser = TSParser(content, filepath)
+        entries_count = 0
         
         for entry in parser.entries:
+            entries_count += 1
             line = entry.get('_line', 0)
             source = entry.get('source', '')
             translation = entry.get('translation', '')
@@ -477,6 +496,8 @@ class L10nLinter:
             # Check: Length
             if translation:
                 self._check_length(filepath, line, source, translation, result)
+        
+        result.entries_checked += entries_count
     
     def _check_placeholders(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for placeholder mismatches."""
@@ -1210,7 +1231,9 @@ Examples:
                 file_result = linter.lint_file(filepath, content)
                 file_elapsed = time.time() - file_start
                 result.files_checked += file_result.files_checked
+                result.entries_checked += file_result.entries_checked
                 result.issues.extend(file_result.issues)
+                vprint(_("       Entries: {count}").format(count=file_result.entries_checked))
                 vprint(_("       Parsed in {elapsed:.3f}s").format(elapsed=file_elapsed))
                 if file_result.issues:
                     vprint(_("       ⚠️  Found {count} issue(s)").format(count=len(file_result.issues)))
@@ -1244,7 +1267,9 @@ Examples:
                 file_result = linter.lint_file(filepath)
                 file_elapsed = time.time() - file_start
                 result.files_checked += file_result.files_checked
+                result.entries_checked += file_result.entries_checked
                 result.issues.extend(file_result.issues)
+                vprint(_("       Entries: {count}").format(count=file_result.entries_checked))
                 vprint(_("       Parsed in {elapsed:.3f}s").format(elapsed=file_elapsed))
                 if file_result.issues:
                     vprint(_("       ⚠️  Found {count} issue(s)").format(count=len(file_result.issues)))
@@ -1258,17 +1283,33 @@ Examples:
         result.issues = [i for i in result.issues if i.rule != 'fuzzy']
     
     # Verbose summary
+    elapsed = time.time() - start_time
     vprint("")
     vprint(_("📊 Summary:"))
     vprint(_("   Files checked: {count}").format(count=result.files_checked))
+    vprint(_("   Entries checked: {count}").format(count=result.entries_checked))
     vprint(_("   Errors: {count}").format(count=result.error_count))
     vprint(_("   Warnings: {count}").format(count=result.warning_count))
-    fuzzy_count = sum(1 for i in result.issues if i.rule == 'fuzzy')
-    vprint(_("   Fuzzy: {count}").format(count=fuzzy_count))
-    missing_count = sum(1 for i in result.issues if i.rule == 'missing-translation')
-    vprint(_("   Missing: {count}").format(count=missing_count))
-    placeholder_count = sum(1 for i in result.issues if i.rule == 'placeholder-mismatch')
-    vprint(_("   Placeholder mismatches: {count}").format(count=placeholder_count))
+    vprint(_("   Info: {count}").format(count=result.info_count))
+    
+    # Issue breakdown by rule
+    issues_by_rule = result.issues_by_rule()
+    if issues_by_rule:
+        vprint(_("   Issues by rule:"))
+        for rule, count in list(issues_by_rule.items())[:10]:
+            vprint(_("     - {rule}: {count}").format(rule=rule, count=count))
+        if len(issues_by_rule) > 10:
+            vprint(_("     ... and {more} more rules").format(more=len(issues_by_rule) - 10))
+    
+    # Processing speed
+    if elapsed > 0:
+        files_per_sec = result.files_checked / elapsed
+        entries_per_sec = result.entries_checked / elapsed if result.entries_checked > 0 else 0
+        vprint(_("   Processing speed:"))
+        vprint(_("     - {speed:.1f} files/sec").format(speed=files_per_sec))
+        if entries_per_sec > 0:
+            vprint(_("     - {speed:.1f} entries/sec").format(speed=entries_per_sec))
+    
     vprint_elapsed()
     vprint("")
     

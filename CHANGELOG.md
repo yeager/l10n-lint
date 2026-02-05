@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.0] - 2026-02-05
+
+### Added
+- **Enhanced verbose mode** (`-V/--verbose`):
+  - Entry count per file
+  - Issue breakdown by rule (top 10)
+  - Processing speed (files/sec, entries/sec)
+  - Info-level issue count
+- `entries_checked` tracking in LintResult
+- `issues_by_rule()` method for rule statistics
+- `info_count` property in LintResult
+
 ## [1.8.0] - 2026-02-04
 
 ### Added

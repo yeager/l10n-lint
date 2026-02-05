@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.11.0] - 2026-02-05
+
+### Added
+- **GTK graphical interface** (`l10n-lint-gtk`):
+  - Modern GTK4/libadwaita interface
+  - File browser for selecting files/directories
+  - Real-time linting with progress indicator
+  - Color-coded issue display (errors, warnings, info)
+  - Summary statistics
+  - About dialog with version info
+  - Run with: `python3 l10n_lint_gtk.py`
+
 ## [1.10.0] - 2026-02-05
 
 ### Added

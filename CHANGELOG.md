@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.14.0] - 2026-02-05
+
+### Added
+- **l10n-lint-gtk 1.2.0** - Major GTK interface improvements:
+  - Sidebar with recent files history
+  - Filter bar (filter by severity, search issues)
+  - Statistics panel (files, entries, translated, untranslated, fuzzy)
+  - Export reports (HTML, JSON, plain text)
+  - Preferences dialog
+  - Keyboard shortcuts (Ctrl+O, Ctrl+Return, Ctrl+E, Ctrl+Q)
+  - Clickable issues with copy-to-clipboard
+  - Progress indicator with file names
+  - GitHub repository support directly in GUI
+  - Full i18n support (47 languages)
+
+### Changed
+- GTK interface now available as separate `l10n-lint-gtk` package
+
 ## [1.13.1] - 2026-02-05
 
 ### Fixed

@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.13.0"
+__version__ = "1.13.1"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -1191,15 +1191,14 @@ def main():
         description=_('l10n-lint - Linter for localization files (.po, .ts)'),
         formatter_class=TranslatedHelpFormatter,
         add_help=False,
-        epilog=_("""
-Examples:
+        epilog=_("Examples:") + """
   l10n-lint ./translations/           # Lint local directory
   l10n-lint file.po                   # Lint single file
   l10n-lint https://example.com/sv.po # Lint file from URL
   l10n-lint --github owner/repo       # Lint GitHub repository
   l10n-lint -f html -o report.html .  # Generate HTML report
   l10n-lint -f json -o results.json . # Generate JSON report
-        """)
+        """
     )
     
     parser.add_argument('paths', nargs='*', help=_('Files or directories to lint'))

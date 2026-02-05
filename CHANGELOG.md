@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.13.1] - 2026-02-05
+
+### Fixed
+- Fixed xgettext warning about embedded URL in translatable string
+- Epilog examples are now properly separated from translatable text
+
 ## [1.13.0] - 2026-02-05
 
 ### Added

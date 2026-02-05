@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.12.0] - 2026-02-05
+
+### Added
+- **GTK translations** – Full i18n support for GTK interface
+  - 47 languages supported (same as CLI)
+  - Gettext integration with shared .po/.mo files
+
+### Changed
+- GTK version bumped to 1.1.0
+
 ## [1.11.0] - 2026-02-05
 
 ### Added

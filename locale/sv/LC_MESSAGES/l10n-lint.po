@@ -3,17 +3,7 @@
 # This file is distributed under the GPL-3.0-or-later license.
 #
 msgid ""
-msgstr ""
-"Project-Id-Version: l10n-lint 1.10.0\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-05 07:36+0100\n"
-"PO-Revision-Date: 2026-02-05 07:05+0100\n"
-"Last-Translator: Daniel Nylander <daniel@danielnylander.se>\n"
-"Language-Team: Swedish\n"
-"Language: sv\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+msgstr "Project-Id-Version: l10n-lint 1.10.0\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-02-05 11:41+0100\nPO-Revision-Date: 2026-02-05 07:05+0100\nLast-Translator: Daniel Nylander <daniel@danielnylander.se>\nLanguage-Team: Swedish\nLanguage: sv\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n"
 
 #: l10n_lint.py:306
 #, python-brace-format
@@ -48,11 +38,8 @@ msgstr "Försvunnen översättning (källa borttagen)"
 
 #: l10n_lint.py:519
 #, python-brace-format
-msgid ""
-"Placeholder mismatch ({name}): source has {source}, translation has {trans}"
-msgstr ""
-"Platshållare stämmer inte ({name}): källa har {source}, översättning har "
-"{trans}"
+msgid "Placeholder mismatch ({name}): source has {source}, translation has {trans}"
+msgstr "Platshållare stämmer inte ({name}): källa har {source}, översättning har {trans}"
 
 #: l10n_lint.py:534
 #, python-brace-format
@@ -169,12 +156,8 @@ msgstr "     Kontext: \"{context}...\""
 
 #: l10n_lint.py:1169
 #, python-brace-format
-msgid ""
-"\n"
-"📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
-msgstr ""
-"\n"
-"📊 Sammanfattning: {files} fil(er), {errors} fel, {warnings} varning(ar)"
+msgid "\n📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
+msgstr "\n📊 Sammanfattning: {files} fil(er), {errors} fel, {warnings} varning(ar)"
 
 #: l10n_lint.py:1181
 msgid "positional arguments"
@@ -189,26 +172,8 @@ msgid "l10n-lint - Linter for localization files (.po, .ts)"
 msgstr "l10n-lint - Linter för lokaliseringsfiler (.po, .ts)"
 
 #: l10n_lint.py:1194
-msgid ""
-"\n"
-"Examples:\n"
-"  l10n-lint ./translations/           # Lint local directory\n"
-"  l10n-lint file.po                   # Lint single file\n"
-"  l10n-lint https://example.com/sv.po # Lint file from URL\n"
-"  l10n-lint --github owner/repo       # Lint GitHub repository\n"
-"  l10n-lint -f html -o report.html .  # Generate HTML report\n"
-"  l10n-lint -f json -o results.json . # Generate JSON report\n"
-"        "
-msgstr ""
-"\n"
-"Exempel:\n"
-"  l10n-lint ./översättningar/         # Granska lokal katalog\n"
-"  l10n-lint fil.po                    # Granska enskild fil\n"
-"  l10n-lint https://example.com/sv.po # Granska fil från URL\n"
-"  l10n-lint --github ägare/repo       # Granska GitHub-arkiv\n"
-"  l10n-lint -f html -o rapport.html . # Generera HTML-rapport\n"
-"  l10n-lint -f json -o resultat.json . # Generera JSON-rapport\n"
-"        "
+msgid "\nExamples:\n  l10n-lint ./translations/           # Lint local directory\n  l10n-lint file.po                   # Lint single file\n  l10n-lint https://example.com/sv.po # Lint file from URL\n  l10n-lint --github owner/repo       # Lint GitHub repository\n  l10n-lint -f html -o report.html .  # Generate HTML report\n  l10n-lint -f json -o results.json . # Generate JSON report\n        "
+msgstr "\nExempel:\n  l10n-lint ./översättningar/         # Granska lokal katalog\n  l10n-lint fil.po                    # Granska enskild fil\n  l10n-lint https://example.com/sv.po # Granska fil från URL\n  l10n-lint --github ägare/repo       # Granska GitHub-arkiv\n  l10n-lint -f html -o rapport.html . # Generera HTML-rapport\n  l10n-lint -f json -o resultat.json . # Generera JSON-rapport\n        "
 
 #: l10n_lint.py:1205
 msgid "Files or directories to lint"
@@ -486,3 +451,80 @@ msgstr "📊 {files} fil(er), {errors} fel, {warnings} varning(ar)"
 #, python-brace-format
 msgid "📄 Report saved to: {file}"
 msgstr "📄 Rapport sparad till: {file}"
+
+#: l10n_lint_gtk.py:144
+#, fuzzy
+msgid "Open file or directory"
+msgstr "Filer eller kataloger att granska"
+
+#: l10n_lint_gtk.py:149
+msgid "Lint"
+msgstr "Ludd"
+
+#: l10n_lint_gtk.py:151
+msgid "Run linter"
+msgstr "Kör linter"
+
+#: l10n_lint_gtk.py:159
+msgid "About"
+msgstr "Om"
+
+#: l10n_lint_gtk.py:160
+msgid "Quit"
+msgstr "Avsluta"
+
+#: l10n_lint_gtk.py:175
+msgid "Path:"
+msgstr "Sökväg:"
+
+#: l10n_lint_gtk.py:180
+msgid "Select a .po or .ts file, or directory..."
+msgstr "Välj en .po- eller .ts-fil eller katalog..."
+
+#: l10n_lint_gtk.py:184
+msgid "Browse..."
+msgstr "Bläddra…"
+
+#: l10n_lint_gtk.py:191
+#, fuzzy
+msgid "Select a file or directory to lint"
+msgstr "Filer eller kataloger att granska"
+
+#: l10n_lint_gtk.py:228
+msgid "Select file or directory"
+msgstr "Välj fil eller katalog"
+
+#: l10n_lint_gtk.py:249
+#, python-brace-format
+msgid "Linting {}..."
+msgstr "damning"
+
+#: l10n_lint_gtk.py:329
+#, fuzzy, python-brace-format
+msgid "Found {} issue(s)"
+msgstr "       ⚠️  Hittade {count} problem"
+
+#: l10n_lint_gtk.py:331
+msgid "errors"
+msgstr "fel"
+
+#: l10n_lint_gtk.py:332
+msgid "warnings"
+msgstr "VARNINGAR"
+
+#: l10n_lint_gtk.py:333
+msgid "info"
+msgstr "informa"
+
+#: l10n_lint_gtk.py:337
+msgid "No issues found!"
+msgstr "Inga problem hittades!&#10;"
+
+#: l10n_lint_gtk.py:339
+msgid "Lint completed successfully"
+msgstr "Ludd slutförd framgångsrikt"
+
+#: l10n_lint_gtk.py:384
+#, fuzzy
+msgid "Linter for localization files (.po, .ts)"
+msgstr "l10n-lint - Linter för lokaliseringsfiler (.po, .ts)"

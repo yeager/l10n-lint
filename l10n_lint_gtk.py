@@ -14,6 +14,8 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Gio, GLib, Adw, Pango
 
+import gettext
+import locale
 import os
 import sys
 import threading
@@ -26,8 +28,39 @@ from l10n_lint import (
     __version__ as LINT_VERSION
 )
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 APP_ID = "se.danielnylander.l10n-lint"
+
+# Translation setup - use same domain and locale as CLI
+DOMAIN = "l10n-lint"
+_possible_locale_dirs = [
+    Path("/usr/share/l10n-lint/locale"),
+    Path(__file__).parent / "locale",
+]
+LOCALE_DIR = None
+for _dir in _possible_locale_dirs:
+    if _dir.is_dir() and (list(_dir.glob("*/LC_MESSAGES")) or list(_dir.glob("*.pot"))):
+        LOCALE_DIR = _dir
+        break
+
+_system_lang = (
+    os.environ.get("LANGUAGE", "").split(":")[0] or
+    os.environ.get("LC_ALL", "") or
+    os.environ.get("LC_MESSAGES", "") or
+    os.environ.get("LANG", "") or
+    locale.getlocale()[0] or
+    "en"
+)
+_lang_code = _system_lang.split("_")[0].split(".")[0] if _system_lang else "en"
+
+try:
+    if LOCALE_DIR:
+        translation = gettext.translation(DOMAIN, LOCALE_DIR, languages=[_lang_code], fallback=True)
+    else:
+        translation = gettext.NullTranslations()
+    _ = translation.gettext
+except Exception:
+    def _(s): return s
 
 
 class LintRow(Gtk.Box):
@@ -108,14 +141,14 @@ class L10nLintWindow(Adw.ApplicationWindow):
         
         # Open file button
         open_btn = Gtk.Button(icon_name="document-open-symbolic")
-        open_btn.set_tooltip_text("Open file or directory")
+        open_btn.set_tooltip_text(_("Open file or directory"))
         open_btn.connect("clicked", self._on_open_clicked)
         header.pack_start(open_btn)
         
         # Lint button
-        self.lint_btn = Gtk.Button(label="Lint")
+        self.lint_btn = Gtk.Button(label=_("Lint"))
         self.lint_btn.add_css_class("suggested-action")
-        self.lint_btn.set_tooltip_text("Run linter")
+        self.lint_btn.set_tooltip_text(_("Run linter"))
         self.lint_btn.connect("clicked", self._on_lint_clicked)
         self.lint_btn.set_sensitive(False)
         header.pack_start(self.lint_btn)
@@ -123,8 +156,8 @@ class L10nLintWindow(Adw.ApplicationWindow):
         # Menu button
         menu_btn = Gtk.MenuButton(icon_name="open-menu-symbolic")
         menu = Gio.Menu()
-        menu.append("About", "app.about")
-        menu.append("Quit", "app.quit")
+        menu.append(_("About"), "app.about")
+        menu.append(_("Quit"), "app.quit")
         menu_btn.set_menu_model(menu)
         header.pack_end(menu_btn)
         
@@ -139,23 +172,23 @@ class L10nLintWindow(Adw.ApplicationWindow):
         
         # Path entry
         path_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        path_label = Gtk.Label(label="Path:")
+        path_label = Gtk.Label(label=_("Path:"))
         path_box.append(path_label)
         
         self.path_entry = Gtk.Entry()
         self.path_entry.set_hexpand(True)
-        self.path_entry.set_placeholder_text("Select a .po or .ts file, or directory...")
+        self.path_entry.set_placeholder_text(_("Select a .po or .ts file, or directory..."))
         self.path_entry.connect("changed", self._on_path_changed)
         path_box.append(self.path_entry)
         
-        browse_btn = Gtk.Button(label="Browse...")
+        browse_btn = Gtk.Button(label=_("Browse..."))
         browse_btn.connect("clicked", self._on_open_clicked)
         path_box.append(browse_btn)
         
         content.append(path_box)
         
         # Status bar
-        self.status_label = Gtk.Label(label="Select a file or directory to lint")
+        self.status_label = Gtk.Label(label=_("Select a file or directory to lint"))
         self.status_label.set_xalign(0)
         self.status_label.add_css_class("dim-label")
         content.append(self.status_label)
@@ -192,7 +225,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
     
     def _on_open_clicked(self, button):
         dialog = Gtk.FileDialog()
-        dialog.set_title("Select file or directory")
+        dialog.set_title(_("Select file or directory"))
         
         # Allow both files and folders
         dialog.open(self, None, self._on_file_selected)
@@ -213,7 +246,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
         self.lint_btn.set_sensitive(False)
         self.progress.set_visible(True)
         self.progress.pulse()
-        self.status_label.set_text(f"Linting {path}...")
+        self.status_label.set_text(_("Linting {}...").format(path))
         
         # Clear previous results
         while child := self.results_box.get_first_child():
@@ -293,17 +326,17 @@ class L10nLintWindow(Adw.ApplicationWindow):
                 row = LintRow(issue)
                 self.results_box.append(row)
             
-            self.status_label.set_text(f"Found {len(result.issues)} issue(s)")
+            self.status_label.set_text(_("Found {} issue(s)").format(len(result.issues)))
             self.summary_label.set_markup(
-                f"<span foreground='#e74c3c'>{errors} errors</span> · "
-                f"<span foreground='#f39c12'>{warnings} warnings</span> · "
-                f"<span foreground='#3498db'>{infos} info</span>"
+                f"<span foreground='#e74c3c'>{errors} " + _("errors") + "</span> · "
+                f"<span foreground='#f39c12'>{warnings} " + _("warnings") + "</span> · "
+                f"<span foreground='#3498db'>{infos} " + _("info") + "</span>"
             )
         else:
             success_label = Gtk.Label()
-            success_label.set_markup("<span foreground='#27ae60' size='large'>✓ No issues found!</span>")
+            success_label.set_markup("<span foreground='#27ae60' size='large'>✓ " + _("No issues found!") + "</span>")
             self.results_box.append(success_label)
-            self.status_label.set_text("Lint completed successfully")
+            self.status_label.set_text(_("Lint completed successfully"))
             self.summary_label.set_text("")
         
         return False
@@ -348,7 +381,7 @@ class L10nLintApp(Adw.Application):
             license_type=Gtk.License.GPL_3_0,
             copyright="© 2026 Daniel Nylander",
             developers=["Daniel Nylander <daniel@danielnylander.se>"],
-            comments="Linter for localization files (.po, .ts)"
+            comments=_("Linter for localization files (.po, .ts)")
         )
         about.present()
 

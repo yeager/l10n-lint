@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR Daniel Nylander
+# This file is distributed under the same license as the l10n-lint package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: l10n-lint 1.11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-05 07:36+0100\n"
+"POT-Creation-Date: 2026-02-05 11:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -474,4 +474,78 @@ msgstr ""
 #: l10n_lint.py:1415
 #, python-brace-format
 msgid "📄 Report saved to: {file}"
+msgstr ""
+
+#: l10n_lint_gtk.py:144
+msgid "Open file or directory"
+msgstr ""
+
+#: l10n_lint_gtk.py:149
+msgid "Lint"
+msgstr ""
+
+#: l10n_lint_gtk.py:151
+msgid "Run linter"
+msgstr ""
+
+#: l10n_lint_gtk.py:159
+msgid "About"
+msgstr ""
+
+#: l10n_lint_gtk.py:160
+msgid "Quit"
+msgstr ""
+
+#: l10n_lint_gtk.py:175
+msgid "Path:"
+msgstr ""
+
+#: l10n_lint_gtk.py:180
+msgid "Select a .po or .ts file, or directory..."
+msgstr ""
+
+#: l10n_lint_gtk.py:184
+msgid "Browse..."
+msgstr ""
+
+#: l10n_lint_gtk.py:191
+msgid "Select a file or directory to lint"
+msgstr ""
+
+#: l10n_lint_gtk.py:228
+msgid "Select file or directory"
+msgstr ""
+
+#: l10n_lint_gtk.py:249
+#, python-brace-format
+msgid "Linting {}..."
+msgstr ""
+
+#: l10n_lint_gtk.py:329
+#, python-brace-format
+msgid "Found {} issue(s)"
+msgstr ""
+
+#: l10n_lint_gtk.py:331
+msgid "errors"
+msgstr ""
+
+#: l10n_lint_gtk.py:332
+msgid "warnings"
+msgstr ""
+
+#: l10n_lint_gtk.py:333
+msgid "info"
+msgstr ""
+
+#: l10n_lint_gtk.py:337
+msgid "No issues found!"
+msgstr ""
+
+#: l10n_lint_gtk.py:339
+msgid "Lint completed successfully"
+msgstr ""
+
+#: l10n_lint_gtk.py:384
+msgid "Linter for localization files (.po, .ts)"
 msgstr ""

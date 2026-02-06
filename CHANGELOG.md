@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.14.5] - 2026-02-06
+
+### Fixed
+- **l10n-lint-gtk 1.2.5** - Module import fix
+  - Fixed "ModuleNotFoundError: No module named 'l10n_lint'" when installed via deb package
+  - l10n-lint now also installed as Python module in /usr/share/l10n-lint/
+  - Added /usr/share/l10n-lint to module search path
+
 ## [1.14.4] - 2026-02-06
 
 ### Fixed

@@ -29,6 +29,7 @@ from datetime import datetime
 _script_dir = Path(__file__).resolve().parent
 _possible_module_paths = [
     _script_dir,  # Same directory as this script
+    Path("/usr/share/l10n-lint"),  # Debian package location
     Path("/usr/lib/python3/dist-packages"),  # Debian/Ubuntu standard
     Path("/usr/local/lib/python3/dist-packages"),  # Local installs
 ]
@@ -50,7 +51,7 @@ except ImportError:
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.2.4"
+__version__ = "1.2.5"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI

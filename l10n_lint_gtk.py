@@ -49,7 +49,7 @@ except ImportError:
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI
@@ -472,6 +472,9 @@ class L10nLintWindow(Adw.ApplicationWindow):
         
         self.set_content(main_box)
         
+        # Drag and drop support
+        self._setup_drop_target()
+        
         # Keyboard shortcuts
         self._setup_shortcuts()
     
@@ -498,6 +501,43 @@ class L10nLintWindow(Adw.ApplicationWindow):
         ))
         
         self.add_controller(controller)
+    
+    def _setup_drop_target(self):
+        """Set up drag and drop support for files."""
+        drop_target = Gtk.DropTarget.new(Gio.File, Gdk.DragAction.COPY)
+        drop_target.connect("drop", self._on_drop)
+        drop_target.connect("enter", self._on_drop_enter)
+        drop_target.connect("leave", self._on_drop_leave)
+        self.add_controller(drop_target)
+    
+    def _on_drop_enter(self, drop_target, x, y):
+        """Visual feedback when dragging over window."""
+        self.add_css_class("drop-target")
+        self.status_label.set_text(_("Drop file to lint..."))
+        return Gdk.DragAction.COPY
+    
+    def _on_drop_leave(self, drop_target):
+        """Remove visual feedback when leaving."""
+        self.remove_css_class("drop-target")
+        if not self.path_entry.get_text():
+            self.status_label.set_text(_("Select a file or directory to lint"))
+    
+    def _on_drop(self, drop_target, value, x, y):
+        """Handle dropped file - set path and auto-lint."""
+        if isinstance(value, Gio.File):
+            path = value.get_path()
+            if path:
+                # Check if it's a supported file type
+                if path.endswith(('.po', '.ts')) or os.path.isdir(path):
+                    self.path_entry.set_text(path)
+                    self.remove_css_class("drop-target")
+                    # Auto-start lint
+                    GLib.idle_add(self._on_lint_clicked, None)
+                    return True
+                else:
+                    self.status_label.set_text(_("Unsupported file type. Use .po or .ts files."))
+                    self.remove_css_class("drop-target")
+        return False
     
     def _load_history(self):
         history_file = Path.home() / ".config" / "l10n-lint" / "history.json"

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.14.2] - 2026-02-06
+
+### Added
+- **l10n-lint-gtk 1.2.2** - Drag and drop support
+  - Drop .po or .ts files directly onto window to lint them
+  - Auto-starts linting when file is dropped
+  - Visual feedback during drag operation
+  - Also accepts directories
+
 ## [1.14.1] - 2026-02-06
 
 ### Fixed

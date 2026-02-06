@@ -51,7 +51,7 @@ except ImportError:
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.2.5"
+__version__ = "1.2.6"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI
@@ -112,7 +112,7 @@ def load_settings():
     """Load user settings from config file."""
     config_file = Path.home() / ".config" / "l10n-lint" / "settings.json"
     defaults = {
-        "enabled_rules": [rule for rule, (_, _, default) in LINT_RULES.items() if default],
+        "enabled_rules": [rule for rule, (name, desc, default) in LINT_RULES.items() if default],
         "max_length_ratio": 3.0,
         "recursive": True,
         "strict_mode": False,
@@ -1302,7 +1302,7 @@ class PreferencesWindow(Adw.PreferencesWindow):
         self.rule_switches = {}
         enabled_rules = set(self.settings.get("enabled_rules", []))
         
-        for rule_id, (name, description, _) in LINT_RULES.items():
+        for rule_id, (name, description, _default) in LINT_RULES.items():
             row = Adw.SwitchRow(title=name, subtitle=description)
             row.set_active(rule_id in enabled_rules)
             row.connect("notify::active", self._on_rule_toggled, rule_id)
@@ -1392,7 +1392,7 @@ class PreferencesWindow(Adw.PreferencesWindow):
         save_settings(self.settings)
     
     def _reset_defaults(self, button):
-        default_rules = [rule for rule, (_, _, default) in LINT_RULES.items() if default]
+        default_rules = [rule for rule, (name, desc, default) in LINT_RULES.items() if default]
         self.settings["enabled_rules"] = default_rules
         for rule_id, switch in self.rule_switches.items():
             switch.set_active(rule_id in default_rules)

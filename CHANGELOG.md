@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.6] - 2026-02-06
+
+### Fixed
+- **l10n-lint-gtk 1.2.6** - Fix gettext function shadowing
+  - Fixed "UnboundLocalError: cannot access local variable '_'" in PreferencesWindow
+  - Variable `_` used to ignore tuple values was shadowing gettext function
+
 ## [1.14.5] - 2026-02-06
 
 ### Fixed

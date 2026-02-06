@@ -51,7 +51,7 @@ except ImportError:
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.2.7"
+__version__ = "1.2.8"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI
@@ -621,6 +621,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
         
         # Menu button
         menu_btn = Gtk.MenuButton(icon_name="open-menu-symbolic")
+        menu_btn.set_primary(True)
         menu = Gio.Menu()
         menu.append(_("Preferences"), "app.preferences")
         menu.append(_("Keyboard Shortcuts"), "app.shortcuts")
@@ -628,6 +629,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
         menu.append(_("Quit"), "app.quit")
         menu_btn.set_menu_model(menu)
         header.pack_end(menu_btn)
+        self.menu_button = menu_btn  # Keep reference
         
         main_box.append(header)
         

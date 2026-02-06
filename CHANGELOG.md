@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.14.8] - 2026-02-06
+
+### Fixed
+- **l10n-lint-gtk 1.2.8** - Menu and translation improvements
+  - Set menu button as primary for better popover behavior
+  - Keep menu button reference to prevent GC issues
+  - Translated missing "HTML tags mismatch" string to Swedish
+
 ## [1.14.7] - 2026-02-06
 
 ### Fixed

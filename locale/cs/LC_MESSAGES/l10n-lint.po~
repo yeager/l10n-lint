@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-05 11:41+0100\n"
+"POT-Creation-Date: 2026-02-05 21:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -193,71 +193,59 @@ msgid "l10n-lint - Linter for localization files (.po, .ts)"
 msgstr "l10n-lint - Linter pro lokalizační soubory (.po, .ts)"
 
 #: l10n_lint.py:1194
-#, fuzzy
-msgid ""
-"\n"
-"Examples:\n"
-"  l10n-lint ./translations/           # Lint local directory\n"
-"  l10n-lint file.po                   # Lint single file\n"
-"  l10n-lint https://example.com/sv.po # Lint file from URL\n"
-"  l10n-lint --github owner/repo       # Lint GitHub repository\n"
-"  l10n-lint -f html -o report.html .  # Generate HTML report\n"
-"  l10n-lint -f json -o results.json . # Generate JSON report\n"
-"        "
+msgid "Examples:"
 msgstr ""
-"\n"
-"Příklady:\n"
-"  l10n-lint ./translations/           # Místní adresář Lint\n"
-"  l10n-lint file.po                   # Lint jeden soubor\n"
-"  l10n-lint --github vlastník/repo       # Lint GitHub repozitář\n"
-"  l10n-lint --github https://github.com/owner/repo --path resources/language/"
 
-#: l10n_lint.py:1205
+#: l10n_lint.py:1204
 msgid "Files or directories to lint"
 msgstr "Soubory nebo adresáře do Lint"
 
-#: l10n_lint.py:1206
+#: l10n_lint.py:1205
 msgid "GitHub repository (owner/repo or URL)"
 msgstr "Repozitář GitHub (vlastník/repo nebo URL)"
 
-#: l10n_lint.py:1207
+#: l10n_lint.py:1206
 msgid "Path filter for GitHub repos"
 msgstr "Filtr cest pro repo služby GitHub"
 
-#: l10n_lint.py:1208
+#: l10n_lint.py:1207
 msgid "Output format"
 msgstr "Výstupní formát"
 
-#: l10n_lint.py:1209
+#: l10n_lint.py:1208
 msgid "Save report to file"
 msgstr ""
 
-#: l10n_lint.py:1210
+#: l10n_lint.py:1209
 msgid "Max translation length (default: 500)"
 msgstr "Maximální délka překladu (výchozí: 500)"
 
-#: l10n_lint.py:1211
+#: l10n_lint.py:1210
 msgid "Don't search subdirectories"
 msgstr "Nevyhledávat podadresáře"
 
-#: l10n_lint.py:1212
+#: l10n_lint.py:1211 l10n_lint_gtk.py:932
 msgid "Treat warnings as errors"
 msgstr "treat warnings as errors"
 
-#: l10n_lint.py:1213
+#: l10n_lint.py:1212
 msgid "Show only summary"
 msgstr ""
 
-#: l10n_lint.py:1214
+#: l10n_lint.py:1213
 msgid "Exit code only, no output (for CI)"
 msgstr ""
 
-#: l10n_lint.py:1215
+#: l10n_lint.py:1214
 msgid "Ignore fuzzy warnings"
 msgstr ""
 
-#: l10n_lint.py:1216
+#: l10n_lint.py:1215
 msgid "Show detailed progress"
+msgstr ""
+
+#: l10n_lint.py:1216
+msgid "Launch GTK graphical interface"
 msgstr ""
 
 #: l10n_lint.py:1217
@@ -268,305 +256,476 @@ msgstr ""
 msgid "Show version number and exit"
 msgstr ""
 
-#: l10n_lint.py:1238
-#, python-brace-format
-msgid "⏱️  Elapsed time: {elapsed:.2f}s"
-msgstr ""
-
-#: l10n_lint.py:1240
-#, python-brace-format
-msgid "🔧 l10n-lint {version} starting..."
-msgstr ""
-
-#: l10n_lint.py:1241
-#, python-brace-format
-msgid "   Max length: {max}"
-msgstr ""
-
-#: l10n_lint.py:1242
-#, python-brace-format
-msgid "   Length ratio: {ratio}x"
-msgstr ""
-
-#: l10n_lint.py:1243
-#, python-brace-format
-msgid "   Strict mode: {strict}"
-msgstr ""
-
-#: l10n_lint.py:1244
-#, fuzzy, python-brace-format
-msgid "   Output format: {fmt}"
-msgstr "Výstupní formát"
-
 #: l10n_lint.py:1245
-#, python-brace-format
-msgid "   Recursive: {rec}"
-msgstr ""
-
-#: l10n_lint.py:1247
-#, python-brace-format
-msgid "   Locale dir: {dir}"
+msgid ""
+"Error: GTK interface not found. Install l10n-lint-gtk or run from source "
+"directory."
 msgstr ""
 
 #: l10n_lint.py:1248
 #, python-brace-format
+msgid "Error launching GTK interface: {error}"
+msgstr ""
+
+#: l10n_lint.py:1266
+#, python-brace-format
+msgid "⏱️  Elapsed time: {elapsed:.2f}s"
+msgstr ""
+
+#: l10n_lint.py:1268
+#, python-brace-format
+msgid "🔧 l10n-lint {version} starting..."
+msgstr ""
+
+#: l10n_lint.py:1269
+#, python-brace-format
+msgid "   Max length: {max}"
+msgstr ""
+
+#: l10n_lint.py:1270
+#, python-brace-format
+msgid "   Length ratio: {ratio}x"
+msgstr ""
+
+#: l10n_lint.py:1271
+#, python-brace-format
+msgid "   Strict mode: {strict}"
+msgstr ""
+
+#: l10n_lint.py:1272
+#, fuzzy, python-brace-format
+msgid "   Output format: {fmt}"
+msgstr "Výstupní formát"
+
+#: l10n_lint.py:1273
+#, python-brace-format
+msgid "   Recursive: {rec}"
+msgstr ""
+
+#: l10n_lint.py:1275
+#, python-brace-format
+msgid "   Locale dir: {dir}"
+msgstr ""
+
+#: l10n_lint.py:1276
+#, python-brace-format
 msgid "   Language: {lang}"
 msgstr ""
 
-#: l10n_lint.py:1250
+#: l10n_lint.py:1278
 msgid "   Locale: not found (using English)"
 msgstr ""
 
-#: l10n_lint.py:1261
+#: l10n_lint.py:1289
 msgid "🌐 GitHub mode"
 msgstr ""
 
-#: l10n_lint.py:1262
+#: l10n_lint.py:1290
 #, python-brace-format
 msgid "🔍 Fetching from GitHub: {repo}"
 msgstr "🔍 Načítání z GitHubu: {repo}"
 
-#: l10n_lint.py:1264
+#: l10n_lint.py:1292
 #, fuzzy, python-brace-format
 msgid "   Path filter: {path}"
 msgstr "Kontrola: {path}"
 
-#: l10n_lint.py:1267
+#: l10n_lint.py:1295
 msgid "   Connecting to GitHub API..."
 msgstr ""
 
-#: l10n_lint.py:1272 l10n_lint.py:1353
+#: l10n_lint.py:1300 l10n_lint.py:1381
 #, fuzzy, python-brace-format
 msgid "  [{n}] {path}"
 msgstr "Kontrola: {path}"
 
-#: l10n_lint.py:1273 l10n_lint.py:1354
+#: l10n_lint.py:1301 l10n_lint.py:1382
 #, python-brace-format
 msgid "       Size: {size} bytes"
 msgstr ""
 
-#: l10n_lint.py:1279 l10n_lint.py:1318 l10n_lint.py:1360
+#: l10n_lint.py:1307 l10n_lint.py:1346 l10n_lint.py:1388
 #, fuzzy, python-brace-format
 msgid "       Entries: {count}"
 msgstr "Kontext: \"{context}...\""
 
-#: l10n_lint.py:1280 l10n_lint.py:1319 l10n_lint.py:1361
+#: l10n_lint.py:1308 l10n_lint.py:1347 l10n_lint.py:1389
 #, python-brace-format
 msgid "       Parsed in {elapsed:.3f}s"
 msgstr ""
 
-#: l10n_lint.py:1282 l10n_lint.py:1321 l10n_lint.py:1363
+#: l10n_lint.py:1310 l10n_lint.py:1349 l10n_lint.py:1391
 #, python-brace-format
 msgid "       ⚠️  Found {count} issue(s)"
 msgstr ""
 
-#: l10n_lint.py:1284 l10n_lint.py:1323 l10n_lint.py:1365
+#: l10n_lint.py:1312 l10n_lint.py:1351 l10n_lint.py:1393
 msgid "       ✓ No issues"
 msgstr ""
 
-#: l10n_lint.py:1286
+#: l10n_lint.py:1314
 #, python-brace-format
 msgid "   Fetched {count} file(s) in {elapsed:.2f}s"
 msgstr ""
 
-#: l10n_lint.py:1289
+#: l10n_lint.py:1317
 #, python-brace-format
 msgid "❌ GitHub error: {error}"
 msgstr "Chyba ❌ GitHubu: {error}"
 
-#: l10n_lint.py:1300
+#: l10n_lint.py:1328
 msgid "🌐 URL mode"
 msgstr ""
 
-#: l10n_lint.py:1305
+#: l10n_lint.py:1333
 #, fuzzy, python-brace-format
 msgid "  [{n}] {url}"
 msgstr "Kontrola: {path}"
 
-#: l10n_lint.py:1309
+#: l10n_lint.py:1337
 #, python-brace-format
 msgid "       Fetched: {name} ({size} bytes) in {elapsed:.3f}s"
 msgstr ""
 
-#: l10n_lint.py:1325
+#: l10n_lint.py:1353
 #, fuzzy, python-brace-format
 msgid "❌ URL error for {url}: {error}"
 msgstr "Chyba ❌ GitHubu: {error}"
 
-#: l10n_lint.py:1331
+#: l10n_lint.py:1359
 #, fuzzy, python-brace-format
 msgid "Could not fetch URL: {error}"
 msgstr "Nelze přečíst soubor: {error}"
 
-#: l10n_lint.py:1335
+#: l10n_lint.py:1363
 #, python-brace-format
 msgid "   Total URL files: {count}"
 msgstr ""
 
-#: l10n_lint.py:1339
+#: l10n_lint.py:1367
 msgid "📁 Local mode"
 msgstr ""
 
-#: l10n_lint.py:1342
+#: l10n_lint.py:1370
 #, fuzzy, python-brace-format
 msgid "📂 Scanning: {path}"
 msgstr "Kontrola: {path}"
 
-#: l10n_lint.py:1346
+#: l10n_lint.py:1374
 #, python-brace-format
 msgid "   Found {count} file(s) in {elapsed:.3f}s"
 msgstr ""
 
-#: l10n_lint.py:1367
+#: l10n_lint.py:1395
 #, python-brace-format
 msgid "   Total local files: {count}"
 msgstr ""
 
-#: l10n_lint.py:1376
+#: l10n_lint.py:1404
 msgid "📊 Summary:"
 msgstr ""
 
-#: l10n_lint.py:1377
+#: l10n_lint.py:1405
 #, python-brace-format
 msgid "   Files checked: {count}"
 msgstr ""
 
-#: l10n_lint.py:1378
+#: l10n_lint.py:1406
 #, python-brace-format
 msgid "   Entries checked: {count}"
 msgstr ""
 
-#: l10n_lint.py:1379
+#: l10n_lint.py:1407
 #, python-brace-format
 msgid "   Errors: {count}"
 msgstr ""
 
-#: l10n_lint.py:1380
+#: l10n_lint.py:1408
 #, python-brace-format
 msgid "   Warnings: {count}"
 msgstr ""
 
-#: l10n_lint.py:1381
+#: l10n_lint.py:1409
 #, python-brace-format
 msgid "   Info: {count}"
 msgstr ""
 
-#: l10n_lint.py:1386
+#: l10n_lint.py:1414
 msgid "   Issues by rule:"
 msgstr ""
 
-#: l10n_lint.py:1388
+#: l10n_lint.py:1416
 #, python-brace-format
 msgid "     - {rule}: {count}"
 msgstr ""
 
-#: l10n_lint.py:1390
+#: l10n_lint.py:1418
 #, python-brace-format
 msgid "     ... and {more} more rules"
 msgstr ""
 
-#: l10n_lint.py:1396
+#: l10n_lint.py:1424
 msgid "   Processing speed:"
 msgstr ""
 
-#: l10n_lint.py:1397
+#: l10n_lint.py:1425
 #, python-brace-format
 msgid "     - {speed:.1f} files/sec"
 msgstr ""
 
-#: l10n_lint.py:1399
+#: l10n_lint.py:1427
 #, python-brace-format
 msgid "     - {speed:.1f} entries/sec"
 msgstr ""
 
-#: l10n_lint.py:1408
+#: l10n_lint.py:1436
 #, fuzzy, python-brace-format
 msgid "📊 {files} file(s), {errors} error(s), {warnings} warning(s)"
 msgstr ""
 "\n"
 "📊 Shrnutí: {files} soubor(y), {errors} chyba(y), {warnings} varování"
 
-#: l10n_lint.py:1415
+#: l10n_lint.py:1443
 #, python-brace-format
 msgid "📄 Report saved to: {file}"
 msgstr ""
 
-#: l10n_lint_gtk.py:144
+#: l10n_lint_gtk.py:183
+msgid "Filter:"
+msgstr ""
+
+#: l10n_lint_gtk.py:187
+msgid "Errors"
+msgstr ""
+
+#: l10n_lint_gtk.py:193
+msgid "Warnings"
+msgstr ""
+
+#: l10n_lint_gtk.py:199
+msgid "Info"
+msgstr ""
+
+#: l10n_lint_gtk.py:212
+msgid "Search issues..."
+msgstr ""
+
+#: l10n_lint_gtk.py:245
+msgid "Files"
+msgstr ""
+
+#: l10n_lint_gtk.py:246
+msgid "Entries"
+msgstr ""
+
+#: l10n_lint_gtk.py:247
+msgid "Translated"
+msgstr ""
+
+#: l10n_lint_gtk.py:248
+msgid "Untranslated"
+msgstr ""
+
+#: l10n_lint_gtk.py:249
+msgid "Fuzzy"
+msgstr ""
+
+#: l10n_lint_gtk.py:304
 #, fuzzy
 msgid "Open file or directory"
 msgstr "Soubory nebo adresáře do Lint"
 
-#: l10n_lint_gtk.py:149
+#: l10n_lint_gtk.py:310
+#, fuzzy
+msgid "Open directory"
+msgstr "Soubory nebo adresáře do Lint"
+
+#: l10n_lint_gtk.py:315
 msgid "Lint"
 msgstr ""
 
-#: l10n_lint_gtk.py:151
-msgid "Run linter"
+#: l10n_lint_gtk.py:317
+msgid "Run linter (Ctrl+Return)"
 msgstr ""
 
-#: l10n_lint_gtk.py:159
+#: l10n_lint_gtk.py:324 l10n_lint_gtk.py:784
+msgid "Export report"
+msgstr ""
+
+#: l10n_lint_gtk.py:331 l10n_lint_gtk.py:917
+msgid "Preferences"
+msgstr ""
+
+#: l10n_lint_gtk.py:332
+msgid "Keyboard Shortcuts"
+msgstr ""
+
+#: l10n_lint_gtk.py:333
 msgid "About"
 msgstr ""
 
-#: l10n_lint_gtk.py:160
+#: l10n_lint_gtk.py:334
 msgid "Quit"
 msgstr ""
 
-#: l10n_lint_gtk.py:175
+#: l10n_lint_gtk.py:348
+msgid "Recent"
+msgstr ""
+
+#: l10n_lint_gtk.py:365
+msgid "Clear History"
+msgstr ""
+
+#: l10n_lint_gtk.py:383
 msgid "Path:"
 msgstr ""
 
-#: l10n_lint_gtk.py:180
-msgid "Select a .po or .ts file, or directory..."
+#: l10n_lint_gtk.py:388
+msgid "File, directory, URL, or GitHub repo (owner/repo)..."
 msgstr ""
 
-#: l10n_lint_gtk.py:184
+#: l10n_lint_gtk.py:394
 msgid "Browse..."
 msgstr ""
 
-#: l10n_lint_gtk.py:191
+#: l10n_lint_gtk.py:411
 #, fuzzy
 msgid "Select a file or directory to lint"
 msgstr "Soubory nebo adresáře do Lint"
 
-#: l10n_lint_gtk.py:228
-msgid "Select file or directory"
+#: l10n_lint_gtk.py:557
+msgid "Select file"
 msgstr ""
 
-#: l10n_lint_gtk.py:249
+#: l10n_lint_gtk.py:562
+#, fuzzy
+msgid "Select directory"
+msgstr "Soubory nebo adresáře do Lint"
+
+#: l10n_lint_gtk.py:589 l10n_lint_gtk.py:661
 #, python-brace-format
-msgid "Linting {}..."
+msgid "Linting {path}..."
 msgstr ""
 
-#: l10n_lint_gtk.py:329
+#: l10n_lint_gtk.py:641
+#, fuzzy
+msgid "Fetching from GitHub..."
+msgstr "🔍 Načítání z GitHubu: {repo}"
+
+#: l10n_lint_gtk.py:647
+#, fuzzy, python-brace-format
+msgid "Path not found: {path}"
+msgstr "Kontrola: {path}"
+
+#: l10n_lint_gtk.py:723
 #, python-brace-format
-msgid "Found {} issue(s)"
+msgid "Found {count} issue(s)"
 msgstr ""
 
-#: l10n_lint_gtk.py:331
+#: l10n_lint_gtk.py:725
 msgid "errors"
 msgstr ""
 
-#: l10n_lint_gtk.py:332
+#: l10n_lint_gtk.py:726
 msgid "warnings"
 msgstr ""
 
-#: l10n_lint_gtk.py:333
+#: l10n_lint_gtk.py:727
 msgid "info"
 msgstr ""
 
-#: l10n_lint_gtk.py:337
+#: l10n_lint_gtk.py:729
+#, python-brace-format
+msgid "Showing {shown} of {total}"
+msgstr ""
+
+#: l10n_lint_gtk.py:735
+msgid "No issues match the current filter"
+msgstr ""
+
+#: l10n_lint_gtk.py:749
 msgid "No issues found!"
 msgstr ""
 
-#: l10n_lint_gtk.py:339
+#: l10n_lint_gtk.py:753
 msgid "Lint completed successfully"
 msgstr ""
 
-#: l10n_lint_gtk.py:384
+#: l10n_lint_gtk.py:767
+msgid "Close"
+msgstr ""
+
+#: l10n_lint_gtk.py:768
+msgid "Copy"
+msgstr ""
+
+#: l10n_lint_gtk.py:800
+msgid "Plain text"
+msgstr ""
+
+#: l10n_lint_gtk.py:820
+#, python-brace-format
+msgid "Report exported to {path}"
+msgstr ""
+
+#: l10n_lint_gtk.py:922
+msgid "Linting"
+msgstr ""
+
+#: l10n_lint_gtk.py:925
 #, fuzzy
-msgid "Linter for localization files (.po, .ts)"
+msgid "Maximum translation length"
+msgstr "Maximální délka překladu (výchozí: 500)"
+
+#: l10n_lint_gtk.py:929
+msgid "Skip fuzzy warnings"
+msgstr ""
+
+#: l10n_lint_gtk.py:932
+msgid "Strict mode"
+msgstr ""
+
+#: l10n_lint_gtk.py:938
+msgid "Interface"
+msgstr ""
+
+#: l10n_lint_gtk.py:940
+#, fuzzy
+msgid "Search subdirectories"
+msgstr "Nevyhledávat podadresáře"
+
+#: l10n_lint_gtk.py:940
+msgid "When linting directories"
+msgstr ""
+
+#: l10n_lint_gtk.py:1055
+#, fuzzy
+msgid "Graphical linter for localization files (.po, .ts)"
 msgstr "l10n-lint - Linter pro lokalizační soubory (.po, .ts)"
+
+#: l10n_lint_gtk.py:1056
+msgid "translator-credits"
+msgstr ""
+
+#, fuzzy
+#~ msgid ""
+#~ "\n"
+#~ "Examples:\n"
+#~ "  l10n-lint ./translations/           # Lint local directory\n"
+#~ "  l10n-lint file.po                   # Lint single file\n"
+#~ "  l10n-lint https://example.com/sv.po # Lint file from URL\n"
+#~ "  l10n-lint --github owner/repo       # Lint GitHub repository\n"
+#~ "  l10n-lint -f html -o report.html .  # Generate HTML report\n"
+#~ "  l10n-lint -f json -o results.json . # Generate JSON report\n"
+#~ "        "
+#~ msgstr ""
+#~ "\n"
+#~ "Příklady:\n"
+#~ "  l10n-lint ./translations/           # Místní adresář Lint\n"
+#~ "  l10n-lint file.po                   # Lint jeden soubor\n"
+#~ "  l10n-lint --github vlastník/repo       # Lint GitHub repozitář\n"
+#~ "  l10n-lint --github https://github.com/owner/repo --path resources/"
+#~ "language/"
 
 #, fuzzy, python-brace-format
 #~ msgid ""

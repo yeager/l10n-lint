@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: l 10n-lint\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-05 21:32+0100\n"
+"POT-Creation-Date: 2026-02-06 09:12+0100\n"
 "PO-Revision-Date: 2026-02-05 21:32+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -218,7 +218,7 @@ msgstr ""
 msgid "Don't search subdirectories"
 msgstr ""
 
-#: l10n_lint.py:1211 l10n_lint_gtk.py:932
+#: l10n_lint.py:1211 l10n_lint_gtk.py:1326
 msgid "Treat warnings as errors"
 msgstr ""
 
@@ -482,211 +482,400 @@ msgstr ""
 msgid "📄 Report saved to: {file}"
 msgstr ""
 
-#: l10n_lint_gtk.py:183
-msgid "Filter:"
+#: l10n_lint_gtk.py:90
+msgid "Missing translations"
 msgstr ""
 
-#: l10n_lint_gtk.py:187
-msgid "Errors"
+#: l10n_lint_gtk.py:90
+msgid "Check for empty msgstr/unfinished translations"
 msgstr ""
 
-#: l10n_lint_gtk.py:193
-msgid "Warnings"
+#: l10n_lint_gtk.py:91
+msgid "Fuzzy entries"
 msgstr ""
 
-#: l10n_lint_gtk.py:199
-msgid "Info"
+#: l10n_lint_gtk.py:91
+msgid "Flag entries marked as fuzzy/needs review"
 msgstr ""
 
-#: l10n_lint_gtk.py:212
-msgid "Search issues..."
+#: l10n_lint_gtk.py:92
+msgid "Placeholder mismatch"
 msgstr ""
 
-#: l10n_lint_gtk.py:245
-msgid "Files"
+#: l10n_lint_gtk.py:92
+#, python-format, python-brace-format
+msgid "Check %s, %d, {0}, {name} consistency"
 msgstr ""
 
-#: l10n_lint_gtk.py:246
+#: l10n_lint_gtk.py:93
+msgid "Length ratio"
+msgstr ""
+
+#: l10n_lint_gtk.py:93
+msgid "Warn if translation is much longer/shorter than source"
+msgstr ""
+
+#: l10n_lint_gtk.py:94
+msgid "Punctuation"
+msgstr ""
+
+#: l10n_lint_gtk.py:94
+msgid "Check ending punctuation matches"
+msgstr ""
+
+#: l10n_lint_gtk.py:95
+msgid "Capitalization"
+msgstr ""
+
+#: l10n_lint_gtk.py:95
+msgid "Check initial letter case matches"
+msgstr ""
+
+#: l10n_lint_gtk.py:96
+msgid "Whitespace"
+msgstr ""
+
+#: l10n_lint_gtk.py:96
+msgid "Check leading/trailing whitespace"
+msgstr ""
+
+#: l10n_lint_gtk.py:97
+msgid "Quote consistency"
+msgstr ""
+
+#: l10n_lint_gtk.py:97
+msgid "Check quote characters are consistent"
+msgstr ""
+
+#: l10n_lint_gtk.py:98
+msgid "HTML tags"
+msgstr ""
+
+#: l10n_lint_gtk.py:98
+msgid "Verify HTML tags match between source and translation"
+msgstr ""
+
+#: l10n_lint_gtk.py:99
+msgid "Escape sequences"
+msgstr ""
+
+#: l10n_lint_gtk.py:99
+msgid "Check \\n, \\t, etc. are preserved"
+msgstr ""
+
+#: l10n_lint_gtk.py:100
+msgid "Accelerators"
+msgstr ""
+
+#: l10n_lint_gtk.py:100
+msgid "Check & keyboard accelerators"
+msgstr ""
+
+#: l10n_lint_gtk.py:101
+msgid "Numeric values"
+msgstr ""
+
+#: l10n_lint_gtk.py:101
+msgid "Check numbers are preserved"
+msgstr ""
+
+#: l10n_lint_gtk.py:102
+msgid "Untranslated words"
+msgstr ""
+
+#: l10n_lint_gtk.py:102
+msgid "Detect English words left in translation"
+msgstr ""
+
+#: l10n_lint_gtk.py:103
+msgid "Repeated words"
+msgstr ""
+
+#: l10n_lint_gtk.py:103
+msgid "Find duplicated words like 'the the'"
+msgstr ""
+
+#: l10n_lint_gtk.py:104
+msgid "Same as source"
+msgstr ""
+
+#: l10n_lint_gtk.py:104
+msgid "Warn if translation equals source"
+msgstr ""
+
+#: l10n_lint_gtk.py:105
+msgid "Option values"
+msgstr ""
+
+#: l10n_lint_gtk.py:105
+msgid "Check option/parameter values preserved"
+msgstr ""
+
+#: l10n_lint_gtk.py:106
+msgid "Duplicate entries"
+msgstr ""
+
+#: l10n_lint_gtk.py:106
+msgid "Find duplicate msgids"
+msgstr ""
+
+#: l10n_lint_gtk.py:267 l10n_lint_gtk.py:374
+msgid "No file selected"
+msgstr ""
+
+#: l10n_lint_gtk.py:291
+msgid "Language"
+msgstr ""
+
+#: l10n_lint_gtk.py:292
+msgid "Last Translator"
+msgstr ""
+
+#: l10n_lint_gtk.py:293
+msgid "Revision Date"
+msgstr ""
+
+#: l10n_lint_gtk.py:294
+msgid "Project"
+msgstr ""
+
+#: l10n_lint_gtk.py:295
+msgid "Language Team"
+msgstr ""
+
+#: l10n_lint_gtk.py:320
 msgid "Entries"
 msgstr ""
 
-#: l10n_lint_gtk.py:247
+#: l10n_lint_gtk.py:321
 msgid "Translated"
 msgstr ""
 
-#: l10n_lint_gtk.py:248
+#: l10n_lint_gtk.py:322
 msgid "Untranslated"
 msgstr ""
 
-#: l10n_lint_gtk.py:249
+#: l10n_lint_gtk.py:323
 msgid "Fuzzy"
 msgstr ""
 
-#: l10n_lint_gtk.py:304
-msgid "Open file or directory"
+#: l10n_lint_gtk.py:344
+msgid "Unknown"
 msgstr ""
 
-#: l10n_lint_gtk.py:310
+#: l10n_lint_gtk.py:501
+msgid "Filter:"
+msgstr ""
+
+#: l10n_lint_gtk.py:505
+msgid "Errors"
+msgstr ""
+
+#: l10n_lint_gtk.py:511
+msgid "Warnings"
+msgstr ""
+
+#: l10n_lint_gtk.py:517
+msgid "Info"
+msgstr ""
+
+#: l10n_lint_gtk.py:526
+msgid "All rules"
+msgstr ""
+
+#: l10n_lint_gtk.py:538
+msgid "Search issues..."
+msgstr ""
+
+#: l10n_lint_gtk.py:597
+msgid "Open file"
+msgstr ""
+
+#: l10n_lint_gtk.py:603
 msgid "Open directory"
 msgstr ""
 
-#: l10n_lint_gtk.py:315
+#: l10n_lint_gtk.py:608
 msgid "Lint"
 msgstr ""
 
-#: l10n_lint_gtk.py:317
+#: l10n_lint_gtk.py:610
 msgid "Run linter (Ctrl+Return)"
 msgstr ""
 
-#: l10n_lint_gtk.py:324 l10n_lint_gtk.py:784
+#: l10n_lint_gtk.py:617 l10n_lint_gtk.py:1171
 msgid "Export report"
 msgstr ""
 
-#: l10n_lint_gtk.py:331 l10n_lint_gtk.py:917
+#: l10n_lint_gtk.py:624 l10n_lint_gtk.py:1290
 msgid "Preferences"
 msgstr ""
 
-#: l10n_lint_gtk.py:332
+#: l10n_lint_gtk.py:625
 msgid "Keyboard Shortcuts"
 msgstr ""
 
-#: l10n_lint_gtk.py:333
+#: l10n_lint_gtk.py:626
 msgid "About"
 msgstr ""
 
-#: l10n_lint_gtk.py:334
+#: l10n_lint_gtk.py:627
 msgid "Quit"
 msgstr ""
 
-#: l10n_lint_gtk.py:348
+#: l10n_lint_gtk.py:641
 msgid "Recent"
 msgstr ""
 
-#: l10n_lint_gtk.py:365
+#: l10n_lint_gtk.py:658
 msgid "Clear History"
 msgstr ""
 
-#: l10n_lint_gtk.py:383
+#: l10n_lint_gtk.py:676
 msgid "Path:"
 msgstr ""
 
-#: l10n_lint_gtk.py:388
+#: l10n_lint_gtk.py:681
 msgid "File, directory, URL, or GitHub repo (owner/repo)..."
 msgstr ""
 
-#: l10n_lint_gtk.py:394
+#: l10n_lint_gtk.py:687
 msgid "Browse..."
 msgstr ""
 
-#: l10n_lint_gtk.py:411
-msgid "Select a file or directory to lint"
+#: l10n_lint_gtk.py:704 l10n_lint_gtk.py:797
+msgid ""
+"Select a file or directory to lint. You can also drag and drop files here."
 msgstr ""
 
-#: l10n_lint_gtk.py:557
+#: l10n_lint_gtk.py:790
+msgid "Drop file to lint..."
+msgstr ""
+
+#: l10n_lint_gtk.py:817
+msgid "Unsupported file type. Use .po or .ts files."
+msgstr ""
+
+#: l10n_lint_gtk.py:903
 msgid "Select file"
 msgstr ""
 
-#: l10n_lint_gtk.py:562
+#: l10n_lint_gtk.py:909
+msgid "Localization files (*.po, *.ts)"
+msgstr ""
+
+#: l10n_lint_gtk.py:915
+msgid "All files"
+msgstr ""
+
+#: l10n_lint_gtk.py:924
 msgid "Select directory"
 msgstr ""
 
-#: l10n_lint_gtk.py:589 l10n_lint_gtk.py:661
+#: l10n_lint_gtk.py:951 l10n_lint_gtk.py:1044
 #, python-brace-format
 msgid "Linting {path}..."
 msgstr ""
 
-#: l10n_lint_gtk.py:641
+#: l10n_lint_gtk.py:1020
 msgid "Fetching from GitHub..."
 msgstr ""
 
-#: l10n_lint_gtk.py:647
+#: l10n_lint_gtk.py:1030
 #, python-brace-format
 msgid "Path not found: {path}"
 msgstr ""
 
-#: l10n_lint_gtk.py:723
+#: l10n_lint_gtk.py:1110
 #, python-brace-format
 msgid "Found {count} issue(s)"
 msgstr ""
 
-#: l10n_lint_gtk.py:725
+#: l10n_lint_gtk.py:1112
 msgid "errors"
 msgstr ""
 
-#: l10n_lint_gtk.py:726
+#: l10n_lint_gtk.py:1113
 msgid "warnings"
 msgstr ""
 
-#: l10n_lint_gtk.py:727
+#: l10n_lint_gtk.py:1114
 msgid "info"
 msgstr ""
 
-#: l10n_lint_gtk.py:729
+#: l10n_lint_gtk.py:1116
 #, python-brace-format
 msgid "Showing {shown} of {total}"
 msgstr ""
 
-#: l10n_lint_gtk.py:735
+#: l10n_lint_gtk.py:1122
 msgid "No issues match the current filter"
 msgstr ""
 
-#: l10n_lint_gtk.py:749
+#: l10n_lint_gtk.py:1136
 msgid "No issues found!"
 msgstr ""
 
-#: l10n_lint_gtk.py:753
+#: l10n_lint_gtk.py:1140
 msgid "Lint completed successfully"
 msgstr ""
 
-#: l10n_lint_gtk.py:767
+#: l10n_lint_gtk.py:1154
 msgid "Close"
 msgstr ""
 
-#: l10n_lint_gtk.py:768
+#: l10n_lint_gtk.py:1155
 msgid "Copy"
 msgstr ""
 
-#: l10n_lint_gtk.py:800
+#: l10n_lint_gtk.py:1187
 msgid "Plain text"
 msgstr ""
 
-#: l10n_lint_gtk.py:820
-#, python-brace-format
-msgid "Report exported to {path}"
+#: l10n_lint_gtk.py:1297
+msgid "Lint Rules"
 msgstr ""
 
-#: l10n_lint_gtk.py:922
-msgid "Linting"
+#: l10n_lint_gtk.py:1298
+msgid "Select which checks to perform"
 msgstr ""
 
-#: l10n_lint_gtk.py:925
-msgid "Maximum translation length"
+#: l10n_lint_gtk.py:1314
+msgid "Options"
 msgstr ""
 
-#: l10n_lint_gtk.py:929
-msgid "Skip fuzzy warnings"
-msgstr ""
-
-#: l10n_lint_gtk.py:932
-msgid "Strict mode"
-msgstr ""
-
-#: l10n_lint_gtk.py:938
-msgid "Interface"
-msgstr ""
-
-#: l10n_lint_gtk.py:940
+#: l10n_lint_gtk.py:1317
 msgid "Search subdirectories"
 msgstr ""
 
-#: l10n_lint_gtk.py:940
-msgid "When linting directories"
+#: l10n_lint_gtk.py:1318
+msgid "Recursively search directories for l10n files"
 msgstr ""
 
-#: l10n_lint_gtk.py:1055
+#: l10n_lint_gtk.py:1325
+msgid "Strict mode"
+msgstr ""
+
+#: l10n_lint_gtk.py:1335
+msgid "Quick Actions"
+msgstr ""
+
+#: l10n_lint_gtk.py:1337
+msgid "Enable All Rules"
+msgstr ""
+
+#: l10n_lint_gtk.py:1341
+msgid "Disable All Rules"
+msgstr ""
+
+#: l10n_lint_gtk.py:1345
+msgid "Reset to Defaults"
+msgstr ""
+
+#: l10n_lint_gtk.py:1514
 msgid "Graphical linter for localization files (.po, .ts)"
 msgstr ""
 
-#: l10n_lint_gtk.py:1056
+#: l10n_lint_gtk.py:1515
 msgid "translator-credits"
 msgstr ""

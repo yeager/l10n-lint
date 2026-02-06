@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.14.3] - 2026-02-06
+
+### Added
+- **l10n-lint-gtk 1.2.3** - Major feature update:
+  - **Lint rule preferences** - Choose which checks to run (Preferences → Lint Rules)
+  - **File metadata panel** - Shows language, last translator, revision date, project info
+  - **Statistics display** - Entries, translated, untranslated, fuzzy counts
+  - **Rule filter dropdown** - Filter issues by specific rule type
+  - **Quick actions** - Enable all / Disable all / Reset defaults buttons
+  - **Better file type detection** - Distinguishes between .po and .ts files
+  - **Settings persistence** - Saves configuration to ~/.config/l10n-lint/settings.json
+  - **Improved drag & drop** - Shows metadata immediately when file is dropped
+
+### Changed
+- Preferences window redesigned with grouped lint rule toggles
+- File filter in open dialog now defaults to localization files (*.po, *.ts)
+
 ## [1.14.2] - 2026-02-06
 
 ### Added

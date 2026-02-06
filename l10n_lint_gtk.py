@@ -18,6 +18,7 @@ import gettext
 import json
 import locale
 import os
+import re
 import sys
 import threading
 from pathlib import Path
@@ -49,7 +50,7 @@ except ImportError:
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.2.2"
+__version__ = "1.2.3"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI
@@ -82,6 +83,304 @@ try:
     _ = translation.gettext
 except Exception:
     def _(s): return s
+
+
+# All available lint rules with descriptions
+LINT_RULES = {
+    "missing-translation": (_("Missing translations"), _("Check for empty msgstr/unfinished translations"), True),
+    "fuzzy": (_("Fuzzy entries"), _("Flag entries marked as fuzzy/needs review"), True),
+    "placeholder": (_("Placeholder mismatch"), _("Check %s, %d, {0}, {name} consistency"), True),
+    "length": (_("Length ratio"), _("Warn if translation is much longer/shorter than source"), True),
+    "punctuation": (_("Punctuation"), _("Check ending punctuation matches"), False),
+    "capitalization": (_("Capitalization"), _("Check initial letter case matches"), False),
+    "whitespace": (_("Whitespace"), _("Check leading/trailing whitespace"), True),
+    "quotes": (_("Quote consistency"), _("Check quote characters are consistent"), False),
+    "html-tags": (_("HTML tags"), _("Verify HTML tags match between source and translation"), True),
+    "escapes": (_("Escape sequences"), _("Check \\n, \\t, etc. are preserved"), True),
+    "accelerators": (_("Accelerators"), _("Check & keyboard accelerators"), False),
+    "numerics": (_("Numeric values"), _("Check numbers are preserved"), False),
+    "untranslated": (_("Untranslated words"), _("Detect English words left in translation"), False),
+    "repeated-words": (_("Repeated words"), _("Find duplicated words like 'the the'"), False),
+    "source-equals-translation": (_("Same as source"), _("Warn if translation equals source"), False),
+    "option-values": (_("Option values"), _("Check option/parameter values preserved"), False),
+    "duplicate": (_("Duplicate entries"), _("Find duplicate msgids"), True),
+}
+
+
+def load_settings():
+    """Load user settings from config file."""
+    config_file = Path.home() / ".config" / "l10n-lint" / "settings.json"
+    defaults = {
+        "enabled_rules": [rule for rule, (_, _, default) in LINT_RULES.items() if default],
+        "max_length_ratio": 3.0,
+        "recursive": True,
+        "strict_mode": False,
+    }
+    if config_file.exists():
+        try:
+            data = json.loads(config_file.read_text())
+            defaults.update(data)
+        except Exception:
+            pass
+    return defaults
+
+
+def save_settings(settings):
+    """Save settings to config file."""
+    config_file = Path.home() / ".config" / "l10n-lint" / "settings.json"
+    config_file.parent.mkdir(parents=True, exist_ok=True)
+    config_file.write_text(json.dumps(settings, indent=2))
+
+
+class FileMetadata:
+    """Extract and hold metadata from .po or .ts files."""
+    
+    def __init__(self, filepath: str):
+        self.filepath = filepath
+        self.file_type = None
+        self.language = None
+        self.last_translator = None
+        self.revision_date = None
+        self.creation_date = None
+        self.project = None
+        self.team = None
+        self.total_entries = 0
+        self.translated = 0
+        self.untranslated = 0
+        self.fuzzy = 0
+        self.file_size = 0
+        self._extract()
+    
+    def _extract(self):
+        p = Path(self.filepath)
+        if not p.exists():
+            return
+        
+        self.file_size = p.stat().st_size
+        ext = p.suffix.lower()
+        
+        try:
+            content = p.read_text(encoding='utf-8')
+        except Exception:
+            try:
+                content = p.read_text(encoding='latin-1')
+            except Exception:
+                return
+        
+        if ext == '.po':
+            self.file_type = "GNU gettext (.po)"
+            self._extract_po(content)
+        elif ext == '.ts':
+            self.file_type = "Qt Linguist (.ts)"
+            self._extract_ts(content)
+    
+    def _extract_po(self, content: str):
+        """Extract metadata from PO file header."""
+        # Find header entry (msgid "")
+        header_match = re.search(r'msgid\s+""\s*\nmsgstr\s+"([^"]*(?:\\n[^"]*)*)"', content, re.MULTILINE)
+        if header_match:
+            header = header_match.group(1).replace('\\n', '\n')
+            
+            # Extract fields
+            for line in header.split('\n'):
+                if ':' in line:
+                    key, _, value = line.partition(':')
+                    key = key.strip().lower()
+                    value = value.strip()
+                    
+                    if key == 'language':
+                        self.language = value
+                    elif key == 'last-translator':
+                        self.last_translator = value
+                    elif key == 'po-revision-date':
+                        self.revision_date = value
+                    elif key == 'pot-creation-date':
+                        self.creation_date = value
+                    elif key == 'project-id-version':
+                        self.project = value
+                    elif key == 'language-team':
+                        self.team = value
+        
+        # Count entries
+        entries = re.findall(r'^msgid\s+"(.+)"', content, re.MULTILINE)
+        self.total_entries = len(entries)
+        
+        # Count translated (non-empty msgstr)
+        for match in re.finditer(r'msgid\s+"(.+)"\s*\n(?:msgid_plural[^\n]*\n)?msgstr(?:\[\d+\])?\s+"([^"]*)"', content):
+            if match.group(2):
+                self.translated += 1
+            else:
+                self.untranslated += 1
+        
+        # Count fuzzy
+        self.fuzzy = len(re.findall(r'^#,.*fuzzy', content, re.MULTILINE))
+        
+        # Adjust counts
+        if self.translated + self.untranslated == 0:
+            self.untranslated = self.total_entries
+    
+    def _extract_ts(self, content: str):
+        """Extract metadata from TS file."""
+        # Language attribute
+        lang_match = re.search(r'<TS[^>]*language="([^"]+)"', content)
+        if lang_match:
+            self.language = lang_match.group(1)
+        
+        # Count messages
+        sources = re.findall(r'<source>([^<]*)</source>', content)
+        self.total_entries = len(sources)
+        
+        # Count translated
+        translations = re.findall(r'<translation(?:\s+type="([^"]*)")?[^>]*>([^<]*)</translation>', content)
+        for trans_type, trans_text in translations:
+            if trans_type == 'unfinished' or not trans_text:
+                self.untranslated += 1
+            else:
+                self.translated += 1
+        
+        # Adjust
+        if self.translated + self.untranslated == 0:
+            self.untranslated = self.total_entries
+
+
+class MetadataPanel(Gtk.Box):
+    """Panel showing file metadata."""
+    
+    def __init__(self):
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        self.add_css_class("card")
+        self.set_margin_start(8)
+        self.set_margin_end(8)
+        self.set_margin_top(8)
+        
+        # Header
+        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        header.set_margin_start(12)
+        header.set_margin_end(12)
+        header.set_margin_top(12)
+        
+        self.file_icon = Gtk.Image.new_from_icon_name("text-x-generic-symbolic")
+        self.file_icon.set_pixel_size(32)
+        header.append(self.file_icon)
+        
+        header_text = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        self.filename_label = Gtk.Label(label=_("No file selected"))
+        self.filename_label.set_xalign(0)
+        self.filename_label.add_css_class("title-3")
+        header_text.append(self.filename_label)
+        
+        self.filetype_label = Gtk.Label()
+        self.filetype_label.set_xalign(0)
+        self.filetype_label.add_css_class("dim-label")
+        header_text.append(self.filetype_label)
+        
+        header.append(header_text)
+        self.append(header)
+        
+        # Metadata grid
+        self.grid = Gtk.Grid()
+        self.grid.set_column_spacing(16)
+        self.grid.set_row_spacing(4)
+        self.grid.set_margin_start(12)
+        self.grid.set_margin_end(12)
+        self.grid.set_margin_bottom(12)
+        
+        self.meta_labels = {}
+        row = 0
+        for key, label_text in [
+            ("language", _("Language")),
+            ("translator", _("Last Translator")),
+            ("revision", _("Revision Date")),
+            ("project", _("Project")),
+            ("team", _("Language Team")),
+        ]:
+            label = Gtk.Label(label=label_text + ":")
+            label.set_xalign(1)
+            label.add_css_class("dim-label")
+            self.grid.attach(label, 0, row, 1, 1)
+            
+            value = Gtk.Label()
+            value.set_xalign(0)
+            value.set_hexpand(True)
+            value.set_ellipsize(Pango.EllipsizeMode.END)
+            value.set_selectable(True)
+            self.grid.attach(value, 1, row, 1, 1)
+            self.meta_labels[key] = value
+            row += 1
+        
+        self.append(self.grid)
+        
+        # Stats row
+        self.stats_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+        self.stats_box.set_halign(Gtk.Align.CENTER)
+        self.stats_box.set_margin_bottom(12)
+        
+        self.stat_labels = {}
+        for name, label, color in [
+            ("total", _("Entries"), "#9b59b6"),
+            ("translated", _("Translated"), "#27ae60"),
+            ("untranslated", _("Untranslated"), "#e74c3c"),
+            ("fuzzy", _("Fuzzy"), "#f39c12"),
+        ]:
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            
+            value_label = Gtk.Label()
+            value_label.set_markup(f"<span foreground='{color}' weight='bold' size='large'>0</span>")
+            box.append(value_label)
+            
+            name_label = Gtk.Label(label=label)
+            name_label.add_css_class("caption")
+            name_label.add_css_class("dim-label")
+            box.append(name_label)
+            
+            self.stat_labels[name] = (value_label, color)
+            self.stats_box.append(box)
+        
+        self.append(self.stats_box)
+    
+    def update(self, metadata: FileMetadata):
+        """Update panel with metadata."""
+        self.filename_label.set_text(Path(metadata.filepath).name)
+        self.filetype_label.set_text(metadata.file_type or _("Unknown"))
+        
+        # Set appropriate icon
+        if metadata.file_type and ".po" in metadata.file_type:
+            self.file_icon.set_from_icon_name("text-x-gettext-translation-symbolic")
+        elif metadata.file_type and ".ts" in metadata.file_type:
+            self.file_icon.set_from_icon_name("text-x-qt-linguist-symbolic")
+        else:
+            self.file_icon.set_from_icon_name("text-x-generic-symbolic")
+        
+        # Update metadata fields
+        self.meta_labels["language"].set_text(metadata.language or "—")
+        self.meta_labels["translator"].set_text(metadata.last_translator or "—")
+        self.meta_labels["revision"].set_text(metadata.revision_date or "—")
+        self.meta_labels["project"].set_text(metadata.project or "—")
+        self.meta_labels["team"].set_text(metadata.team or "—")
+        
+        # Update stats
+        stats = {
+            "total": metadata.total_entries,
+            "translated": metadata.translated,
+            "untranslated": metadata.untranslated,
+            "fuzzy": metadata.fuzzy,
+        }
+        for name, value in stats.items():
+            label, color = self.stat_labels[name]
+            label.set_markup(f"<span foreground='{color}' weight='bold' size='large'>{value}</span>")
+    
+    def clear(self):
+        """Clear the panel."""
+        self.filename_label.set_text(_("No file selected"))
+        self.filetype_label.set_text("")
+        self.file_icon.set_from_icon_name("text-x-generic-symbolic")
+        
+        for key in self.meta_labels:
+            self.meta_labels[key].set_text("—")
+        
+        for name in self.stat_labels:
+            label, color = self.stat_labels[name]
+            label.set_markup(f"<span foreground='{color}' weight='bold' size='large'>0</span>")
 
 
 class LintRow(Gtk.Box):
@@ -138,7 +437,7 @@ class LintRow(Gtk.Box):
         header.append(severity_label)
         
         # Location
-        location = Gtk.Label(label=f"{issue.file}:{issue.line}")
+        location = Gtk.Label(label=f"{Path(issue.file).name}:{issue.line}")
         location.add_css_class("dim-label")
         location.set_hexpand(True)
         location.set_xalign(0)
@@ -221,6 +520,14 @@ class FilterBar(Gtk.Box):
         self.info_toggle.connect("toggled", self._on_toggled)
         self.append(self.info_toggle)
         
+        # Rule filter dropdown
+        self.rule_dropdown = Gtk.DropDown()
+        self.rule_model = Gtk.StringList()
+        self.rule_model.append(_("All rules"))
+        self.rule_dropdown.set_model(self.rule_model)
+        self.rule_dropdown.connect("notify::selected", self._on_rule_changed)
+        self.append(self.rule_dropdown)
+        
         # Spacer
         spacer = Gtk.Box()
         spacer.set_hexpand(True)
@@ -235,67 +542,33 @@ class FilterBar(Gtk.Box):
     def _on_toggled(self, button):
         self.on_filter_changed()
     
+    def _on_rule_changed(self, dropdown, param):
+        self.on_filter_changed()
+    
     def _on_search_changed(self, entry):
         self.on_filter_changed()
     
+    def update_rules(self, rules: list):
+        """Update rule dropdown with found rules."""
+        # Clear and rebuild
+        while self.rule_model.get_n_items() > 1:
+            self.rule_model.remove(1)
+        for rule in sorted(set(rules)):
+            self.rule_model.append(rule)
+    
     def get_filters(self):
+        selected = self.rule_dropdown.get_selected()
+        selected_rule = None
+        if selected > 0:
+            selected_rule = self.rule_model.get_string(selected)
+        
         return {
             "errors": self.error_toggle.get_active(),
             "warnings": self.warning_toggle.get_active(),
             "info": self.info_toggle.get_active(),
+            "rule": selected_rule,
             "search": self.search_entry.get_text().lower(),
         }
-
-
-class StatsPanel(Gtk.Box):
-    """Statistics panel showing lint results overview."""
-    
-    def __init__(self):
-        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
-        self.add_css_class("card")
-        self.set_margin_start(8)
-        self.set_margin_end(8)
-        self.set_margin_top(8)
-        self.set_margin_bottom(8)
-        self.set_halign(Gtk.Align.CENTER)
-        
-        self.stats = {}
-        for name, label, color in [
-            ("files", _("Files"), "#9b59b6"),
-            ("entries", _("Entries"), "#3498db"),
-            ("translated", _("Translated"), "#27ae60"),
-            ("untranslated", _("Untranslated"), "#e74c3c"),
-            ("fuzzy", _("Fuzzy"), "#f39c12"),
-        ]:
-            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-            box.set_margin_start(16)
-            box.set_margin_end(16)
-            box.set_margin_top(12)
-            box.set_margin_bottom(12)
-            
-            value_label = Gtk.Label(label="0")
-            value_label.add_css_class("title-1")
-            value_label.set_markup(f"<span foreground='{color}' weight='bold'>0</span>")
-            box.append(value_label)
-            
-            name_label = Gtk.Label(label=label)
-            name_label.add_css_class("dim-label")
-            box.append(name_label)
-            
-            self.stats[name] = (value_label, color)
-            self.append(box)
-    
-    def update(self, result: LintResult):
-        data = {
-            "files": result.files_checked,
-            "entries": result.total_entries,
-            "translated": result.translated,
-            "untranslated": result.untranslated,
-            "fuzzy": result.fuzzy,
-        }
-        for name, value in data.items():
-            label, color = self.stats[name]
-            label.set_markup(f"<span foreground='{color}' weight='bold'>{value}</span>")
 
 
 class L10nLintWindow(Adw.ApplicationWindow):
@@ -303,8 +576,9 @@ class L10nLintWindow(Adw.ApplicationWindow):
     
     def __init__(self, app):
         super().__init__(application=app, title="l10n-lint")
-        self.set_default_size(1000, 800)
+        self.set_default_size(1100, 850)
         
+        self.settings = load_settings()
         self.current_result = None
         self.all_issues = []
         self.history = []
@@ -320,7 +594,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
         
         # Open file button
         open_btn = Gtk.Button(icon_name="document-open-symbolic")
-        open_btn.set_tooltip_text(_("Open file or directory"))
+        open_btn.set_tooltip_text(_("Open file"))
         open_btn.connect("clicked", self._on_open_clicked)
         header.pack_start(open_btn)
         
@@ -416,10 +690,10 @@ class L10nLintWindow(Adw.ApplicationWindow):
         
         content.append(path_box)
         
-        # Stats panel
-        self.stats_panel = StatsPanel()
-        self.stats_panel.set_visible(False)
-        content.append(self.stats_panel)
+        # Metadata panel
+        self.metadata_panel = MetadataPanel()
+        self.metadata_panel.set_visible(False)
+        content.append(self.metadata_panel)
         
         # Filter bar
         self.filter_bar = FilterBar(self._apply_filters)
@@ -427,7 +701,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
         content.append(self.filter_bar)
         
         # Status bar
-        self.status_label = Gtk.Label(label=_("Select a file or directory to lint"))
+        self.status_label = Gtk.Label(label=_("Select a file or directory to lint. You can also drag and drop files here."))
         self.status_label.set_xalign(0)
         self.status_label.set_margin_start(8)
         self.status_label.add_css_class("dim-label")
@@ -520,7 +794,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
         """Remove visual feedback when leaving."""
         self.remove_css_class("drop-target")
         if not self.path_entry.get_text():
-            self.status_label.set_text(_("Select a file or directory to lint"))
+            self.status_label.set_text(_("Select a file or directory to lint. You can also drag and drop files here."))
     
     def _on_drop(self, drop_target, value, x, y):
         """Handle dropped file - set path and auto-lint."""
@@ -531,6 +805,11 @@ class L10nLintWindow(Adw.ApplicationWindow):
                 if path.endswith(('.po', '.ts')) or os.path.isdir(path):
                     self.path_entry.set_text(path)
                     self.remove_css_class("drop-target")
+                    # Show metadata immediately
+                    if not os.path.isdir(path):
+                        metadata = FileMetadata(path)
+                        self.metadata_panel.update(metadata)
+                        self.metadata_panel.set_visible(True)
                     # Auto-start lint
                     GLib.idle_add(self._on_lint_clicked, None)
                     return True
@@ -610,10 +889,34 @@ class L10nLintWindow(Adw.ApplicationWindow):
             "/" in path  # GitHub repo
         )
         self.lint_btn.set_sensitive(valid)
+        
+        # Show metadata for single file
+        if valid and Path(path).is_file():
+            metadata = FileMetadata(path)
+            self.metadata_panel.update(metadata)
+            self.metadata_panel.set_visible(True)
+        elif not valid or Path(path).is_dir():
+            self.metadata_panel.set_visible(False)
     
     def _on_open_clicked(self, button):
         dialog = Gtk.FileDialog()
         dialog.set_title(_("Select file"))
+        
+        # File filter
+        filter_store = Gio.ListStore.new(Gtk.FileFilter)
+        
+        l10n_filter = Gtk.FileFilter()
+        l10n_filter.set_name(_("Localization files (*.po, *.ts)"))
+        l10n_filter.add_pattern("*.po")
+        l10n_filter.add_pattern("*.ts")
+        filter_store.append(l10n_filter)
+        
+        all_filter = Gtk.FileFilter()
+        all_filter.set_name(_("All files"))
+        all_filter.add_pattern("*")
+        filter_store.append(all_filter)
+        
+        dialog.set_filters(filter_store)
         dialog.open(self, None, self._on_file_selected)
     
     def _on_open_folder_clicked(self, button):
@@ -647,7 +950,15 @@ class L10nLintWindow(Adw.ApplicationWindow):
         self.progress.set_fraction(0)
         self.status_label.set_text(_("Linting {path}...").format(path=path))
         self.filter_bar.set_visible(False)
-        self.stats_panel.set_visible(False)
+        
+        # Show metadata panel
+        p = Path(path)
+        if p.is_file():
+            metadata = FileMetadata(path)
+            self.metadata_panel.update(metadata)
+            self.metadata_panel.set_visible(True)
+        elif p.is_dir():
+            self.metadata_panel.set_visible(False)
         
         # Clear previous results
         while child := self.results_box.get_first_child():
@@ -675,31 +986,44 @@ class L10nLintWindow(Adw.ApplicationWindow):
             linter = L10nLinter()
             result = LintResult()
             
+            # Set linter options based on settings
+            enabled_rules = set(self.settings.get("enabled_rules", []))
+            
             p = Path(path)
             if p.is_dir():
-                files = list(find_l10n_files(path, recursive=True))
+                files = list(find_l10n_files(path, recursive=self.settings.get("recursive", True)))
                 total = len(files)
                 for i, file_path in enumerate(files):
                     file_result = linter.lint(file_path)
-                    result.issues.extend(file_result.issues)
+                    # Filter issues by enabled rules
+                    for issue in file_result.issues:
+                        if issue.rule in enabled_rules or not enabled_rules:
+                            result.issues.append(issue)
                     result.files_checked += file_result.files_checked
-                    result.total_entries += file_result.total_entries
-                    result.translated += file_result.translated
-                    result.untranslated += file_result.untranslated
-                    result.fuzzy += file_result.fuzzy
                     GLib.idle_add(self._update_progress, (i + 1) / total, file_path)
             elif p.is_file():
-                result = linter.lint(path)
+                file_result = linter.lint(path)
+                # Filter issues by enabled rules
+                for issue in file_result.issues:
+                    if issue.rule in enabled_rules or not enabled_rules:
+                        result.issues.append(issue)
+                result.files_checked = file_result.files_checked
             elif is_url(path):
                 temp_path, content = fetch_url_file(path)
-                result = linter.lint(temp_path)
-                for issue in result.issues:
+                file_result = linter.lint(temp_path)
+                for issue in file_result.issues:
                     issue.file = path
+                    if issue.rule in enabled_rules or not enabled_rules:
+                        result.issues.append(issue)
             elif "/" in path and not path.startswith("/"):
                 # GitHub repo
                 GLib.idle_add(self.status_label.set_text, _("Fetching from GitHub..."))
                 from l10n_lint import lint_github_repo
-                result = lint_github_repo(path, "")
+                github_result = lint_github_repo(path, "")
+                for issue in github_result.issues:
+                    if issue.rule in enabled_rules or not enabled_rules:
+                        result.issues.append(issue)
+                result.files_checked = github_result.files_checked
             else:
                 result.issues.append(LintIssue(
                     file=path, line=0, severity=Severity.ERROR,
@@ -726,9 +1050,9 @@ class L10nLintWindow(Adw.ApplicationWindow):
         self.progress.set_visible(False)
         self.lint_btn.set_sensitive(True)
         
-        # Show stats
-        self.stats_panel.update(result)
-        self.stats_panel.set_visible(True)
+        # Update filter bar with found rules
+        found_rules = [issue.rule for issue in result.issues]
+        self.filter_bar.update_rules(found_rules)
         
         # Show filter bar if there are issues
         self.filter_bar.set_visible(bool(result.issues))
@@ -750,6 +1074,10 @@ class L10nLintWindow(Adw.ApplicationWindow):
             if issue.severity == Severity.WARNING and not filters["warnings"]:
                 continue
             if issue.severity == Severity.INFO and not filters["info"]:
+                continue
+            
+            # Rule filter
+            if filters["rule"] and issue.rule != filters["rule"]:
                 continue
             
             # Search filter
@@ -874,11 +1202,6 @@ class L10nLintWindow(Adw.ApplicationWindow):
                     self._export_html(path)
                 else:
                     self._export_text(path)
-                
-                # Show toast
-                toast = Adw.Toast(title=_("Report exported to {path}").format(path=path))
-                # Get the toast overlay if available
-                self.get_application().props.active_window
         except GLib.Error:
             pass
     
@@ -886,10 +1209,6 @@ class L10nLintWindow(Adw.ApplicationWindow):
         data = {
             "timestamp": datetime.now().isoformat(),
             "files_checked": self.current_result.files_checked,
-            "total_entries": self.current_result.total_entries,
-            "translated": self.current_result.translated,
-            "untranslated": self.current_result.untranslated,
-            "fuzzy": self.current_result.fuzzy,
             "issues": [
                 {
                     "file": i.file,
@@ -931,10 +1250,9 @@ body {{ font-family: system-ui; max-width: 1200px; margin: 0 auto; padding: 20px
 
 <div class="stats">
 <div class="stat"><div class="stat-value">{self.current_result.files_checked}</div>Files</div>
-<div class="stat"><div class="stat-value">{self.current_result.total_entries}</div>Entries</div>
-<div class="stat"><div class="stat-value" style="color:#27ae60">{self.current_result.translated}</div>Translated</div>
-<div class="stat"><div class="stat-value" style="color:#e74c3c">{self.current_result.untranslated}</div>Untranslated</div>
-<div class="stat"><div class="stat-value" style="color:#f39c12">{self.current_result.fuzzy}</div>Fuzzy</div>
+<div class="stat"><div class="stat-value">{len(self.current_result.issues)}</div>Issues</div>
+<div class="stat"><div class="stat-value" style="color:#e74c3c">{self.current_result.error_count}</div>Errors</div>
+<div class="stat"><div class="stat-value" style="color:#f39c12">{self.current_result.warning_count}</div>Warnings</div>
 </div>
 
 <h2>Issues ({len(self.current_result.issues)})</h2>
@@ -955,10 +1273,6 @@ body {{ font-family: system-ui; max-width: 1200px; margin: 0 auto; padding: 20px
         lines = [
             f"l10n-lint Report - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             f"Files: {self.current_result.files_checked}",
-            f"Entries: {self.current_result.total_entries}",
-            f"Translated: {self.current_result.translated}",
-            f"Untranslated: {self.current_result.untranslated}",
-            f"Fuzzy: {self.current_result.fuzzy}",
             "",
             f"Issues: {len(self.current_result.issues)}",
             "-" * 60,
@@ -969,40 +1283,119 @@ body {{ font-family: system-ui; max-width: 1200px; margin: 0 auto; padding: 20px
 
 
 class PreferencesWindow(Adw.PreferencesWindow):
-    """Preferences window."""
+    """Preferences window with lint rule selection."""
     
     def __init__(self, app):
         super().__init__(transient_for=app.props.active_window)
         self.set_title(_("Preferences"))
+        self.settings = load_settings()
         
         page = Adw.PreferencesPage()
         
-        # Linting group
-        lint_group = Adw.PreferencesGroup(title=_("Linting"))
+        # Lint rules group
+        rules_group = Adw.PreferencesGroup(
+            title=_("Lint Rules"),
+            description=_("Select which checks to perform")
+        )
         
-        max_length_row = Adw.SpinRow.new_with_range(100, 2000, 50)
-        max_length_row.set_title(_("Maximum translation length"))
-        max_length_row.set_value(500)
-        lint_group.add(max_length_row)
+        self.rule_switches = {}
+        enabled_rules = set(self.settings.get("enabled_rules", []))
         
-        skip_fuzzy_row = Adw.SwitchRow(title=_("Skip fuzzy warnings"))
-        lint_group.add(skip_fuzzy_row)
+        for rule_id, (name, description, _) in LINT_RULES.items():
+            row = Adw.SwitchRow(title=name, subtitle=description)
+            row.set_active(rule_id in enabled_rules)
+            row.connect("notify::active", self._on_rule_toggled, rule_id)
+            self.rule_switches[rule_id] = row
+            rules_group.add(row)
         
-        strict_row = Adw.SwitchRow(title=_("Strict mode"), subtitle=_("Treat warnings as errors"))
-        lint_group.add(strict_row)
+        page.add(rules_group)
         
-        page.add(lint_group)
+        # Options group
+        options_group = Adw.PreferencesGroup(title=_("Options"))
         
-        # Interface group
-        ui_group = Adw.PreferencesGroup(title=_("Interface"))
+        recursive_row = Adw.SwitchRow(
+            title=_("Search subdirectories"),
+            subtitle=_("Recursively search directories for l10n files")
+        )
+        recursive_row.set_active(self.settings.get("recursive", True))
+        recursive_row.connect("notify::active", self._on_recursive_toggled)
+        options_group.add(recursive_row)
         
-        recursive_row = Adw.SwitchRow(title=_("Search subdirectories"), subtitle=_("When linting directories"))
-        recursive_row.set_active(True)
-        ui_group.add(recursive_row)
+        strict_row = Adw.SwitchRow(
+            title=_("Strict mode"),
+            subtitle=_("Treat warnings as errors")
+        )
+        strict_row.set_active(self.settings.get("strict_mode", False))
+        strict_row.connect("notify::active", self._on_strict_toggled)
+        options_group.add(strict_row)
         
-        page.add(ui_group)
+        page.add(options_group)
+        
+        # Quick actions
+        actions_group = Adw.PreferencesGroup(title=_("Quick Actions"))
+        
+        enable_all = Gtk.Button(label=_("Enable All Rules"))
+        enable_all.connect("clicked", self._enable_all_rules)
+        enable_all.add_css_class("pill")
+        
+        disable_all = Gtk.Button(label=_("Disable All Rules"))
+        disable_all.connect("clicked", self._disable_all_rules)
+        disable_all.add_css_class("pill")
+        
+        reset_defaults = Gtk.Button(label=_("Reset to Defaults"))
+        reset_defaults.connect("clicked", self._reset_defaults)
+        reset_defaults.add_css_class("pill")
+        
+        buttons_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        buttons_box.set_halign(Gtk.Align.CENTER)
+        buttons_box.set_margin_top(12)
+        buttons_box.append(enable_all)
+        buttons_box.append(disable_all)
+        buttons_box.append(reset_defaults)
+        
+        actions_row = Adw.PreferencesRow()
+        actions_row.set_child(buttons_box)
+        actions_group.add(actions_row)
+        
+        page.add(actions_group)
         
         self.add(page)
+    
+    def _on_rule_toggled(self, row, param, rule_id):
+        enabled = set(self.settings.get("enabled_rules", []))
+        if row.get_active():
+            enabled.add(rule_id)
+        else:
+            enabled.discard(rule_id)
+        self.settings["enabled_rules"] = list(enabled)
+        save_settings(self.settings)
+    
+    def _on_recursive_toggled(self, row, param):
+        self.settings["recursive"] = row.get_active()
+        save_settings(self.settings)
+    
+    def _on_strict_toggled(self, row, param):
+        self.settings["strict_mode"] = row.get_active()
+        save_settings(self.settings)
+    
+    def _enable_all_rules(self, button):
+        self.settings["enabled_rules"] = list(LINT_RULES.keys())
+        for switch in self.rule_switches.values():
+            switch.set_active(True)
+        save_settings(self.settings)
+    
+    def _disable_all_rules(self, button):
+        self.settings["enabled_rules"] = []
+        for switch in self.rule_switches.values():
+            switch.set_active(False)
+        save_settings(self.settings)
+    
+    def _reset_defaults(self, button):
+        default_rules = [rule for rule, (_, _, default) in LINT_RULES.items() if default]
+        self.settings["enabled_rules"] = default_rules
+        for rule_id, switch in self.rule_switches.items():
+            switch.set_active(rule_id in default_rules)
+        save_settings(self.settings)
 
 
 class L10nLintApp(Adw.Application):
@@ -1079,6 +1472,13 @@ class L10nLintApp(Adw.Application):
                         <property name="visible">true</property>
                         <property name="accelerator">&lt;Control&gt;e</property>
                         <property name="title">Export report</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkShortcutsShortcut">
+                        <property name="visible">true</property>
+                        <property name="accelerator">&lt;Control&gt;comma</property>
+                        <property name="title">Preferences</property>
                       </object>
                     </child>
                     <child>

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.1] - 2026-02-06
+
+### Fixed
+- **l10n-lint-gtk 1.2.1** - Fixed ModuleNotFoundError when running installed package
+  - GTK interface now searches multiple paths for l10n_lint module
+  - Works with both system packages and local development installs
+
 ## [1.14.0] - 2026-02-05
 
 ### Added

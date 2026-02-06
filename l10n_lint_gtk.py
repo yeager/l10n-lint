@@ -24,13 +24,32 @@ from pathlib import Path
 from datetime import datetime
 
 # Import l10n-lint core functionality
-from l10n_lint import (
-    L10nLinter, LintResult, LintIssue, Severity,
-    find_l10n_files, fetch_url_file, is_url,
-    __version__ as LINT_VERSION
-)
+# Try multiple locations: site-packages, same directory, /usr/lib/python3/dist-packages
+_script_dir = Path(__file__).resolve().parent
+_possible_module_paths = [
+    _script_dir,  # Same directory as this script
+    Path("/usr/lib/python3/dist-packages"),  # Debian/Ubuntu standard
+    Path("/usr/local/lib/python3/dist-packages"),  # Local installs
+]
 
-__version__ = "1.2.0"
+# Add paths to sys.path if module not already importable
+try:
+    from l10n_lint import (
+        L10nLinter, LintResult, LintIssue, Severity,
+        find_l10n_files, fetch_url_file, is_url,
+        __version__ as LINT_VERSION
+    )
+except ImportError:
+    for path in _possible_module_paths:
+        if path.exists() and str(path) not in sys.path:
+            sys.path.insert(0, str(path))
+    from l10n_lint import (
+        L10nLinter, LintResult, LintIssue, Severity,
+        find_l10n_files, fetch_url_file, is_url,
+        __version__ as LINT_VERSION
+    )
+
+__version__ = "1.2.1"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI

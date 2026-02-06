@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.14.4] - 2026-02-06
+
+### Fixed
+- **l10n-lint-gtk 1.2.4** - Complete Swedish translation
+  - All menu items translated (Preferences, About, Quit, Keyboard Shortcuts)
+  - All GTK interface strings translated (170+ strings)
+  - All lint rule names and descriptions translated
+  - All error messages and status texts translated
+
 ## [1.14.3] - 2026-02-06
 
 ### Added

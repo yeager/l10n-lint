@@ -50,7 +50,7 @@ except ImportError:
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.2.3"
+__version__ = "1.2.4"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI

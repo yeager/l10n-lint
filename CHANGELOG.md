@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.14.7] - 2026-02-06
+
+### Fixed
+- **l10n-lint-gtk 1.2.7** - Critical fixes
+  - Fixed "L10nLinter has no attribute 'lint'" - method is lint_file()
+  - Fixed ampersand markup error in Swedish translation
+  - About dialog already exists with full project info and copyright
+
 ## [1.14.6] - 2026-02-06
 
 ### Fixed

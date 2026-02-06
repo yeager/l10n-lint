@@ -51,7 +51,7 @@ except ImportError:
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.2.6"
+__version__ = "1.2.7"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI
@@ -995,7 +995,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
                 files = list(find_l10n_files(path, recursive=self.settings.get("recursive", True)))
                 total = len(files)
                 for i, file_path in enumerate(files):
-                    file_result = linter.lint(file_path)
+                    file_result = linter.lint_file(file_path)
                     # Filter issues by enabled rules
                     for issue in file_result.issues:
                         if issue.rule in enabled_rules or not enabled_rules:
@@ -1003,7 +1003,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
                     result.files_checked += file_result.files_checked
                     GLib.idle_add(self._update_progress, (i + 1) / total, file_path)
             elif p.is_file():
-                file_result = linter.lint(path)
+                file_result = linter.lint_file(path)
                 # Filter issues by enabled rules
                 for issue in file_result.issues:
                     if issue.rule in enabled_rules or not enabled_rules:
@@ -1011,7 +1011,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
                 result.files_checked = file_result.files_checked
             elif is_url(path):
                 temp_path, content = fetch_url_file(path)
-                file_result = linter.lint(temp_path)
+                file_result = linter.lint_file(temp_path)
                 for issue in file_result.issues:
                     issue.file = path
                     if issue.rule in enabled_rules or not enabled_rules:

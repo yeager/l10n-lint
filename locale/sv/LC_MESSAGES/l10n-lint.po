@@ -569,7 +569,7 @@ msgstr "Snabbtangenter"
 
 #: l10n_lint_gtk.py:100
 msgid "Check & keyboard accelerators"
-msgstr "Kontrollera &-tangentbordsgenvägar"
+msgstr "Kontrollera tangentbordsgenvägar (ampersand)"
 
 #: l10n_lint_gtk.py:101
 msgid "Numeric values"

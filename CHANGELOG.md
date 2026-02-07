@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.14.9] - 2026-02-07
+
+### Fixed
+- **l10n-lint-gtk 1.2.9** - Metadata parsing fix
+  - Last-Translator and PO-Revision-Date now display correctly in the GTK interface
+
 ## [1.14.8] - 2026-02-06
 
 ### Fixed

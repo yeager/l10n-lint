@@ -51,7 +51,7 @@ except ImportError:
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.2.8"
+__version__ = "1.2.9"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI
@@ -177,10 +177,19 @@ class FileMetadata:
     
     def _extract_po(self, content: str):
         """Extract metadata from PO file header."""
-        # Find header entry (msgid "")
-        header_match = re.search(r'msgid\s+""\s*\nmsgstr\s+"([^"]*(?:\\n[^"]*)*)"', content, re.MULTILINE)
+        # Find header entry (msgid "" followed by msgstr with continuation lines)
+        header_match = re.search(
+            r'msgid\s+""\s*\nmsgstr\s+"((?:[^"\\]|\\.)*)"\s*\n((?:\s*"(?:[^"\\]|\\.)*"\s*\n)*)',
+            content, re.MULTILINE
+        )
         if header_match:
-            header = header_match.group(1).replace('\\n', '\n')
+            # Combine the first msgstr line and all continuation lines
+            header = header_match.group(1)
+            continuation = header_match.group(2)
+            if continuation:
+                for line_match in re.finditer(r'"((?:[^"\\]|\\.)*)"', continuation):
+                    header += line_match.group(1)
+            header = header.replace('\\n', '\n')
             
             # Extract fields
             for line in header.split('\n'):

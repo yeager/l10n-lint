@@ -4,7 +4,7 @@
 
 Check your translation files for common issues like missing translations, fuzzy entries, placeholder mismatches, and more.
 
-**Version:** 1.14.3 (CLI) / 1.2.3 (GTK)
+**Version:** 1.14.9 (CLI) / 1.2.9 (GTK)
 
 ## Features
 

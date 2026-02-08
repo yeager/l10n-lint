@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=l10n-lint
+GenericName=Localization Linter
+Comment=Linter for localization files (.po, .ts)
+Exec=l10n-lint --gtk
+Icon=io.github.yeager.l10n-lint
+Terminal=false
+Type=Application
+Categories=Development;Translation;
+Keywords=translation;localization;i18n;l10n;gettext;PO;TS;linter;

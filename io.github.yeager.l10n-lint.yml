@@ -1,0 +1,32 @@
+app-id: io.github.yeager.l10n-lint
+runtime: org.gnome.Platform
+runtime-version: '46'
+sdk: org.gnome.Sdk
+command: l10n-lint
+
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --filesystem=host
+
+modules:
+  - name: python3-polib
+    buildsystem: simple
+    build-commands:
+      - pip3 install --no-index --find-links=. --prefix=/app polib
+    sources:
+      - type: pypi
+        name: polib
+
+  - name: l10n-lint
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 l10n_lint.py /app/bin/l10n-lint
+      - install -Dm755 l10n_lint_gtk.py /app/bin/l10n-lint-gtk
+      - install -Dm644 io.github.yeager.l10n-lint.desktop /app/share/applications/io.github.yeager.l10n-lint.desktop
+      - install -Dm644 io.github.yeager.l10n-lint.metainfo.xml /app/share/metainfo/io.github.yeager.l10n-lint.metainfo.xml
+    sources:
+      - type: git
+        url: https://github.com/yeager/l10n-lint.git
+        tag: v1.3.6

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/opt/homebrew/bin/python3
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: GPL-3.0-or-later
 # l10n-lint-gtk - GTK interface for l10n-lint
@@ -51,7 +51,7 @@ except ImportError:
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.2.9"
+__version__ = "1.3.0"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI
@@ -98,7 +98,7 @@ LINT_RULES = {
     "quotes": (_("Quote consistency"), _("Check quote characters are consistent"), False),
     "html-tags": (_("HTML tags"), _("Verify HTML tags match between source and translation"), True),
     "escapes": (_("Escape sequences"), _("Check \\n, \\t, etc. are preserved"), True),
-    "accelerators": (_("Accelerators"), _("Check & keyboard accelerators"), False),
+    "accelerators": (_("Accelerators"), _("Check &amp; keyboard accelerators"), False),
     "numerics": (_("Numeric values"), _("Check numbers are preserved"), False),
     "untranslated": (_("Untranslated words"), _("Detect English words left in translation"), False),
     "repeated-words": (_("Repeated words"), _("Find duplicated words like 'the the'"), False),

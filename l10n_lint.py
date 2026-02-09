@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.14.9"
+__version__ = "1.15.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -282,6 +282,25 @@ class L10nLinter:
     
     # Option value pattern (--option=VALUE or --option VALUE)
     OPTION_VALUE_PATTERN = re.compile(r'--?\w+[=\s]([A-Z][A-Z0-9_]+)')
+    
+    # Number patterns for localization checks
+    NUMBER_WITH_COMMAS = re.compile(r'\b\d{1,3}(,\d{3})+\b')  # e.g. 1,000 or 1,000,000
+    
+    # Currency patterns
+    CURRENCY_PATTERN = re.compile(r'[\$€£¥]\s?\d|USD|EUR|GBP|JPY')
+    
+    # Date format patterns (common English formats)
+    DATE_PATTERNS = [
+        re.compile(r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b'),
+        re.compile(r'\b\d{1,2}/\d{1,2}/\d{2,4}\b'),  # MM/DD/YYYY
+        re.compile(r'\b\d{4}-\d{2}-\d{2}\b'),  # ISO format (usually OK)
+    ]
+    
+    # Python brace format
+    PYTHON_BRACE_FORMAT = re.compile(r'\{(\w*(?:\.\w+)*(?:\[[\w"\']+\])*)?(?:![rsa])?(?::[^}]*)?\}')
+    
+    # Newline pattern (literal \n in raw text before unescape)
+    NEWLINE_LITERAL = re.compile(r'\\n')
     
     def __init__(self, config: Optional[dict] = None):
         self.config = config or {}
@@ -827,6 +846,90 @@ class L10nLinter:
                         message=_("Option value '{value}' from source not found in translation").format(value=value),
                         context=source[:50]
                     ))
+
+
+    def _check_number_localization(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check that numbers use localized formatting (e.g. 1,000 → 1 000 in Swedish)."""
+        # Find comma-separated numbers in translation that look like English formatting
+        english_nums = self.NUMBER_WITH_COMMAS.findall(translation)
+        if english_nums:
+            # Check if source also has them (might be intentional)
+            source_nums = self.NUMBER_WITH_COMMAS.findall(source)
+            if english_nums and source_nums:
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.WARNING,
+                    rule="number-localization",
+                    message=_("Number formatting may not be localized (e.g. 1,000 should be 1 000 in some locales)"),
+                    context=source[:50]
+                ))
+
+    def _check_currency_localization(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check currency format localization."""
+        source_currencies = self.CURRENCY_PATTERN.findall(source)
+        if source_currencies:
+            trans_currencies = self.CURRENCY_PATTERN.findall(translation)
+            # If source has currency symbols and translation has identical ones, might not be localized
+            if source_currencies and source_currencies == trans_currencies:
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.INFO,
+                    rule="currency-localization",
+                    message=_("Currency format may need localization"),
+                    context=source[:50]
+                ))
+
+    def _check_date_format(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check date format localization."""
+        for pattern in self.DATE_PATTERNS[:2]:  # Skip ISO format
+            source_dates = pattern.findall(source)
+            if source_dates:
+                trans_dates = pattern.findall(translation)
+                if trans_dates:
+                    result.add(LintIssue(
+                        file=filepath,
+                        line=line,
+                        severity=Severity.WARNING,
+                        rule="date-format",
+                        message=_("Date format may not be localized"),
+                        context=source[:50]
+                    ))
+                    break
+
+    def _check_newline_mismatch(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check that the number of newlines matches between source and translation."""
+        source_newlines = source.count('\n')
+        trans_newlines = translation.count('\n')
+        if source_newlines != trans_newlines:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="newline-mismatch",
+                message=_("Newline count mismatch: source has {src}, translation has {trans}").format(
+                    src=source_newlines, trans=trans_newlines
+                ),
+                context=source[:50]
+            ))
+
+    def _check_python_format(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check Python {}-format strings specifically."""
+        source_braces = sorted(self.PYTHON_BRACE_FORMAT.findall(source))
+        trans_braces = sorted(self.PYTHON_BRACE_FORMAT.findall(translation))
+        
+        if source_braces and source_braces != trans_braces:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.ERROR,
+                rule="python-format",
+                message=_("Python format string mismatch: source has {src}, translation has {trans}").format(
+                    src=source_braces, trans=trans_braces
+                ),
+                context=source[:50]
+            ))
 
 
 def find_l10n_files(path: str, recursive: bool = True) -> Generator[str, None, None]:

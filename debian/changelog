@@ -1,0 +1,7 @@
+l10n-lint (1.14.9) stable; urgency=medium
+
+  * Updated checks and improved linting accuracy
+  * GTK GUI improvements
+  * Bug fixes
+
+ -- Daniel Nylander <daniel@danielnylander.se>  Mon, 09 Feb 2026 15:00:00 +0100

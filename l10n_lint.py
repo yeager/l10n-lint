@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.15.0"
+__version__ = "1.15.1"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -1547,11 +1547,11 @@ def main():
             else:
                 print(output)
     
-    # Exit code
+    # Exit code: 0=success, 1=warnings, 2=errors
     if args.strict:
-        sys.exit(1 if result.issues else 0)
+        sys.exit(2 if result.error_count > 0 else (1 if result.warning_count > 0 else (1 if result.issues else 0)))
     else:
-        sys.exit(1 if result.error_count > 0 else 0)
+        sys.exit(2 if result.error_count > 0 else (1 if result.warning_count > 0 else 0))
 
 
 if __name__ == '__main__':

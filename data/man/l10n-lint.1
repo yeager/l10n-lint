@@ -1,0 +1,69 @@
+.TH L10N-LINT 1 "2026-02-15" "Daniel Nylander" "l10n-lint Manual"
+.SH NAME
+l10n-lint - Linter for localization files
+.SH SYNOPSIS
+.B l10n-lint
+.RI [ OPTIONS ]
+.RI [ PATHS... ]
+.SH DESCRIPTION
+\fBl10n-lint\fR is a linter and validator for translation files (.po, .ts, .xliff). It checks for missing translations, fuzzy entries, placeholder mismatches, typography issues, HTML tag validation, keyboard accelerator mismatches, and quality problems. Available as both CLI and GTK4/Adwaita GUI. Supports GitHub repo scanning without cloning and localized output in 45+ languages.
+.SH OPTIONS
+.TP
+.BR \-g ", " \-\-github " " \fIREPO\fR
+GitHub repository (owner/repo or URL) to scan.
+.TP
+.BR \-p ", " \-\-path " " \fIPATH\fR
+Path filter for GitHub repos.
+.TP
+.BR \-f ", " \-\-format " " \fIFORMAT\fR
+Output format: text, json, html, github (default: text).
+.TP
+.BR \-o ", " \-\-output " " \fIFILE\fR
+Save report to file.
+.TP
+.BR \-\-max\-length " " \fIN\fR
+Maximum translation length (default: 500).
+.TP
+.B \-\-no\-recursive
+Do not search subdirectories.
+.TP
+.B \-\-strict
+Treat warnings as errors.
+.TP
+.BR \-q ", " \-\-quiet
+Show only summary.
+.TP
+.B \-\-check
+Exit code only, no output (for CI).
+.TP
+.B \-\-skip\-fuzzy
+Ignore fuzzy warnings.
+.TP
+.BR \-V ", " \-\-verbose
+Show detailed progress.
+.TP
+.BR \-G ", " \-\-gtk
+Launch GTK graphical interface.
+.TP
+.BR \-v ", " \-\-version
+Show version number and exit.
+.SH EXAMPLES
+.nf
+l10n-lint translations/
+l10n-lint -g yeager/ubuntu-l10n
+l10n-lint --format json -o report.json *.po
+l10n-lint --strict --check src/
+.fi
+.SH FILES
+.TP
+.I ~/.config/l10n-lint/
+Configuration files.
+.TP
+.I ~/.cache/l10n-lint/
+Cached data.
+.SH BUGS
+Report bugs at https://github.com/yeager/l10n-lint/issues
+.SH AUTHOR
+Daniel Nylander <daniel@danielnylander.se>
+.SH SEE ALSO
+Project homepage: https://github.com/yeager/l10n-lint

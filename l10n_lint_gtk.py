@@ -1520,6 +1520,7 @@ class L10nLintApp(Adw.Application):
             version=f"GTK {__version__} (core {LINT_VERSION})",
             website="https://github.com/yeager/l10n-lint",
             issue_url="https://github.com/yeager/l10n-lint/issues",
+            translate_url="https://app.transifex.com/danielnylander/l10n-lint/",
             license_type=Gtk.License.GPL_3_0,
             copyright="© 2026 Daniel Nylander",
             developers=["Daniel Nylander <daniel@danielnylander.se>"],

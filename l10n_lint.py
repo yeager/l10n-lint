@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.15.5"
+__version__ = "1.15.6"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -289,6 +289,8 @@ class L10nLinter:
     
     # Currency patterns
     CURRENCY_PATTERN = re.compile(r'[\$€£¥]\s?\d|USD|EUR|GBP|JPY')
+    # Pattern to strip printf positional args (%1$s, %2$d etc.) before currency check
+    PRINTF_POSITIONAL = re.compile(r'%\d+\$[a-zA-Z]')
     
     # Date format patterns (common English formats)
     DATE_PATTERNS = [
@@ -762,11 +764,11 @@ class L10nLinter:
         
         # Numbers in source but not in translation
         missing = source_nums - trans_nums
-        if missing and len(source_nums) <= 3:  # Only warn for few numbers
+        if missing and len(source_nums) <= 3:  # Only inform for few numbers
             result.add(LintIssue(
                 file=filepath,
                 line=line,
-                severity=Severity.WARNING,
+                severity=Severity.INFO,
                 rule="numeric-mismatch",
                 message=_("Numbers {nums} from source missing in translation").format(nums=missing),
                 context=source[:50]
@@ -868,7 +870,7 @@ class L10nLinter:
                 result.add(LintIssue(
                     file=filepath,
                     line=line,
-                    severity=Severity.WARNING,
+                    severity=Severity.INFO,
                     rule="number-localization",
                     message=_("Number formatting may not be localized (e.g. 1,000 should be 1 000 in some locales)"),
                     context=source[:50]
@@ -876,9 +878,12 @@ class L10nLinter:
 
     def _check_currency_localization(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check currency format localization."""
-        source_currencies = self.CURRENCY_PATTERN.findall(source)
+        # Strip printf positional args (%1$s) before checking — $ there is not currency
+        clean_source = self.PRINTF_POSITIONAL.sub('', source)
+        clean_trans = self.PRINTF_POSITIONAL.sub('', translation)
+        source_currencies = self.CURRENCY_PATTERN.findall(clean_source)
         if source_currencies:
-            trans_currencies = self.CURRENCY_PATTERN.findall(translation)
+            trans_currencies = self.CURRENCY_PATTERN.findall(clean_trans)
             # If source has currency symbols and translation has identical ones, might not be localized
             if source_currencies and source_currencies == trans_currencies:
                 result.add(LintIssue(

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.15.6] - 2026-02-15
+
+### Changed
+- Untranslated numbers (`numeric-mismatch`) downgraded from WARNING to INFO
+- Number localization (`number-localization`) downgraded from WARNING to INFO
+
+### Fixed
+- Printf positional args (`%1$s`, `%2$d`) no longer trigger false currency warnings — `$` in format specifiers is not currency
+
 ## [1.15.5] - 2026-02-15
 
 ### Added

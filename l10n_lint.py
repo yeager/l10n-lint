@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.15.3"
+__version__ = "1.15.4"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -38,6 +38,7 @@ DOMAIN = "l10n-lint"
 # Look for locale in multiple places
 _possible_locale_dirs = [
     Path("/usr/share/l10n-lint/locale"),  # System install (Debian)
+    Path("/usr/share/locale"),  # Standard system locale (RPM/Fedora)
     Path(__file__).parent / "locale",  # Development
 ]
 LOCALE_DIR = None
@@ -632,8 +633,8 @@ class L10nLinter:
     
     def _check_whitespace(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for whitespace issues."""
-        # Trailing whitespace
-        if translation != translation.rstrip():
+        # Trailing whitespace (only spaces/tabs, not newlines)
+        if translation != translation.rstrip(' \t'):
             result.add(LintIssue(
                 file=filepath,
                 line=line,

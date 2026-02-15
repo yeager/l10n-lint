@@ -58,6 +58,7 @@ APP_ID = "se.danielnylander.l10n-lint"
 DOMAIN = "l10n-lint"
 _possible_locale_dirs = [
     Path("/usr/share/l10n-lint/locale"),
+    Path("/usr/share/locale"),  # Standard system locale (RPM/Fedora)
     Path(__file__).parent / "locale",
 ]
 LOCALE_DIR = None

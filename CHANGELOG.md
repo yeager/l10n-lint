@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.4] - 2026-02-15
+
+### Fixed
+- Fixed false trailing-whitespace warnings on strings ending with `\n` (now only flags actual spaces/tabs)
+- Fixed CLI translations not loading on Fedora/RPM installs (added `/usr/share/locale` to search paths)
+- Removed stray `.po` and `.po~` files from locale directory — only `.mo` files are now shipped in packages
+
 ## [1.14.9] - 2026-02-07
 
 ### Fixed

@@ -12,3 +12,9 @@ file_filter  = po/<lang>.po
 source_file  = po/l10n-lint-gtk.pot
 source_lang  = en
 type         = PO
+
+[o:danielnylander:p:l10n-lint:r:l10n-lint-man]
+file_filter  = po/man/<lang>.po
+source_file  = po/man/l10n-lint.1.pot
+source_lang  = en
+type         = PO

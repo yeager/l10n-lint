@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-02-15 15:39+0100\n"
+"POT-Creation-Date: 2026-02-15 18:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,12 +71,12 @@ msgstr ""
 #. type: Plain text
 #: data/man/l10n-lint.1:10
 msgid ""
-"B<l10n-lint> is a linter and validator for translation files "
-"(.po, .ts, .xliff). It checks for missing translations, fuzzy entries, "
-"placeholder mismatches, typography issues, HTML tag validation, keyboard "
-"accelerator mismatches, and quality problems. Available as both CLI and GTK4/"
-"Adwaita GUI. Supports GitHub repo scanning without cloning and localized "
-"output in 45+ languages."
+"B<l10n-lint> is a linter and validator for translation files (.po, .ts, ."
+"xliff). It checks for missing translations, fuzzy entries, placeholder "
+"mismatches, typography issues, HTML tag validation, keyboard accelerator "
+"mismatches, and quality problems. Available as both CLI and GTK4/Adwaita "
+"GUI. Supports GitHub repo scanning without cloning and localized output in "
+"45+ languages."
 msgstr ""
 
 #. type: SH

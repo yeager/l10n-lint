@@ -40,6 +40,10 @@ install -m 755 "$SRCDIR/debian/prerm" "$DEST/DEBIAN/prerm"
 install -m 755 "$SRCDIR/l10n_lint.py" "$DEST/usr/bin/l10n-lint"
 install -m 755 "$SRCDIR/l10n_lint_gtk.py" "$DEST/usr/bin/l10n-lint-gtk"
 
+# Python module (so l10n-lint-gtk can import l10n_lint)
+mkdir -p "$DEST/usr/lib/python3/dist-packages"
+install -m 644 "$SRCDIR/l10n_lint.py" "$DEST/usr/lib/python3/dist-packages/l10n_lint.py"
+
 # Desktop file
 install -m 644 "$SRCDIR/io.github.yeager.l10n-lint.desktop" "$DEST/usr/share/applications/"
 

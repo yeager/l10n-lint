@@ -44,25 +44,18 @@ l10n-lint
 
 ## 🌍 Contributing Translations
 
-Help translate this app into your language! All translations are managed via Transifex.
+This app is translated via Transifex. Help translate it into your language!
 
-**→ [Translate on Transifex](https://app.transifex.com/danielnylander/l10n-lint/)**
+**[→ Translate on Transifex](https://app.transifex.com/danielnylander/l10n-lint/)**
 
-### How to contribute:
-1. Visit the [Transifex project page](https://app.transifex.com/danielnylander/l10n-lint/)
-2. Create a free account (or log in)
-3. Select your language and start translating
+Currently supported: Swedish (sv). More languages welcome!
 
-### Currently supported languages:
-Arabic, Czech, Danish, German, Spanish, Finnish, French, Italian, Japanese, Korean, Norwegian Bokmål, Dutch, Polish, Brazilian Portuguese, Russian, Swedish, Ukrainian, Chinese (Simplified)
+### For Translators
+1. Create a free account at [Transifex](https://www.transifex.com)
+2. Join the [danielnylander](https://app.transifex.com/danielnylander/) organization
+3. Start translating!
 
-### Notes:
-- Please do **not** submit pull requests with .po file changes — they are synced automatically from Transifex
-- Source strings are pushed to Transifex daily via GitHub Actions
-- Translations are pulled back and included in releases
-
-New language? Open an [issue](https://github.com/yeager/l10n-lint/issues) and we'll add it!
-
+Translations are automatically synced via GitHub Actions.
 ## License
 
 GPL-3.0-or-later — Daniel Nylander <daniel@danielnylander.se>

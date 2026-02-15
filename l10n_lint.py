@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.15.4"
+__version__ = "1.15.5"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -644,14 +644,22 @@ class L10nLinter:
                 context=source[:50]
             ))
         
-        # Double spaces (but not at line breaks)
-        if '  ' in translation.replace('\n ', '\n'):
+        # Double spaces — only between words (not leading indentation)
+        has_double = False
+        for tline in translation.split('\n'):
+            stripped = tline.lstrip()
+            if '  ' in stripped:
+                # Check it's between word characters (not just formatting)
+                if re.search(r'\S  +\S', stripped):
+                    has_double = True
+                    break
+        if has_double:
             result.add(LintIssue(
                 file=filepath,
                 line=line,
                 severity=Severity.INFO,
                 rule="double-spaces",
-                message=_("Translation contains double spaces"),
+                message=_("Translation contains double spaces between words"),
                 context=source[:50]
             ))
     
@@ -1251,6 +1259,20 @@ def format_output(result: LintResult, format_type: str = "text") -> str:
             lines.append(f"::{level} file={issue.file},line={issue.line}::[{issue.rule}] {issue.message}")
         return '\n'.join(lines)
     
+    elif format_type == "gnu":
+        # GNU style — Emacs compilation-mode compatible
+        # Format: file:line: severity: [rule] message
+        lines = []
+        for issue in sorted(result.issues, key=lambda x: (x.file, x.line)):
+            severity = "error" if issue.severity == Severity.ERROR else "warning" if issue.severity == Severity.WARNING else "info"
+            lines.append(f"{issue.file}:{issue.line}: {severity}: [{issue.rule}] {issue.message}")
+        if lines:
+            lines.append("")
+            lines.append(f"{result.files_checked} file(s), {result.error_count} error(s), {result.warning_count} warning(s)")
+        else:
+            lines.append(f"{result.files_checked} file(s) checked, no issues found.")
+        return '\n'.join(lines)
+    
     else:  # text
         if not result.issues:
             return _("✅ {count} file(s) checked, no issues found.").format(count=result.files_checked)
@@ -1308,7 +1330,7 @@ def main():
     parser.add_argument('paths', nargs='*', help=_('Files or directories to lint'))
     parser.add_argument('--github', '-g', metavar='REPO', help=_('GitHub repository (owner/repo or URL)'))
     parser.add_argument('--path', '-p', metavar='PATH', default='', help=_('Path filter for GitHub repos'))
-    parser.add_argument('--format', '-f', choices=['text', 'json', 'html', 'github'], default='text', help=_('Output format'))
+    parser.add_argument('--format', '-f', choices=['text', 'json', 'html', 'github', 'gnu'], default='text', help=_('Output format (gnu = Emacs-compatible file:line:col format)'))
     parser.add_argument('--output', '-o', metavar='FILE', help=_('Save report to file'))
     parser.add_argument('--max-length', type=int, default=500, help=_('Max translation length (default: 500)'))
     parser.add_argument('--no-recursive', action='store_true', help=_("Don't search subdirectories"))

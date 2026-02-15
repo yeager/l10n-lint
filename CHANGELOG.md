@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.15.5] - 2026-02-15
+
+### Added
+- New `--format gnu` / `-f gnu` output format — Emacs compilation-mode compatible (`file:line: severity: message`)
+
+### Fixed
+- Double-spaces check now only flags double spaces between words, ignoring leading indentation (e.g. man page formatting like `"  -a, --multiple\n"`)
+
 ## [1.15.4] - 2026-02-15
 
 ### Fixed

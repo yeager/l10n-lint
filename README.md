@@ -195,6 +195,12 @@ l10n-lint --format json ./po/ | jq '.issues[] | select(.severity == "error")'
 | 0 | No errors (warnings allowed) |
 | 1 | Errors found (or warnings with `--strict`) |
 
+## Translations
+
+[![Translation status](https://hosted.weblate.org/widget/danielnylander/l10n-lint/svg-badge.svg)](https://app.transifex.com/danielnylander/l10n-lint/)
+
+Help translate l10n-lint on [Transifex](https://app.transifex.com/danielnylander/l10n-lint/).
+
 ## Requirements
 
 **CLI:**

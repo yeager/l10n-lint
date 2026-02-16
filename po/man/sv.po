@@ -1,15 +1,20 @@
-# Swedish translations for l package
-# Copyright (C) 2026 Free Software Foundation, Inc.
-# This file is distributed under the same license as the l package.
-# Automatically generated, 2026.
+# SOME DESCRIPTIVE TITLE
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+# Translators:
+# Daniel Nylander <po@danielnylander.se>, 2026
+#
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: l 10n-lint\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2026-02-15 18:05+0000\n"
-"PO-Revision-Date: 2026-02-15 15:39+0100\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2026-02-15 14:39+0000\n"
+"Last-Translator: Daniel Nylander <po@danielnylander.se>, 2026\n"
+"Language-Team: Swedish (https://app.transifex.com/danielnylander/"
+"teams/304710/sv/)\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,53 +25,53 @@ msgstr ""
 #: data/man/l10n-lint.1:1
 #, no-wrap
 msgid "L10N-LINT"
-msgstr ""
+msgstr "L10N-LINT"
 
 #. type: TH
 #: data/man/l10n-lint.1:1
 #, no-wrap
 msgid "2026-02-15"
-msgstr ""
+msgstr "2026-02-15"
 
 #. type: TH
 #: data/man/l10n-lint.1:1
 #, no-wrap
 msgid "Daniel Nylander"
-msgstr ""
+msgstr "Daniel Nylander"
 
 #. type: TH
 #: data/man/l10n-lint.1:1
 #, no-wrap
 msgid "l10n-lint Manual"
-msgstr ""
+msgstr "Manual för l10n-lint"
 
 #. type: SH
 #: data/man/l10n-lint.1:2
 #, no-wrap
 msgid "NAME"
-msgstr ""
+msgstr "NAMN"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:4
 msgid "l10n-lint - Linter for localization files"
-msgstr ""
+msgstr "l10n-lint – Linter för lokaliseringsfiler"
 
 #. type: SH
 #: data/man/l10n-lint.1:4
 #, no-wrap
 msgid "SYNOPSIS"
-msgstr ""
+msgstr "SYNOPSIS"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:8
 msgid "B<l10n-lint> [I<OPTIONS>] [I<PATHS...>]"
-msgstr ""
+msgstr "B<l10n-lint> [I<FLAGGOR>] [I<SÖKVÄGAR...>]"
 
 #. type: SH
 #: data/man/l10n-lint.1:8
 #, no-wrap
 msgid "DESCRIPTION"
-msgstr ""
+msgstr "BESKRIVNING"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:10
@@ -78,161 +83,167 @@ msgid ""
 "GUI. Supports GitHub repo scanning without cloning and localized output in "
 "45+ languages."
 msgstr ""
+"B<l10n-lint> är ett linter- och valideringsprogram för översättningsfiler (."
+"po, .ts, .xliff). Det letar efter saknade översättningar, luddiga poster, "
+"felaktiga platshållare, typografiska problem, HTML-taggvalidering, felaktiga "
+"tangentbordsgenvägar och kvalitetsproblem. Finns både som CLI och GTK4/"
+"Adwaita GUI. Har stöd för att söka igenom GitHub-arkiv utan kloning och "
+"lokaliserad utdata på över 45 språk."
 
 #. type: SH
 #: data/man/l10n-lint.1:10
 #, no-wrap
 msgid "OPTIONS"
-msgstr ""
+msgstr "FLAGGOR"
 
 #. type: TP
 #: data/man/l10n-lint.1:11
 #, no-wrap
 msgid "B<-g>, B<--github> I<REPO>"
-msgstr ""
+msgstr "B<-g>, B<--github> I<REPO>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:14
 msgid "GitHub repository (owner/repo or URL) to scan."
-msgstr ""
+msgstr "GitHub-arkiv (ägare/arkiv eller URL) som ska sökas igenom."
 
 #. type: TP
 #: data/man/l10n-lint.1:14
 #, no-wrap
 msgid "B<-p>, B<--path> I<PATH>"
-msgstr ""
+msgstr "B<-p>, B<--path> I<SÖKVÄG>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:17
 msgid "Path filter for GitHub repos."
-msgstr ""
+msgstr "Sökvägsfilter för GitHub-arkiv."
 
 #. type: TP
 #: data/man/l10n-lint.1:17
 #, no-wrap
 msgid "B<-f>, B<--format> I<FORMAT>"
-msgstr ""
+msgstr "B<-f>, B<--format> I<FORMAT>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:20
 msgid "Output format: text, json, html, github (default: text)."
-msgstr ""
+msgstr "Utdataformat: text, json, html, github (standard: text)."
 
 #. type: TP
 #: data/man/l10n-lint.1:20
 #, no-wrap
 msgid "B<-o>, B<--output> I<FILE>"
-msgstr ""
+msgstr "B<-o>, B<--output> I<FIL>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:23
 msgid "Save report to file."
-msgstr ""
+msgstr "Spara rapport till fil."
 
 #. type: TP
 #: data/man/l10n-lint.1:23
 #, no-wrap
 msgid "B<--max-length> I<N>"
-msgstr ""
+msgstr "B<--max-length> I<N>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:26
 msgid "Maximum translation length (default: 500)."
-msgstr ""
+msgstr "Maximal översättningslängd (standard: 500)."
 
 #. type: TP
 #: data/man/l10n-lint.1:26
 #, no-wrap
 msgid "B<--no-recursive>"
-msgstr ""
+msgstr "B<--no-recursive>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:29
 msgid "Do not search subdirectories."
-msgstr ""
+msgstr "Sök inte i underkataloger."
 
 #. type: TP
 #: data/man/l10n-lint.1:29
 #, no-wrap
 msgid "B<--strict>"
-msgstr ""
+msgstr "B<--strict>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:32
 msgid "Treat warnings as errors."
-msgstr ""
+msgstr "Behandla varningar som fel."
 
 #. type: TP
 #: data/man/l10n-lint.1:32
 #, no-wrap
 msgid "B<-q>, B<--quiet>"
-msgstr ""
+msgstr "B<-q>, B<--quiet>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:35
 msgid "Show only summary."
-msgstr ""
+msgstr "Visa endast sammanfattning."
 
 #. type: TP
 #: data/man/l10n-lint.1:35
 #, no-wrap
 msgid "B<--check>"
-msgstr ""
+msgstr "B<--check>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:38
 msgid "Exit code only, no output (for CI)."
-msgstr ""
+msgstr "Endast avslutskod, ingen utdata (för CI)."
 
 #. type: TP
 #: data/man/l10n-lint.1:38
 #, no-wrap
 msgid "B<--skip-fuzzy>"
-msgstr ""
+msgstr "B<--skip-fuzzy>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:41
 msgid "Ignore fuzzy warnings."
-msgstr ""
+msgstr "Ignorera luddiga varningar."
 
 #. type: TP
 #: data/man/l10n-lint.1:41
 #, no-wrap
 msgid "B<-V>, B<--verbose>"
-msgstr ""
+msgstr "B<-V>, B<--verbose>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:44
 msgid "Show detailed progress."
-msgstr ""
+msgstr "Visa detaljerat förlopp."
 
 #. type: TP
 #: data/man/l10n-lint.1:44
 #, no-wrap
 msgid "B<-G>, B<--gtk>"
-msgstr ""
+msgstr "B<-G>, B<--gtk>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:47
 msgid "Launch GTK graphical interface."
-msgstr ""
+msgstr "Starta grafiskt GTK-gränssnitt."
 
 #. type: TP
 #: data/man/l10n-lint.1:47
 #, no-wrap
 msgid "B<-v>, B<--version>"
-msgstr ""
+msgstr "B<-v>, B<--version>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:50
 msgid "Show version number and exit."
-msgstr ""
+msgstr "Visa versionsnummer och avsluta."
 
 #. type: SH
 #: data/man/l10n-lint.1:50
 #, no-wrap
 msgid "EXAMPLES"
-msgstr ""
+msgstr "EXEMPEL"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:56
@@ -243,64 +254,68 @@ msgid ""
 "l10n-lint --format json -o report.json *.po\n"
 "l10n-lint --strict --check src/\n"
 msgstr ""
+"l10n-lint translations/\n"
+"l10n-lint -g yeager/ubuntu-l10n\n"
+"l10n-lint --format json -o report.json *.po\n"
+"l10n-lint --strict --check src/\n"
 
 #. type: SH
 #: data/man/l10n-lint.1:57
 #, no-wrap
 msgid "FILES"
-msgstr ""
+msgstr "FILER"
 
 #. type: TP
 #: data/man/l10n-lint.1:58
 #, no-wrap
 msgid "I<~/.config/l10n-lint/>"
-msgstr ""
+msgstr "I<~/.config/l10n-lint/>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:61
 msgid "Configuration files."
-msgstr ""
+msgstr "Konfigurationsfiler."
 
 #. type: TP
 #: data/man/l10n-lint.1:61
 #, no-wrap
 msgid "I<~/.cache/l10n-lint/>"
-msgstr ""
+msgstr "I<~/.cache/l10n-lint/>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:64
 msgid "Cached data."
-msgstr ""
+msgstr "Cachat data."
 
 #. type: SH
 #: data/man/l10n-lint.1:64
 #, no-wrap
 msgid "BUGS"
-msgstr ""
+msgstr "BUGGAR"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:66
 msgid "Report bugs at https://github.com/yeager/l10n-lint/issues"
-msgstr ""
+msgstr "Rapportera buggar på https://github.com/yeager/l10n-lint/issues"
 
 #. type: SH
 #: data/man/l10n-lint.1:66
 #, no-wrap
 msgid "AUTHOR"
-msgstr ""
+msgstr "UPPHOVSPERSON"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:68
 msgid "Daniel Nylander E<lt>daniel@danielnylander.seE<gt>"
-msgstr ""
+msgstr "Daniel Nylander E<lt>daniel@danielnylander.seE<gt>"
 
 #. type: SH
 #: data/man/l10n-lint.1:68
 #, no-wrap
 msgid "SEE ALSO"
-msgstr ""
+msgstr "SE ÄVEN"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:69
 msgid "Project homepage: https://github.com/yeager/l10n-lint"
-msgstr ""
+msgstr "Projektets webbsida: https://github.com/yeager/l10n-lint"

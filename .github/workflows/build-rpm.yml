@@ -31,6 +31,9 @@ jobs:
           cp l10n_lint.py l10n-lint-${{ steps.version.outputs.version }}/
           cp -r locale l10n-lint-${{ steps.version.outputs.version }}/
           cp -r man l10n-lint-${{ steps.version.outputs.version }}/
+          cp io.github.yeager.l10n-lint.desktop l10n-lint-${{ steps.version.outputs.version }}/
+          cp io.github.yeager.l10n-lint.metainfo.xml l10n-lint-${{ steps.version.outputs.version }}/
+          cp -r data/icons l10n-lint-${{ steps.version.outputs.version }}/
           tar czf ~/rpmbuild/SOURCES/l10n-lint-${{ steps.version.outputs.version }}.tar.gz l10n-lint-${{ steps.version.outputs.version }}
       
       - name: Create spec file
@@ -57,23 +60,32 @@ jobs:
           %install
           mkdir -p %{buildroot}%{_bindir}
           mkdir -p %{buildroot}%{_datadir}/l10n-lint/locale
+          mkdir -p %{buildroot}%{_datadir}/applications
+          mkdir -p %{buildroot}%{_datadir}/metainfo
+          mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
           mkdir -p %{buildroot}%{_mandir}/man1
           mkdir -p %{buildroot}%{_mandir}/sv/man1
 
           install -m 755 l10n_lint.py %{buildroot}%{_bindir}/l10n-lint
           cp -r locale/* %{buildroot}%{_datadir}/l10n-lint/locale/
+          install -m 644 io.github.yeager.l10n-lint.desktop %{buildroot}%{_datadir}/applications/
+          install -m 644 io.github.yeager.l10n-lint.metainfo.xml %{buildroot}%{_datadir}/metainfo/
+          install -m 644 icons/hicolor/scalable/apps/io.github.yeager.l10n-lint-gtk.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/
           install -m 644 man/en/l10n-lint.1 %{buildroot}%{_mandir}/man1/
           install -m 644 man/sv/l10n-lint.1 %{buildroot}%{_mandir}/sv/man1/
 
           %files
           %{_bindir}/l10n-lint
           %{_datadir}/l10n-lint/
+          %{_datadir}/applications/io.github.yeager.l10n-lint.desktop
+          %{_datadir}/metainfo/io.github.yeager.l10n-lint.metainfo.xml
+          %{_datadir}/icons/hicolor/scalable/apps/io.github.yeager.l10n-lint-gtk.svg
           %{_mandir}/man1/l10n-lint.1*
           %{_mandir}/sv/man1/l10n-lint.1*
 
           %changelog
           * $(date "+%a %b %d %Y") Daniel Nylander <daniel@danielnylander.se> - ${{ steps.version.outputs.version }}-1
-          - URL support for linting remote files
+          - Fix RPM file conflict with filesystem package on Fedora
           EOF
       
       - name: Build RPM

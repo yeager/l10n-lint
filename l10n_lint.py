@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.15.6"
+__version__ = "1.15.7"
 
 # Translation setup
 DOMAIN = "l10n-lint"

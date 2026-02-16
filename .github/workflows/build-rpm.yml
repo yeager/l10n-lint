@@ -76,6 +76,14 @@ jobs:
             [ "$lang" = "en" ] && continue
             for f in "$langdir"*.1; do
               [ -f "$f" ] || continue
+              # Skip <20% translated
+              en_base="man/en/$(basename "$f")"
+              if [ -f "$en_base" ]; then
+                en_lines=$(grep -cv '^\.' "$en_base" || echo 1)
+                same=$(comm -12 <(grep -v '^\.' "$en_base" | sort) <(grep -v '^\.' "$f" | sort) | wc -l)
+                trans_pct=$(( (en_lines - same) * 100 / (en_lines > 0 ? en_lines : 1) ))
+                [ "$trans_pct" -lt 20 ] && continue
+              fi
               mkdir -p %{buildroot}%{_mandir}/${lang}/man1
               install -m 644 "$f" %{buildroot}%{_mandir}/${lang}/man1/
             done

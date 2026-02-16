@@ -1,0 +1,120 @@
+name: Build .deb
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: echo "version=$(grep -oP '__version__ = "\K[^"]+' l10n_lint.py)" >> $GITHUB_OUTPUT
+
+      - name: Build .deb
+        run: |
+          PKG=l10n-lint
+          VER=${{ steps.version.outputs.version }}
+          ROOT=pkg-deb/${PKG}_${VER}-1_all
+          mkdir -p ${ROOT}/DEBIAN
+          mkdir -p ${ROOT}/usr/bin
+          mkdir -p ${ROOT}/usr/lib/python3/dist-packages
+          mkdir -p ${ROOT}/usr/share/applications
+          mkdir -p ${ROOT}/usr/share/metainfo
+          mkdir -p ${ROOT}/usr/share/icons/hicolor/scalable/apps
+          mkdir -p ${ROOT}/usr/share/${PKG}/locale
+          mkdir -p ${ROOT}/usr/share/man/man1
+
+          # Main script
+          cp l10n_lint.py ${ROOT}/usr/lib/python3/dist-packages/
+          cat > ${ROOT}/usr/bin/l10n-lint << 'WRAPPER'
+          #!/usr/bin/python3
+          import sys
+          from l10n_lint import main
+          sys.exit(main())
+          WRAPPER
+          chmod 755 ${ROOT}/usr/bin/l10n-lint
+
+          # GTK frontend
+          if [ -f l10n_lint_gtk.py ]; then
+            cp l10n_lint_gtk.py ${ROOT}/usr/lib/python3/dist-packages/
+            cat > ${ROOT}/usr/bin/l10n-lint-gtk << 'WRAPPER'
+          #!/usr/bin/python3
+          import sys
+          from l10n_lint_gtk import main
+          sys.exit(main())
+          WRAPPER
+            chmod 755 ${ROOT}/usr/bin/l10n-lint-gtk
+          fi
+
+          # Desktop + metainfo + icons
+          cp io.github.yeager.l10n-lint.desktop ${ROOT}/usr/share/applications/
+          cp io.github.yeager.l10n-lint.metainfo.xml ${ROOT}/usr/share/metainfo/
+          cp -r data/icons/hicolor/scalable/apps/*.svg ${ROOT}/usr/share/icons/hicolor/scalable/apps/ 2>/dev/null || true
+
+          # Locale
+          cp -r locale/* ${ROOT}/usr/share/${PKG}/locale/ 2>/dev/null || true
+
+          # Man pages — English
+          if [ -f man/en/l10n-lint.1 ]; then
+            gzip -9cn man/en/l10n-lint.1 > ${ROOT}/usr/share/man/man1/l10n-lint.1.gz
+          elif [ -f l10n-lint.1 ]; then
+            gzip -9cn l10n-lint.1 > ${ROOT}/usr/share/man/man1/l10n-lint.1.gz
+          fi
+          if [ -f man/en/l10n-lint-gtk.1 ]; then
+            gzip -9cn man/en/l10n-lint-gtk.1 > ${ROOT}/usr/share/man/man1/l10n-lint-gtk.1.gz
+          fi
+
+          # Man pages — translations
+          for langdir in man/*/; do
+            lang=$(basename "$langdir")
+            [ "$lang" = "en" ] && continue
+            for manfile in "$langdir"*.1; do
+              [ -f "$manfile" ] || continue
+              name=$(basename "$manfile")
+              mkdir -p ${ROOT}/usr/share/man/${lang}/man1
+              gzip -9cn "$manfile" > ${ROOT}/usr/share/man/${lang}/man1/${name}.gz
+            done
+          done
+
+          # DEBIAN/control
+          cat > ${ROOT}/DEBIAN/control << EOF
+          Package: ${PKG}
+          Version: ${VER}-1
+          Architecture: all
+          Maintainer: Daniel Nylander <daniel@danielnylander.se>
+          Depends: python3 (>= 3.9)
+          Section: devel
+          Priority: optional
+          Homepage: https://github.com/yeager/${PKG}
+          Description: Linter for localization files (.po, .ts)
+           l10n-lint checks gettext .po and Qt .ts localization files for
+           common issues: missing translations, fuzzy entries, placeholder
+           mismatches, and more.
+          EOF
+          sed -i 's/^          //' ${ROOT}/DEBIAN/control
+
+          # postinst / prerm
+          if [ -d debian ]; then
+            [ -f debian/postinst ] && install -m 755 debian/postinst ${ROOT}/DEBIAN/
+            [ -f debian/prerm ] && install -m 755 debian/prerm ${ROOT}/DEBIAN/
+          fi
+
+          dpkg-deb --build --root-owner-group ${ROOT}
+          mv pkg-deb/*.deb .
+
+      - name: Upload .deb to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VER=${{ steps.version.outputs.version }}
+          gh release upload "v${VER}" l10n-lint_${VER}-1_all.deb --clobber 2>/dev/null || \
+          gh release upload "${GITHUB_REF_NAME}" l10n-lint_${VER}-1_all.deb --clobber

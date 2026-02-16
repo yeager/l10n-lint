@@ -31,72 +31,72 @@ jobs:
             msgfmt -o locale/$lang/LC_MESSAGES/l10n-lint.mo "$po"
           done
 
-      - name: Setup RPM build
-        run: |
-          VER=${{ steps.version.outputs.version }}
-          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-          mkdir -p l10n-lint-$VER
-          cp l10n_lint.py l10n_lint_gtk.py l10n-lint-$VER/ 2>/dev/null || true
-          cp -r locale l10n-lint-$VER/
-          cp -r man l10n-lint-$VER/ 2>/dev/null || true
-          cp io.github.yeager.l10n-lint.desktop l10n-lint-$VER/ 2>/dev/null || true
-          cp io.github.yeager.l10n-lint.metainfo.xml l10n-lint-$VER/ 2>/dev/null || true
-          cp -r data/icons l10n-lint-$VER/ 2>/dev/null || true
-          tar czf ~/rpmbuild/SOURCES/l10n-lint-$VER.tar.gz l10n-lint-$VER
-
-      - name: Create spec and build
+      - name: Build RPM
         run: |
           VER=${{ steps.version.outputs.version }}
           DATE=$(date "+%a %b %d %Y")
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+
+          # Create tarball
+          PKG=l10n-lint-$VER
+          mkdir -p $PKG
+          cp l10n_lint.py l10n_lint_gtk.py $PKG/ 2>/dev/null || cp l10n_lint.py $PKG/
+          cp -r locale $PKG/
+          cp -r man $PKG/ 2>/dev/null || true
+          cp io.github.yeager.l10n-lint.desktop $PKG/ 2>/dev/null || true
+          cp io.github.yeager.l10n-lint.metainfo.xml $PKG/ 2>/dev/null || true
+          cp -r data/icons $PKG/ 2>/dev/null || true
+          tar czf ~/rpmbuild/SOURCES/l10n-lint-$VER.tar.gz $PKG
+
+          # Write spec
           cat > ~/rpmbuild/SPECS/l10n-lint.spec << SPECEOF
-Name:           l10n-lint
-Version:        ${VER}
-Release:        1
-Summary:        Linter for localization files (.po, .ts)
-License:        GPL-3.0-or-later
-URL:            https://github.com/yeager/l10n-lint
-Source0:        %{name}-%{version}.tar.gz
-BuildArch:      noarch
-Requires:       python3 >= 3.9
+          Name:           l10n-lint
+          Version:        $VER
+          Release:        1
+          Summary:        Linter for localization files
+          License:        GPL-3.0-or-later
+          URL:            https://github.com/yeager/l10n-lint
+          Source0:        l10n-lint-$VER.tar.gz
+          BuildArch:      noarch
+          Requires:       python3 >= 3.9
+          
+          %description
+          l10n-lint checks .po and .ts localization files for common issues.
+          
+          %prep
+          %setup -q
+          
+          %install
+          mkdir -p \$RPM_BUILD_ROOT/usr/bin
+          mkdir -p \$RPM_BUILD_ROOT/usr/share/l10n-lint/locale
+          mkdir -p \$RPM_BUILD_ROOT/usr/share/applications
+          mkdir -p \$RPM_BUILD_ROOT/usr/share/metainfo
+          mkdir -p \$RPM_BUILD_ROOT/usr/share/icons/hicolor/scalable/apps
+          mkdir -p \$RPM_BUILD_ROOT/usr/share/man/man1
+          install -m 755 l10n_lint.py \$RPM_BUILD_ROOT/usr/bin/l10n-lint
+          test -f l10n_lint_gtk.py && cp l10n_lint_gtk.py \$RPM_BUILD_ROOT/usr/share/l10n-lint/ || true
+          cp -r locale/* \$RPM_BUILD_ROOT/usr/share/l10n-lint/locale/
+          test -f io.github.yeager.l10n-lint.desktop && install -m 644 io.github.yeager.l10n-lint.desktop \$RPM_BUILD_ROOT/usr/share/applications/ || true
+          test -f io.github.yeager.l10n-lint.metainfo.xml && install -m 644 io.github.yeager.l10n-lint.metainfo.xml \$RPM_BUILD_ROOT/usr/share/metainfo/ || true
+          test -f icons/hicolor/scalable/apps/io.github.yeager.l10n-lint-gtk.svg && install -m 644 icons/hicolor/scalable/apps/io.github.yeager.l10n-lint-gtk.svg \$RPM_BUILD_ROOT/usr/share/icons/hicolor/scalable/apps/ || true
+          test -f man/en/l10n-lint.1 && install -m 644 man/en/l10n-lint.1 \$RPM_BUILD_ROOT/usr/share/man/man1/ || true
+          
+          %files
+          /usr/bin/l10n-lint
+          /usr/share/l10n-lint/
+          /usr/share/applications/*.desktop
+          /usr/share/metainfo/*.xml
+          /usr/share/icons/hicolor/scalable/apps/*.svg
+          /usr/share/man/man1/l10n-lint.1*
+          
+          %changelog
+          * $DATE Daniel Nylander <daniel@danielnylander.se> - $VER-1
+          - Fix About dialog, compile translations
+          SPECEOF
 
-%description
-l10n-lint checks gettext .po and Qt .ts localization files for
-common issues: missing translations, fuzzy entries, placeholder
-mismatches, and more.
+          # Remove leading whitespace from spec (heredoc was indented)
+          sed -i 's/^          //' ~/rpmbuild/SPECS/l10n-lint.spec
 
-%prep
-%setup -q
-
-%install
-mkdir -p %{buildroot}%{_bindir}
-mkdir -p %{buildroot}%{_datadir}/l10n-lint/locale
-mkdir -p %{buildroot}%{_datadir}/applications
-mkdir -p %{buildroot}%{_datadir}/metainfo
-mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
-mkdir -p %{buildroot}%{_mandir}/man1
-
-install -m 755 l10n_lint.py %{buildroot}%{_bindir}/l10n-lint
-cp l10n_lint_gtk.py %{buildroot}%{_datadir}/l10n-lint/ 2>/dev/null || true
-cp -r locale/* %{buildroot}%{_datadir}/l10n-lint/locale/
-install -m 644 io.github.yeager.l10n-lint.desktop %{buildroot}%{_datadir}/applications/ 2>/dev/null || true
-install -m 644 io.github.yeager.l10n-lint.metainfo.xml %{buildroot}%{_datadir}/metainfo/ 2>/dev/null || true
-install -m 644 icons/hicolor/scalable/apps/io.github.yeager.l10n-lint-gtk.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/ 2>/dev/null || true
-if [ -f man/en/l10n-lint.1 ]; then
-  install -m 644 man/en/l10n-lint.1 %{buildroot}%{_mandir}/man1/
-fi
-
-%files
-%{_bindir}/l10n-lint
-%{_datadir}/l10n-lint/
-%{_datadir}/applications/*.desktop
-%{_datadir}/metainfo/*.xml
-%{_datadir}/icons/hicolor/scalable/apps/*.svg
-%{_mandir}/man1/l10n-lint.1*
-
-%changelog
-* ${DATE} Daniel Nylander <daniel@danielnylander.se> - ${VER}-1
-- AboutDialog migration, compile translations in CI
-SPECEOF
           rpmbuild -ba ~/rpmbuild/SPECS/l10n-lint.spec
 
       - name: Upload RPM to release
@@ -104,6 +104,5 @@ SPECEOF
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG=${{ github.event.release.tag_name || github.ref_name }}
-          VER=${{ steps.version.outputs.version }}
           RPM=$(find ~/rpmbuild/RPMS -name "*.rpm" | head -1)
           [ -f "$RPM" ] && gh release upload "$TAG" "$RPM" --clobber || echo "No RPM found"

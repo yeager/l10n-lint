@@ -3,88 +3,182 @@
 l10n-lint \- linter for localization files
 .SH SYNOPSIS
 .B l10n-lint
-[\fIOPTIONS\fR] \fIPATH\fR...
+[\fIOPTIONS\fR] [\fIPATH\fR...]
 .SH DESCRIPTION
 .B l10n-lint
 checks gettext .po and Qt .ts localization files for common issues:
-missing translations, fuzzy entries, placeholder mismatches, and length problems.
+missing translations, fuzzy entries, placeholder mismatches, length problems, 
+and other translation quality issues. It supports direct GitHub repository
+analysis and various output formats for integration with different workflows.
+
+The tool performs comprehensive checks including: missing translations detection,
+fuzzy entry identification, placeholder consistency validation, translation
+length ratio analysis, maximum length enforcement, and format string verification.
 .SH OPTIONS
 .TP
 .BR \-h ", " \-\-help
-Show help message and exit.
+Show help message with usage information and exit.
 .TP
 .BR \-v ", " \-\-version
-Show version number and exit.
+Show version number and build information, then exit.
 .TP
 .BR \-g " " \fIREPO\fR ", " \-\-github " " \fIREPO\fR
-Analyze GitHub repository. Specify as owner/repo or full URL.
-Automatically scans for translation files in the repository.
+Analyze a GitHub repository directly without cloning locally.
+Specify as owner/repo (e.g., "yeager/l10n-lint") or as a full URL.
+Automatically discovers and scans all supported translation files
+in the repository using the GitHub API.
 .TP
 .BR \-p " " \fIPATH\fR ", " \-\-path " " \fIPATH\fR
-Path filter for GitHub repositories. Limit scanning to specific
-subdirectories within the repository.
+Path filter for GitHub repositories. When used with \-\-github,
+limits scanning to specific subdirectories within the repository.
+Supports glob patterns for flexible path matching.
 .TP
 .BR \-f " " \fIFORMAT\fR ", " \-\-format " " \fIFORMAT\fR
-Output format: text (default), json, html, github, gnu.
-The 'gnu' format produces Emacs-compatible file:line:col output.
+Output format for the lint report. Available formats:
+.RS 8
+.B text
+(default) Human-readable text format with colored output
+.RE
+.RS 8
+.B json
+Machine-readable JSON format for programmatic processing
+.RE
+.RS 8
+.B html
+HTML report suitable for web browsers with interactive features
+.RE
+.RS 8
+.B github
+GitHub Actions annotation format for CI/CD integration
+.RE
+.RS 8
+.B gnu
+Emacs-compatible file:line:col format for editor integration
+.RE
 .TP
 .BR \-o " " \fIFILE\fR ", " \-\-output " " \fIFILE\fR
-Save the lint report to the specified file instead of stdout.
+Save the lint report to the specified file instead of writing to stdout.
+The file format is automatically detected from the extension if no
+\-\-format is specified.
 .TP
 .BR \-\-max\-length " " \fIN\fR
 Maximum allowed translation length in characters (default: 500).
-Translations exceeding this limit are flagged as potentially problematic.
+Translations exceeding this limit are flagged as potentially
+problematic for UI layout. Set to 0 to disable length checking.
 .TP
 .BR \-\-no\-recursive
 Do not recursively search subdirectories for translation files.
-Only process files in the specified directory.
+Only process files directly specified or in the immediate directory.
+Useful for controlled scanning of large directory structures.
 .TP
 .BR \-\-strict
-Treat warnings as errors. Exit with non-zero status even for
-minor issues that would normally be warnings.
+Treat all warnings as errors. When enabled, the exit code will be
+non-zero even for minor issues that would normally be warnings.
+This is useful for enforcing strict translation quality in CI pipelines.
 .TP
 .BR \-q ", " \-\-quiet
-Show only summary information. Suppress detailed per-file output
-and display only the final statistics.
+Quiet mode. Show only the final summary line with total counts.
+Suppress all detailed per-file output and progress indicators.
+Individual issue details are not displayed.
 .TP
 .BR \-\-check
-Exit code only mode for CI/CD integration. Perform the analysis
-but produce no output - only return exit code.
+Check-only mode for CI/CD integration. Perform the complete analysis
+but produce absolutely no output - communicate results only through
+the exit code. Useful for automated quality gates.
 .TP
 .BR \-\-skip\-fuzzy
-Ignore fuzzy translation entries during analysis. Fuzzy entries
-are normally flagged as incomplete translations.
+Skip fuzzy translation entry checks. Fuzzy entries are normally
+flagged as incomplete translations requiring review, but this
+option ignores them during analysis. Useful when fuzzy entries
+are expected or acceptable in the current workflow.
 .TP
 .BR \-V ", " \-\-verbose
-Show detailed progress information during operations.
-Displays timing, file sizes, locale detection, and per-file issue counts.
+Enable verbose output with detailed progress information.
+Shows timing data, file sizes, locale detection results,
+per-file issue counts, and other diagnostic information
+useful for debugging and performance analysis.
 .TP
 .BR \-G ", " \-\-gtk
-Launch the GTK graphical user interface instead of running
-in command-line mode.
+Launch the GTK4 graphical user interface instead of running
+in command-line mode. The GUI provides interactive file browsing,
+real-time results, and visual issue highlighting. Note: This
+option launches a GUI application, not a CLI tool.
 .SH EXIT STATUS
 .TP
 .B 0
-No issues found.
+No translation issues found. All files passed validation.
 .TP
 .B 1
-Issues found or error occurred.
+Translation issues detected, or an error occurred during processing.
+The specific issues are detailed in the output (unless using \-\-check).
 .SH EXAMPLES
 .TP
-Check all .po files in current directory:
+Check all translation files in current directory recursively:
 .B l10n-lint .
 .TP
-Check specific file with JSON output:
-.B l10n-lint \-\-format json messages.po
+Check specific .po file with detailed output:
+.B l10n-lint \-\-verbose messages.po
 .TP
-Skip fuzzy check:
-.B l10n-lint \-\-skip fuzzy locale/
+Generate JSON report for CI integration:
+.B l10n-lint \-\-format json \-\-output report.json src/
+.TP
+Check GitHub repository directly:
+.B l10n-lint \-\-github yeager/l10n-lint
+.TP
+Check specific path in GitHub repo:
+.B l10n-lint \-\-github user/repo \-\-path "locale/"
+.TP
+Strict checking with custom length limit:
+.B l10n-lint \-\-strict \-\-max-length 200 *.po
+.TP
+Skip fuzzy entries, quiet output:
+.B l10n-lint \-\-skip-fuzzy \-\-quiet po/
+.TP
+Generate HTML report:
+.B l10n-lint \-\-format html \-\-output report.html locale/
+.TP
+GNU format for Emacs integration:
+.B l10n-lint \-\-format gnu translations/
+.TP
+CI-friendly check (exit code only):
+.B l10n-lint \-\-check src/locale/
+.SH CHECKS PERFORMED
+.B l10n-lint
+performs the following validation checks:
+.TP
+.B Missing Translations
+Identifies untranslated strings that should have translations.
+.TP
+.B Fuzzy Entries
+Flags translations marked as fuzzy (requiring review).
+.TP
+.B Placeholder Mismatches
+Validates that format specifiers (%s, %d, etc.) match between
+original and translated strings.
+.TP
+.B Length Ratio Analysis
+Checks if translations are significantly longer or shorter
+than the original text (may indicate translation issues).
+.TP
+.B Maximum Length Validation
+Ensures translations don't exceed the specified character limit
+(useful for UI constraints).
+.SH FILES
+.TP
+.B *.po
+GNU gettext portable object files
+.TP
+.B *.ts
+Qt Linguist translation source files
 .SH AUTHOR
 Daniel Nylander <daniel@danielnylander.se>
 .SH SEE ALSO
+.BR po-translate (1),
+.BR tp-lint (1),
+.BR l10n-conv (1),
+.BR svlang (1),
 .BR msgfmt (1),
 .BR msginit (1),
-.BR tp-lint (1),
-.BR po-translate (1)
+.BR linguist (1)
 .SH BUGS
 Report bugs at: https://github.com/yeager/l10n-lint/issues

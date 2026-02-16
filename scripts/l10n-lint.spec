@@ -1,5 +1,5 @@
 Name:           l10n-lint
-Version:        1.14.9
+Version:        1.15.7
 Release:        1%{?dist}
 Summary:        Linter for localization files
 License:        GPL-3.0-or-later
@@ -51,6 +51,10 @@ update-desktop-database /usr/share/applications 2>/dev/null || true
 %license LICENSE
 
 %changelog
+* Mon Feb 16 2026 BOSSe Nylander <bosse@danielnylander.se> - 1.15.7-1
+- Fix RPM file conflict with filesystem package on Fedora
+- Remove ownership of /usr/share/metainfo directory
+
 * Mon Feb 09 2026 Daniel Nylander <daniel@danielnylander.se> - 1.14.9-1
 - Updated checks and improved linting accuracy
 - GTK GUI improvements

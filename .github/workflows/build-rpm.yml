@@ -11,105 +11,99 @@ permissions:
 jobs:
   build-rpm:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Install RPM tools
-        run: sudo apt-get update && sudo apt-get install -y rpm
-      
+
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y rpm gettext
+
       - name: Get version
         id: version
         run: echo "version=$(grep -oP '__version__ = "\K[^"]+' l10n_lint.py)" >> $GITHUB_OUTPUT
-      
-      - name: Setup RPM build
+
+      - name: Compile translations
         run: |
-          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-          
-          # Create tarball
-          mkdir -p l10n-lint-${{ steps.version.outputs.version }}
-          cp l10n_lint.py l10n-lint-${{ steps.version.outputs.version }}/
-          cp -r locale l10n-lint-${{ steps.version.outputs.version }}/
-          cp -r man l10n-lint-${{ steps.version.outputs.version }}/
-          cp io.github.yeager.l10n-lint.desktop l10n-lint-${{ steps.version.outputs.version }}/
-          cp io.github.yeager.l10n-lint.metainfo.xml l10n-lint-${{ steps.version.outputs.version }}/
-          cp -r data/icons l10n-lint-${{ steps.version.outputs.version }}/
-          tar czf ~/rpmbuild/SOURCES/l10n-lint-${{ steps.version.outputs.version }}.tar.gz l10n-lint-${{ steps.version.outputs.version }}
-      
-      - name: Create spec file
-        run: |
-          cat > ~/rpmbuild/SPECS/l10n-lint.spec << 'EOF'
-          Name:           l10n-lint
-          Version:        ${{ steps.version.outputs.version }}
-          Release:        1%{?dist}
-          Summary:        Linter for localization files (.po, .ts)
-          License:        GPL-3.0-or-later
-          URL:            https://github.com/yeager/l10n-lint
-          Source0:        %{name}-%{version}.tar.gz
-          BuildArch:      noarch
-          Requires:       python3 >= 3.9
-
-          %description
-          l10n-lint checks gettext .po and Qt .ts localization files for
-          common issues: missing translations, fuzzy entries, placeholder
-          mismatches, and more. Supports local files, URLs, and GitHub repos.
-
-          %prep
-          %setup -q
-
-          %install
-          mkdir -p %{buildroot}%{_bindir}
-          mkdir -p %{buildroot}%{_datadir}/l10n-lint/locale
-          mkdir -p %{buildroot}%{_datadir}/applications
-          mkdir -p %{buildroot}%{_datadir}/metainfo
-          mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
-          mkdir -p %{buildroot}%{_mandir}/man1
-
-          install -m 755 l10n_lint.py %{buildroot}%{_bindir}/l10n-lint
-          cp -r locale/* %{buildroot}%{_datadir}/l10n-lint/locale/
-          install -m 644 io.github.yeager.l10n-lint.desktop %{buildroot}%{_datadir}/applications/
-          install -m 644 io.github.yeager.l10n-lint.metainfo.xml %{buildroot}%{_datadir}/metainfo/
-          install -m 644 icons/hicolor/scalable/apps/io.github.yeager.l10n-lint-gtk.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/
-          install -m 644 man/en/l10n-lint.1 %{buildroot}%{_mandir}/man1/
-          for langdir in man/*/; do
-            lang=$(basename "$langdir")
-            [ "$lang" = "en" ] && continue
-            for f in "$langdir"*.1; do
-              [ -f "$f" ] || continue
-              # Skip <20% translated
-              en_base="man/en/$(basename "$f")"
-              if [ -f "$en_base" ]; then
-                en_lines=$(grep -cv '^\.' "$en_base" || echo 1)
-                same=$(comm -12 <(grep -v '^\.' "$en_base" | sort) <(grep -v '^\.' "$f" | sort) | wc -l)
-                trans_pct=$(( (en_lines - same) * 100 / (en_lines > 0 ? en_lines : 1) ))
-                [ "$trans_pct" -lt 20 ] && continue
-              fi
-              mkdir -p %{buildroot}%{_mandir}/${lang}/man1
-              install -m 644 "$f" %{buildroot}%{_mandir}/${lang}/man1/
-            done
+          for po in po/*.po; do
+            [ -f "$po" ] || continue
+            lang=$(basename "$po" .po)
+            mkdir -p locale/$lang/LC_MESSAGES
+            msgfmt -o locale/$lang/LC_MESSAGES/l10n-lint.mo "$po"
           done
 
-          %files
-          %{_bindir}/l10n-lint
-          %{_datadir}/l10n-lint/
-          %{_datadir}/applications/io.github.yeager.l10n-lint.desktop
-          %{_datadir}/metainfo/io.github.yeager.l10n-lint.metainfo.xml
-          %{_datadir}/icons/hicolor/scalable/apps/io.github.yeager.l10n-lint-gtk.svg
-          %{_mandir}/man1/l10n-lint.1*
-          %{_mandir}/*/man1/l10n-lint.1*
+      - name: Setup RPM build
+        run: |
+          VER=${{ steps.version.outputs.version }}
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          mkdir -p l10n-lint-$VER
+          cp l10n_lint.py l10n_lint_gtk.py l10n-lint-$VER/ 2>/dev/null || true
+          cp -r locale l10n-lint-$VER/
+          cp -r man l10n-lint-$VER/ 2>/dev/null || true
+          cp io.github.yeager.l10n-lint.desktop l10n-lint-$VER/ 2>/dev/null || true
+          cp io.github.yeager.l10n-lint.metainfo.xml l10n-lint-$VER/ 2>/dev/null || true
+          cp -r data/icons l10n-lint-$VER/ 2>/dev/null || true
+          tar czf ~/rpmbuild/SOURCES/l10n-lint-$VER.tar.gz l10n-lint-$VER
 
-          %changelog
-          * $(date "+%a %b %d %Y") Daniel Nylander <daniel@danielnylander.se> - ${{ steps.version.outputs.version }}-1
-          - Fix RPM file conflict with filesystem package on Fedora
-          EOF
-      
-      - name: Build RPM
-        run: rpmbuild -ba ~/rpmbuild/SPECS/l10n-lint.spec
-      
+      - name: Create spec and build
+        run: |
+          VER=${{ steps.version.outputs.version }}
+          DATE=$(date "+%a %b %d %Y")
+          cat > ~/rpmbuild/SPECS/l10n-lint.spec << SPECEOF
+Name:           l10n-lint
+Version:        ${VER}
+Release:        1
+Summary:        Linter for localization files (.po, .ts)
+License:        GPL-3.0-or-later
+URL:            https://github.com/yeager/l10n-lint
+Source0:        %{name}-%{version}.tar.gz
+BuildArch:      noarch
+Requires:       python3 >= 3.9
+
+%description
+l10n-lint checks gettext .po and Qt .ts localization files for
+common issues: missing translations, fuzzy entries, placeholder
+mismatches, and more.
+
+%prep
+%setup -q
+
+%install
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_datadir}/l10n-lint/locale
+mkdir -p %{buildroot}%{_datadir}/applications
+mkdir -p %{buildroot}%{_datadir}/metainfo
+mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
+mkdir -p %{buildroot}%{_mandir}/man1
+
+install -m 755 l10n_lint.py %{buildroot}%{_bindir}/l10n-lint
+cp l10n_lint_gtk.py %{buildroot}%{_datadir}/l10n-lint/ 2>/dev/null || true
+cp -r locale/* %{buildroot}%{_datadir}/l10n-lint/locale/
+install -m 644 io.github.yeager.l10n-lint.desktop %{buildroot}%{_datadir}/applications/ 2>/dev/null || true
+install -m 644 io.github.yeager.l10n-lint.metainfo.xml %{buildroot}%{_datadir}/metainfo/ 2>/dev/null || true
+install -m 644 icons/hicolor/scalable/apps/io.github.yeager.l10n-lint-gtk.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/ 2>/dev/null || true
+if [ -f man/en/l10n-lint.1 ]; then
+  install -m 644 man/en/l10n-lint.1 %{buildroot}%{_mandir}/man1/
+fi
+
+%files
+%{_bindir}/l10n-lint
+%{_datadir}/l10n-lint/
+%{_datadir}/applications/*.desktop
+%{_datadir}/metainfo/*.xml
+%{_datadir}/icons/hicolor/scalable/apps/*.svg
+%{_mandir}/man1/l10n-lint.1*
+
+%changelog
+* ${DATE} Daniel Nylander <daniel@danielnylander.se> - ${VER}-1
+- AboutDialog migration, compile translations in CI
+SPECEOF
+          rpmbuild -ba ~/rpmbuild/SPECS/l10n-lint.spec
+
       - name: Upload RPM to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload v${{ steps.version.outputs.version }} \
-            ~/rpmbuild/RPMS/noarch/l10n-lint-${{ steps.version.outputs.version }}-1.noarch.rpm \
-            --clobber
+          TAG=${{ github.event.release.tag_name || github.ref_name }}
+          VER=${{ steps.version.outputs.version }}
+          RPM=$(find ~/rpmbuild/RPMS -name "*.rpm" | head -1)
+          [ -f "$RPM" ] && gh release upload "$TAG" "$RPM" --clobber || echo "No RPM found"

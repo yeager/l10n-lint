@@ -19,6 +19,9 @@ jobs:
         id: version
         run: echo "version=$(grep -oP '__version__ = "\K[^"]+' l10n_lint.py)" >> $GITHUB_OUTPUT
 
+      - name: Install tools
+        run: sudo apt-get install -y gettext
+
       - name: Build .deb
         run: |
           PKG=l10n-lint
@@ -60,7 +63,13 @@ jobs:
           cp io.github.yeager.l10n-lint.metainfo.xml ${ROOT}/usr/share/metainfo/
           cp -r data/icons/hicolor/scalable/apps/*.svg ${ROOT}/usr/share/icons/hicolor/scalable/apps/ 2>/dev/null || true
 
-          # Locale
+          # Compile and install locale
+          for po in po/*.po; do
+            [ -f "$po" ] || continue
+            lang=$(basename "$po" .po)
+            mkdir -p locale/$lang/LC_MESSAGES
+            msgfmt -o locale/$lang/LC_MESSAGES/l10n-lint.mo "$po"
+          done
           cp -r locale/* ${ROOT}/usr/share/${PKG}/locale/ 2>/dev/null || true
 
           # Man pages — English

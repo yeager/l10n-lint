@@ -51,7 +51,7 @@ except ImportError:
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI
@@ -1513,22 +1513,20 @@ class L10nLintApp(Adw.Application):
         shortcuts.present()
     
     def on_about(self, action, param):
-        about = Adw.AboutWindow(
-            transient_for=self.props.active_window,
+        about = Adw.AboutDialog(
             application_name="l10n-lint",
             application_icon=APP_ID,
             developer_name="Daniel Nylander",
             version=f"GTK {__version__} (core {LINT_VERSION})",
             website="https://github.com/yeager/l10n-lint",
             issue_url="https://github.com/yeager/l10n-lint/issues",
-            translate_url="https://app.transifex.com/danielnylander/l10n-lint/",
             license_type=Gtk.License.GPL_3_0,
             copyright="© 2026 Daniel Nylander",
             developers=["Daniel Nylander <daniel@danielnylander.se>"],
             comments=_("Graphical linter for localization files (.po, .ts)"),
             translator_credits=_("translator-credits"),
         )
-        about.present()
+        about.present(self.props.active_window)
 
 
 def main():

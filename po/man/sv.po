@@ -35,10 +35,9 @@ msgstr ""
 
 #. type: TH
 #: data/man/l10n-lint.1:1
-#, fuzzy, no-wrap
-#| msgid "l10n-lint Manual"
+#, no-wrap
 msgid "l10n-lint 1.15.7"
-msgstr "Manual för l10n-lint"
+msgstr ""
 
 #. type: TH
 #: data/man/l10n-lint.1:1
@@ -54,10 +53,8 @@ msgstr "NAMN"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:4
-#, fuzzy
-#| msgid "l10n-lint - Linter for localization files"
 msgid "l10n-lint - lint and validate PO/XLIFF/TS translation files"
-msgstr "l10n-lint – Linter för lokaliseringsfiler"
+msgstr ""
 
 #. type: SH
 #: data/man/l10n-lint.1:4
@@ -67,10 +64,8 @@ msgstr "SYNOPSIS"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:7
-#, fuzzy
-#| msgid "B<l10n-lint> [I<OPTIONS>] [I<PATHS...>]"
 msgid "B<l10n-lint> [I<OPTIONS>] [I<PATHS>...]"
-msgstr "B<l10n-lint> [I<FLAGGOR>] [I<SÖKVÄGAR...>]"
+msgstr ""
 
 #. type: SH
 #: data/man/l10n-lint.1:7
@@ -285,17 +280,14 @@ msgstr ""
 
 #. type: TP
 #: data/man/l10n-lint.1:78
-#, fuzzy, no-wrap
-#| msgid "B<-q>, B<--quiet>"
+#, no-wrap
 msgid "B<-h>, B<--help>"
-msgstr "B<-q>, B<--quiet>"
+msgstr ""
 
 #. type: Plain text
 #: data/man/l10n-lint.1:81
-#, fuzzy
-#| msgid "Show version number and exit."
 msgid "Show help message and exit."
-msgstr "Visa versionsnummer och avsluta."
+msgstr ""
 
 #. type: TP
 #: data/man/l10n-lint.1:81
@@ -436,10 +428,9 @@ msgstr ""
 
 #. type: Plain text
 #: data/man/l10n-lint.1:127
-#, fuzzy, no-wrap
-#| msgid "l10n-lint Manual"
+#, no-wrap
 msgid "l10n-lint .\n"
-msgstr "Manual för l10n-lint"
+msgstr ""
 
 #. type: Plain text
 #: data/man/l10n-lint.1:131
@@ -504,10 +495,8 @@ msgstr "BUGGAR"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:162
-#, fuzzy
-#| msgid "Report bugs at https://github.com/yeager/l10n-lint/issues"
 msgid "Report bugs at: https://github.com/yeager/l10n-lint/issues"
-msgstr "Rapportera buggar på https://github.com/yeager/l10n-lint/issues"
+msgstr ""
 
 #. type: SH
 #: data/man/l10n-lint.1:162

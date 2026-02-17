@@ -101,6 +101,7 @@ class LintResult:
     issues: list = field(default_factory=list)
     files_checked: int = 0
     entries_checked: int = 0
+    disabled_rules: set = field(default_factory=set)
     
     @property
     def error_count(self):
@@ -122,6 +123,8 @@ class LintResult:
         return dict(sorted(by_rule.items(), key=lambda x: -x[1]))
     
     def add(self, issue: LintIssue):
+        if issue.rule in self.disabled_rules:
+            return
         self.issues.append(issue)
 
 
@@ -305,14 +308,15 @@ class L10nLinter:
     # Newline pattern (literal \n in raw text before unescape)
     NEWLINE_LITERAL = re.compile(r'\\n')
     
-    def __init__(self, config: Optional[dict] = None):
+    def __init__(self, config: Optional[dict] = None, disabled_rules: Optional[set] = None):
         self.config = config or {}
+        self.disabled_rules = disabled_rules or set()
         self.max_length = self.config.get('max_length', 500)
         self.length_ratio = self.config.get('length_ratio', 3.0)  # Translation shouldn't be 3x longer
     
     def lint_file(self, filepath: str, content: Optional[str] = None) -> LintResult:
         """Lint a single file."""
-        result = LintResult()
+        result = LintResult(disabled_rules=self.disabled_rules)
         result.files_checked = 1
         
         if content is None:
@@ -589,10 +593,17 @@ class L10nLinter:
         if not source or not translation:
             return
         
+        # Treat '...' and '…' (U+2026) as equivalent
+        source_stripped = source.rstrip()
+        trans_stripped = translation.rstrip()
+        if (source_stripped.endswith('...') and trans_stripped.endswith('\u2026')) or \
+           (source_stripped.endswith('\u2026') and trans_stripped.endswith('...')):
+            return
+        
         # Check ending punctuation
         end_punct = '.!?:;'
-        source_end = source.rstrip()[-1] if source.rstrip() else ''
-        trans_end = translation.rstrip()[-1] if translation.rstrip() else ''
+        source_end = source_stripped[-1] if source_stripped else ''
+        trans_end = trans_stripped[-1] if trans_stripped else ''
         
         if source_end in end_punct and trans_end not in end_punct:
             result.add(LintIssue(
@@ -636,7 +647,8 @@ class L10nLinter:
     def _check_whitespace(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for whitespace issues."""
         # Trailing whitespace (only spaces/tabs, not newlines)
-        if translation != translation.rstrip(' \t'):
+        # Don't flag if source also has trailing whitespace
+        if translation != translation.rstrip(' \t') and source == source.rstrip(' \t'):
             result.add(LintIssue(
                 file=filepath,
                 line=line,
@@ -1343,6 +1355,7 @@ def main():
     parser.add_argument('--quiet', '-q', action='store_true', help=_('Show only summary'))
     parser.add_argument('--check', action='store_true', help=_('Exit code only, no output (for CI)'))
     parser.add_argument('--skip-fuzzy', action='store_true', help=_('Ignore fuzzy warnings'))
+    parser.add_argument('--disable', metavar='RULES', help=_('Comma-separated list of rule names to disable (e.g. trailing-whitespace,keyboard-shortcut-missing)'))
     parser.add_argument('--verbose', '-V', action='store_true', help=_('Show detailed progress'))
     parser.add_argument('--gtk', '-G', action='store_true', help=_('Launch GTK graphical interface'))
     parser.add_argument('-h', '--help', action='help', help=_('Show this help message and exit'))
@@ -1409,11 +1422,15 @@ def main():
         vprint(_("   Locale: not found (using English)"))
     vprint("")
     
+    disabled = set()
+    if hasattr(args, 'disable') and args.disable:
+        disabled = {r.strip() for r in args.disable.split(',')}
+    
     linter = L10nLinter(config={
         'max_length': args.max_length,
-    })
+    }, disabled_rules=disabled)
     
-    result = LintResult()
+    result = LintResult(disabled_rules=disabled)
     
     # Lint GitHub repo
     if args.github:

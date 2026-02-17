@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: l10n-lint 1.14.9\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-07 16:49+0100\n"
+"Project-Id-Version: l10n-lint 1.15.8\n"
+"Report-Msgid-Bugs-To: daniel@danielnylander.se\n"
+"POT-Creation-Date: 2026-02-17 11:14+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,865 +17,498 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: l10n_lint.py:306
+#: l10n_lint.py:332
 #, python-brace-format
 msgid "Could not read file: {error}"
 msgstr ""
 
-#: l10n_lint.py:323
+#: l10n_lint.py:349
 #, python-brace-format
 msgid "Unknown file format: {ext}"
 msgstr ""
 
-#: l10n_lint.py:361 l10n_lint.py:372
+#: l10n_lint.py:387 l10n_lint.py:398
 msgid "Missing translation (empty msgstr)"
 msgstr ""
 
-#: l10n_lint.py:383
+#: l10n_lint.py:409
 msgid "Fuzzy translation needs review"
 msgstr ""
 
-#: l10n_lint.py:450
+#: l10n_lint.py:476
 #, python-brace-format
 msgid "Duplicate msgid (first seen at line {line})"
 msgstr ""
 
-#: l10n_lint.py:477
+#: l10n_lint.py:503
 msgid "Unfinished/missing translation"
 msgstr ""
 
-#: l10n_lint.py:488
+#: l10n_lint.py:514
 msgid "Vanished translation (source removed)"
 msgstr ""
 
-#: l10n_lint.py:519
+#: l10n_lint.py:545
 #, python-brace-format
 msgid ""
 "Placeholder mismatch ({name}): source has {source}, translation has {trans}"
 msgstr ""
 
-#: l10n_lint.py:534
+#: l10n_lint.py:560
 #, python-brace-format
 msgid "Translation is very long ({length} chars, max {max})"
 msgstr ""
 
-#: l10n_lint.py:546
+#: l10n_lint.py:572
 #, python-brace-format
 msgid "Translation is {ratio:.1f}x longer than source"
 msgstr ""
 
-#: l10n_lint.py:559
+#: l10n_lint.py:585
 #, python-brace-format
 msgid "Translation is suspiciously short ({ratio:.1f}x of source)"
 msgstr ""
 
-#: l10n_lint.py:581
+#: l10n_lint.py:614
 #, python-brace-format
 msgid "Missing ending punctuation (source ends with '{char}')"
 msgstr ""
 
-#: l10n_lint.py:590
+#: l10n_lint.py:623
 msgid "Extra ending punctuation (source has none)"
 msgstr ""
 
-#: l10n_lint.py:610
+#: l10n_lint.py:643
 msgid "Source starts with uppercase, translation with lowercase"
 msgstr ""
 
-#: l10n_lint.py:623
+#: l10n_lint.py:657
 msgid "Translation has trailing whitespace"
 msgstr ""
 
-#: l10n_lint.py:634
-msgid "Translation contains double spaces"
+#: l10n_lint.py:676
+msgid "Translation contains double spaces between words"
 msgstr ""
 
-#: l10n_lint.py:652
+#: l10n_lint.py:694
 msgid "Translation has mixed quote styles"
 msgstr ""
 
-#: l10n_lint.py:667
+#: l10n_lint.py:709
 #, python-brace-format
 msgid "HTML tags mismatch: source has {source}, translation has {trans}"
 msgstr ""
 
-#: l10n_lint.py:695
+#: l10n_lint.py:737
 #, python-brace-format
 msgid "Escape character count mismatch: {details}"
 msgstr ""
 
-#: l10n_lint.py:713
+#: l10n_lint.py:755
 msgid "Keyboard accelerator missing in translation"
-msgstr ""
-
-#: l10n_lint.py:725
-#, python-brace-format
-msgid "Nordic character '{char}' used as keyboard accelerator"
-msgstr ""
-
-#: l10n_lint.py:743
-#, python-brace-format
-msgid "Numbers {nums} from source missing in translation"
 msgstr ""
 
 #: l10n_lint.py:767
 #, python-brace-format
+msgid "Nordic character '{char}' used as keyboard accelerator"
+msgstr ""
+
+#: l10n_lint.py:785
+#, python-brace-format
+msgid "Numbers {nums} from source missing in translation"
+msgstr ""
+
+#: l10n_lint.py:809
+#, python-brace-format
 msgid "Translation may contain untranslated English: {words}"
 msgstr ""
 
-#: l10n_lint.py:782
+#: l10n_lint.py:824
 #, python-brace-format
 msgid "Repeated word: '{word}'"
 msgstr ""
 
-#: l10n_lint.py:798
+#: l10n_lint.py:840
 msgid "Translation is identical to source (possibly untranslated)"
 msgstr ""
 
-#: l10n_lint.py:827
+#: l10n_lint.py:869
 #, python-brace-format
 msgid "Option value '{value}' from source not found in translation"
 msgstr ""
 
+#: l10n_lint.py:887
+msgid ""
+"Number formatting may not be localized (e.g. 1,000 should be 1 000 in some "
+"locales)"
+msgstr ""
+
 #: l10n_lint.py:906
+msgid "Currency format may need localization"
+msgstr ""
+
+#: l10n_lint.py:922
+msgid "Date format may not be localized"
+msgstr ""
+
+#: l10n_lint.py:937
+#, python-brace-format
+msgid "Newline count mismatch: source has {src}, translation has {trans}"
+msgstr ""
+
+#: l10n_lint.py:954
+#, python-brace-format
+msgid ""
+"Python format string mismatch: source has {src}, translation has {trans}"
+msgstr ""
+
+#: l10n_lint.py:1035
 #, python-brace-format
 msgid "Warning: Could not fetch {path}: {error}"
 msgstr ""
 
-#: l10n_lint.py:924
+#: l10n_lint.py:1053
 #, python-brace-format
 msgid "Invalid URL scheme: {scheme}"
 msgstr ""
 
-#: l10n_lint.py:932
+#: l10n_lint.py:1061
 #, python-brace-format
 msgid "URL must point to a .po or .ts file, got: {ext}"
 msgstr ""
 
-#: l10n_lint.py:1152
+#: l10n_lint.py:1295
 #, python-brace-format
 msgid "✅ {count} file(s) checked, no issues found."
 msgstr ""
 
-#: l10n_lint.py:1163
+#: l10n_lint.py:1306
 #, python-brace-format
 msgid "  {icon} Line {line}: [{rule}] {message}"
 msgstr ""
 
-#: l10n_lint.py:1167
+#: l10n_lint.py:1310
 #, python-brace-format
 msgid "     Context: \"{context}...\""
 msgstr ""
 
-#: l10n_lint.py:1169
+#: l10n_lint.py:1312
 #, python-brace-format
 msgid ""
 "\n"
 "📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
 msgstr ""
 
-#: l10n_lint.py:1181
+#: l10n_lint.py:1324
 msgid "positional arguments"
 msgstr ""
 
-#: l10n_lint.py:1182 l10n_lint.py:1183
+#: l10n_lint.py:1325 l10n_lint.py:1326
 msgid "options"
 msgstr ""
 
-#: l10n_lint.py:1191
+#: l10n_lint.py:1334
 msgid "l10n-lint - Linter for localization files (.po, .ts)"
 msgstr ""
 
-#: l10n_lint.py:1194
+#: l10n_lint.py:1337
 msgid "Examples:"
 msgstr ""
 
-#: l10n_lint.py:1204
+#: l10n_lint.py:1347
 msgid "Files or directories to lint"
 msgstr ""
 
-#: l10n_lint.py:1205
+#: l10n_lint.py:1348
 msgid "GitHub repository (owner/repo or URL)"
 msgstr ""
 
-#: l10n_lint.py:1206
+#: l10n_lint.py:1349
 msgid "Path filter for GitHub repos"
 msgstr ""
 
-#: l10n_lint.py:1207
-msgid "Output format"
+#: l10n_lint.py:1350
+msgid "Output format (gnu = Emacs-compatible file:line:col format)"
 msgstr ""
 
-#: l10n_lint.py:1208
+#: l10n_lint.py:1351
 msgid "Save report to file"
 msgstr ""
 
-#: l10n_lint.py:1209
+#: l10n_lint.py:1352
 msgid "Max translation length (default: 500)"
 msgstr ""
 
-#: l10n_lint.py:1210
+#: l10n_lint.py:1353
 msgid "Don't search subdirectories"
 msgstr ""
 
-#: l10n_lint.py:1211 l10n_lint_gtk.py:1338
+#: l10n_lint.py:1354
 msgid "Treat warnings as errors"
 msgstr ""
 
-#: l10n_lint.py:1212
+#: l10n_lint.py:1355
 msgid "Show only summary"
 msgstr ""
 
-#: l10n_lint.py:1213
+#: l10n_lint.py:1356
 msgid "Exit code only, no output (for CI)"
 msgstr ""
 
-#: l10n_lint.py:1214
+#: l10n_lint.py:1357
 msgid "Ignore fuzzy warnings"
 msgstr ""
 
-#: l10n_lint.py:1215
+#: l10n_lint.py:1358
+msgid ""
+"Comma-separated list of rule names to disable (e.g. trailing-"
+"whitespace,keyboard-shortcut-missing)"
+msgstr ""
+
+#: l10n_lint.py:1359
 msgid "Show detailed progress"
 msgstr ""
 
-#: l10n_lint.py:1216
+#: l10n_lint.py:1360
 msgid "Launch GTK graphical interface"
 msgstr ""
 
-#: l10n_lint.py:1217
+#: l10n_lint.py:1361
 msgid "Show this help message and exit"
 msgstr ""
 
-#: l10n_lint.py:1219
+#: l10n_lint.py:1363
 msgid "Show version number and exit"
 msgstr ""
 
-#: l10n_lint.py:1245
+#: l10n_lint.py:1389
 msgid ""
 "Error: GTK interface not found. Install l10n-lint-gtk or run from source "
 "directory."
 msgstr ""
 
-#: l10n_lint.py:1248
+#: l10n_lint.py:1392
 #, python-brace-format
 msgid "Error launching GTK interface: {error}"
 msgstr ""
 
-#: l10n_lint.py:1266
+#: l10n_lint.py:1410
 #, python-brace-format
 msgid "⏱️  Elapsed time: {elapsed:.2f}s"
 msgstr ""
 
-#: l10n_lint.py:1268
+#: l10n_lint.py:1412
 #, python-brace-format
 msgid "🔧 l10n-lint {version} starting..."
 msgstr ""
 
-#: l10n_lint.py:1269
+#: l10n_lint.py:1413
 #, python-brace-format
 msgid "   Max length: {max}"
 msgstr ""
 
-#: l10n_lint.py:1270
+#: l10n_lint.py:1414
 #, python-brace-format
 msgid "   Length ratio: {ratio}x"
 msgstr ""
 
-#: l10n_lint.py:1271
+#: l10n_lint.py:1415
 #, python-brace-format
 msgid "   Strict mode: {strict}"
 msgstr ""
 
-#: l10n_lint.py:1272
+#: l10n_lint.py:1416
 #, python-brace-format
 msgid "   Output format: {fmt}"
 msgstr ""
 
-#: l10n_lint.py:1273
+#: l10n_lint.py:1417
 #, python-brace-format
 msgid "   Recursive: {rec}"
 msgstr ""
 
-#: l10n_lint.py:1275
+#: l10n_lint.py:1419
 #, python-brace-format
 msgid "   Locale dir: {dir}"
 msgstr ""
 
-#: l10n_lint.py:1276
+#: l10n_lint.py:1420
 #, python-brace-format
 msgid "   Language: {lang}"
 msgstr ""
 
-#: l10n_lint.py:1278
+#: l10n_lint.py:1422
 msgid "   Locale: not found (using English)"
 msgstr ""
 
-#: l10n_lint.py:1289
+#: l10n_lint.py:1437
 msgid "🌐 GitHub mode"
 msgstr ""
 
-#: l10n_lint.py:1290
+#: l10n_lint.py:1438
 #, python-brace-format
 msgid "🔍 Fetching from GitHub: {repo}"
 msgstr ""
 
-#: l10n_lint.py:1292
+#: l10n_lint.py:1440
 #, python-brace-format
 msgid "   Path filter: {path}"
 msgstr ""
 
-#: l10n_lint.py:1295
+#: l10n_lint.py:1443
 msgid "   Connecting to GitHub API..."
 msgstr ""
 
-#: l10n_lint.py:1300 l10n_lint.py:1381
+#: l10n_lint.py:1448 l10n_lint.py:1529
 #, python-brace-format
 msgid "  [{n}] {path}"
 msgstr ""
 
-#: l10n_lint.py:1301 l10n_lint.py:1382
+#: l10n_lint.py:1449 l10n_lint.py:1530
 #, python-brace-format
 msgid "       Size: {size} bytes"
 msgstr ""
 
-#: l10n_lint.py:1307 l10n_lint.py:1346 l10n_lint.py:1388
+#: l10n_lint.py:1455 l10n_lint.py:1494 l10n_lint.py:1536
 #, python-brace-format
 msgid "       Entries: {count}"
 msgstr ""
 
-#: l10n_lint.py:1308 l10n_lint.py:1347 l10n_lint.py:1389
+#: l10n_lint.py:1456 l10n_lint.py:1495 l10n_lint.py:1537
 #, python-brace-format
 msgid "       Parsed in {elapsed:.3f}s"
 msgstr ""
 
-#: l10n_lint.py:1310 l10n_lint.py:1349 l10n_lint.py:1391
+#: l10n_lint.py:1458 l10n_lint.py:1497 l10n_lint.py:1539
 #, python-brace-format
 msgid "       ⚠️  Found {count} issue(s)"
 msgstr ""
 
-#: l10n_lint.py:1312 l10n_lint.py:1351 l10n_lint.py:1393
+#: l10n_lint.py:1460 l10n_lint.py:1499 l10n_lint.py:1541
 msgid "       ✓ No issues"
 msgstr ""
 
-#: l10n_lint.py:1314
+#: l10n_lint.py:1462
 #, python-brace-format
 msgid "   Fetched {count} file(s) in {elapsed:.2f}s"
 msgstr ""
 
-#: l10n_lint.py:1317
+#: l10n_lint.py:1465
 #, python-brace-format
 msgid "❌ GitHub error: {error}"
 msgstr ""
 
-#: l10n_lint.py:1328
+#: l10n_lint.py:1476
 msgid "🌐 URL mode"
 msgstr ""
 
-#: l10n_lint.py:1333
+#: l10n_lint.py:1481
 #, python-brace-format
 msgid "  [{n}] {url}"
 msgstr ""
 
-#: l10n_lint.py:1337
+#: l10n_lint.py:1485
 #, python-brace-format
 msgid "       Fetched: {name} ({size} bytes) in {elapsed:.3f}s"
 msgstr ""
 
-#: l10n_lint.py:1353
+#: l10n_lint.py:1501
 #, python-brace-format
 msgid "❌ URL error for {url}: {error}"
 msgstr ""
 
-#: l10n_lint.py:1359
+#: l10n_lint.py:1507
 #, python-brace-format
 msgid "Could not fetch URL: {error}"
 msgstr ""
 
-#: l10n_lint.py:1363
+#: l10n_lint.py:1511
 #, python-brace-format
 msgid "   Total URL files: {count}"
 msgstr ""
 
-#: l10n_lint.py:1367
+#: l10n_lint.py:1515
 msgid "📁 Local mode"
 msgstr ""
 
-#: l10n_lint.py:1370
+#: l10n_lint.py:1518
 #, python-brace-format
 msgid "📂 Scanning: {path}"
 msgstr ""
 
-#: l10n_lint.py:1374
+#: l10n_lint.py:1522
 #, python-brace-format
 msgid "   Found {count} file(s) in {elapsed:.3f}s"
 msgstr ""
 
-#: l10n_lint.py:1395
+#: l10n_lint.py:1543
 #, python-brace-format
 msgid "   Total local files: {count}"
 msgstr ""
 
-#: l10n_lint.py:1404
+#: l10n_lint.py:1552
 msgid "📊 Summary:"
 msgstr ""
 
-#: l10n_lint.py:1405
+#: l10n_lint.py:1553
 #, python-brace-format
 msgid "   Files checked: {count}"
 msgstr ""
 
-#: l10n_lint.py:1406
+#: l10n_lint.py:1554
 #, python-brace-format
 msgid "   Entries checked: {count}"
 msgstr ""
 
-#: l10n_lint.py:1407
+#: l10n_lint.py:1555
 #, python-brace-format
 msgid "   Errors: {count}"
 msgstr ""
 
-#: l10n_lint.py:1408
+#: l10n_lint.py:1556
 #, python-brace-format
 msgid "   Warnings: {count}"
 msgstr ""
 
-#: l10n_lint.py:1409
+#: l10n_lint.py:1557
 #, python-brace-format
 msgid "   Info: {count}"
 msgstr ""
 
-#: l10n_lint.py:1414
+#: l10n_lint.py:1562
 msgid "   Issues by rule:"
 msgstr ""
 
-#: l10n_lint.py:1416
+#: l10n_lint.py:1564
 #, python-brace-format
 msgid "     - {rule}: {count}"
 msgstr ""
 
-#: l10n_lint.py:1418
+#: l10n_lint.py:1566
 #, python-brace-format
 msgid "     ... and {more} more rules"
 msgstr ""
 
-#: l10n_lint.py:1424
+#: l10n_lint.py:1572
 msgid "   Processing speed:"
 msgstr ""
 
-#: l10n_lint.py:1425
+#: l10n_lint.py:1573
 #, python-brace-format
 msgid "     - {speed:.1f} files/sec"
 msgstr ""
 
-#: l10n_lint.py:1427
+#: l10n_lint.py:1575
 #, python-brace-format
 msgid "     - {speed:.1f} entries/sec"
 msgstr ""
 
-#: l10n_lint.py:1436
+#: l10n_lint.py:1584
 #, python-brace-format
 msgid "📊 {files} file(s), {errors} error(s), {warnings} warning(s)"
 msgstr ""
 
-#: l10n_lint.py:1443
+#: l10n_lint.py:1591
 #, python-brace-format
 msgid "📄 Report saved to: {file}"
-msgstr ""
-
-#: l10n_lint_gtk.py:91
-msgid "Missing translations"
-msgstr ""
-
-#: l10n_lint_gtk.py:91
-msgid "Check for empty msgstr/unfinished translations"
-msgstr ""
-
-#: l10n_lint_gtk.py:92
-msgid "Fuzzy entries"
-msgstr ""
-
-#: l10n_lint_gtk.py:92
-msgid "Flag entries marked as fuzzy/needs review"
-msgstr ""
-
-#: l10n_lint_gtk.py:93
-msgid "Placeholder mismatch"
-msgstr ""
-
-#: l10n_lint_gtk.py:93
-#, python-format, python-brace-format
-msgid "Check %s, %d, {0}, {name} consistency"
-msgstr ""
-
-#: l10n_lint_gtk.py:94
-msgid "Length ratio"
-msgstr ""
-
-#: l10n_lint_gtk.py:94
-msgid "Warn if translation is much longer/shorter than source"
-msgstr ""
-
-#: l10n_lint_gtk.py:95
-msgid "Punctuation"
-msgstr ""
-
-#: l10n_lint_gtk.py:95
-msgid "Check ending punctuation matches"
-msgstr ""
-
-#: l10n_lint_gtk.py:96
-msgid "Capitalization"
-msgstr ""
-
-#: l10n_lint_gtk.py:96
-msgid "Check initial letter case matches"
-msgstr ""
-
-#: l10n_lint_gtk.py:97
-msgid "Whitespace"
-msgstr ""
-
-#: l10n_lint_gtk.py:97
-msgid "Check leading/trailing whitespace"
-msgstr ""
-
-#: l10n_lint_gtk.py:98
-msgid "Quote consistency"
-msgstr ""
-
-#: l10n_lint_gtk.py:98
-msgid "Check quote characters are consistent"
-msgstr ""
-
-#: l10n_lint_gtk.py:99
-msgid "HTML tags"
-msgstr ""
-
-#: l10n_lint_gtk.py:99
-msgid "Verify HTML tags match between source and translation"
-msgstr ""
-
-#: l10n_lint_gtk.py:100
-msgid "Escape sequences"
-msgstr ""
-
-#: l10n_lint_gtk.py:100
-msgid "Check \\n, \\t, etc. are preserved"
-msgstr ""
-
-#: l10n_lint_gtk.py:101
-msgid "Accelerators"
-msgstr ""
-
-#: l10n_lint_gtk.py:101
-msgid "Check & keyboard accelerators"
-msgstr ""
-
-#: l10n_lint_gtk.py:102
-msgid "Numeric values"
-msgstr ""
-
-#: l10n_lint_gtk.py:102
-msgid "Check numbers are preserved"
-msgstr ""
-
-#: l10n_lint_gtk.py:103
-msgid "Untranslated words"
-msgstr ""
-
-#: l10n_lint_gtk.py:103
-msgid "Detect English words left in translation"
-msgstr ""
-
-#: l10n_lint_gtk.py:104
-msgid "Repeated words"
-msgstr ""
-
-#: l10n_lint_gtk.py:104
-msgid "Find duplicated words like 'the the'"
-msgstr ""
-
-#: l10n_lint_gtk.py:105
-msgid "Same as source"
-msgstr ""
-
-#: l10n_lint_gtk.py:105
-msgid "Warn if translation equals source"
-msgstr ""
-
-#: l10n_lint_gtk.py:106
-msgid "Option values"
-msgstr ""
-
-#: l10n_lint_gtk.py:106
-msgid "Check option/parameter values preserved"
-msgstr ""
-
-#: l10n_lint_gtk.py:107
-msgid "Duplicate entries"
-msgstr ""
-
-#: l10n_lint_gtk.py:107
-msgid "Find duplicate msgids"
-msgstr ""
-
-#: l10n_lint_gtk.py:277 l10n_lint_gtk.py:384
-msgid "No file selected"
-msgstr ""
-
-#: l10n_lint_gtk.py:301
-msgid "Language"
-msgstr ""
-
-#: l10n_lint_gtk.py:302
-msgid "Last Translator"
-msgstr ""
-
-#: l10n_lint_gtk.py:303
-msgid "Revision Date"
-msgstr ""
-
-#: l10n_lint_gtk.py:304
-msgid "Project"
-msgstr ""
-
-#: l10n_lint_gtk.py:305
-msgid "Language Team"
-msgstr ""
-
-#: l10n_lint_gtk.py:330
-msgid "Entries"
-msgstr ""
-
-#: l10n_lint_gtk.py:331
-msgid "Translated"
-msgstr ""
-
-#: l10n_lint_gtk.py:332
-msgid "Untranslated"
-msgstr ""
-
-#: l10n_lint_gtk.py:333
-msgid "Fuzzy"
-msgstr ""
-
-#: l10n_lint_gtk.py:354
-msgid "Unknown"
-msgstr ""
-
-#: l10n_lint_gtk.py:511
-msgid "Filter:"
-msgstr ""
-
-#: l10n_lint_gtk.py:515
-msgid "Errors"
-msgstr ""
-
-#: l10n_lint_gtk.py:521
-msgid "Warnings"
-msgstr ""
-
-#: l10n_lint_gtk.py:527
-msgid "Info"
-msgstr ""
-
-#: l10n_lint_gtk.py:536
-msgid "All rules"
-msgstr ""
-
-#: l10n_lint_gtk.py:548
-msgid "Search issues..."
-msgstr ""
-
-#: l10n_lint_gtk.py:607
-msgid "Open file"
-msgstr ""
-
-#: l10n_lint_gtk.py:613
-msgid "Open directory"
-msgstr ""
-
-#: l10n_lint_gtk.py:618
-msgid "Lint"
-msgstr ""
-
-#: l10n_lint_gtk.py:620
-msgid "Run linter (Ctrl+Return)"
-msgstr ""
-
-#: l10n_lint_gtk.py:627 l10n_lint_gtk.py:1183
-msgid "Export report"
-msgstr ""
-
-#: l10n_lint_gtk.py:635 l10n_lint_gtk.py:1302
-msgid "Preferences"
-msgstr ""
-
-#: l10n_lint_gtk.py:636
-msgid "Keyboard Shortcuts"
-msgstr ""
-
-#: l10n_lint_gtk.py:637
-msgid "About"
-msgstr ""
-
-#: l10n_lint_gtk.py:638
-msgid "Quit"
-msgstr ""
-
-#: l10n_lint_gtk.py:653
-msgid "Recent"
-msgstr ""
-
-#: l10n_lint_gtk.py:670
-msgid "Clear History"
-msgstr ""
-
-#: l10n_lint_gtk.py:688
-msgid "Path:"
-msgstr ""
-
-#: l10n_lint_gtk.py:693
-msgid "File, directory, URL, or GitHub repo (owner/repo)..."
-msgstr ""
-
-#: l10n_lint_gtk.py:699
-msgid "Browse..."
-msgstr ""
-
-#: l10n_lint_gtk.py:716 l10n_lint_gtk.py:809
-msgid ""
-"Select a file or directory to lint. You can also drag and drop files here."
-msgstr ""
-
-#: l10n_lint_gtk.py:802
-msgid "Drop file to lint..."
-msgstr ""
-
-#: l10n_lint_gtk.py:829
-msgid "Unsupported file type. Use .po or .ts files."
-msgstr ""
-
-#: l10n_lint_gtk.py:915
-msgid "Select file"
-msgstr ""
-
-#: l10n_lint_gtk.py:921
-msgid "Localization files (*.po, *.ts)"
-msgstr ""
-
-#: l10n_lint_gtk.py:927
-msgid "All files"
-msgstr ""
-
-#: l10n_lint_gtk.py:936
-msgid "Select directory"
-msgstr ""
-
-#: l10n_lint_gtk.py:963 l10n_lint_gtk.py:1056
-#, python-brace-format
-msgid "Linting {path}..."
-msgstr ""
-
-#: l10n_lint_gtk.py:1032
-msgid "Fetching from GitHub..."
-msgstr ""
-
-#: l10n_lint_gtk.py:1042
-#, python-brace-format
-msgid "Path not found: {path}"
-msgstr ""
-
-#: l10n_lint_gtk.py:1122
-#, python-brace-format
-msgid "Found {count} issue(s)"
-msgstr ""
-
-#: l10n_lint_gtk.py:1124
-msgid "errors"
-msgstr ""
-
-#: l10n_lint_gtk.py:1125
-msgid "warnings"
-msgstr ""
-
-#: l10n_lint_gtk.py:1126
-msgid "info"
-msgstr ""
-
-#: l10n_lint_gtk.py:1128
-#, python-brace-format
-msgid "Showing {shown} of {total}"
-msgstr ""
-
-#: l10n_lint_gtk.py:1134
-msgid "No issues match the current filter"
-msgstr ""
-
-#: l10n_lint_gtk.py:1148
-msgid "No issues found!"
-msgstr ""
-
-#: l10n_lint_gtk.py:1152
-msgid "Lint completed successfully"
-msgstr ""
-
-#: l10n_lint_gtk.py:1166
-msgid "Close"
-msgstr ""
-
-#: l10n_lint_gtk.py:1167
-msgid "Copy"
-msgstr ""
-
-#: l10n_lint_gtk.py:1199
-msgid "Plain text"
-msgstr ""
-
-#: l10n_lint_gtk.py:1309
-msgid "Lint Rules"
-msgstr ""
-
-#: l10n_lint_gtk.py:1310
-msgid "Select which checks to perform"
-msgstr ""
-
-#: l10n_lint_gtk.py:1326
-msgid "Options"
-msgstr ""
-
-#: l10n_lint_gtk.py:1329
-msgid "Search subdirectories"
-msgstr ""
-
-#: l10n_lint_gtk.py:1330
-msgid "Recursively search directories for l10n files"
-msgstr ""
-
-#: l10n_lint_gtk.py:1337
-msgid "Strict mode"
-msgstr ""
-
-#: l10n_lint_gtk.py:1347
-msgid "Quick Actions"
-msgstr ""
-
-#: l10n_lint_gtk.py:1349
-msgid "Enable All Rules"
-msgstr ""
-
-#: l10n_lint_gtk.py:1353
-msgid "Disable All Rules"
-msgstr ""
-
-#: l10n_lint_gtk.py:1357
-msgid "Reset to Defaults"
-msgstr ""
-
-#: l10n_lint_gtk.py:1526
-msgid "Graphical linter for localization files (.po, .ts)"
-msgstr ""
-
-#: l10n_lint_gtk.py:1527
-msgid "translator-credits"
 msgstr ""

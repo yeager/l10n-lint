@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.15.10"
+__version__ = "1.16.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -466,18 +466,20 @@ class L10nLinter:
             if msgstr:
                 self._check_option_values(filepath, line, msgid, msgstr, result)
             
-            # Check: Duplicates
-            if msgid in seen_msgids:
+            # Check: Duplicates (use msgctxt+msgid as key to avoid false positives)
+            msgctxt = entry.get('msgctxt', '')
+            dup_key = (msgctxt, msgid)
+            if dup_key in seen_msgids:
                 result.add(LintIssue(
                     file=filepath,
                     line=line,
                     severity=Severity.WARNING,
                     rule="duplicate",
-                    message=_("Duplicate msgid (first seen at line {line})").format(line=seen_msgids[msgid]),
+                    message=_("Duplicate msgid (first seen at line {line})").format(line=seen_msgids[dup_key]),
                     context=msgid[:50]
                 ))
             else:
-                seen_msgids[msgid] = line
+                seen_msgids[dup_key] = line
         
         result.entries_checked += entries_count
     
@@ -689,10 +691,15 @@ class L10nLinter:
     
     def _check_quotes(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for quote consistency."""
+        # Skip strings containing HTML attributes (href="...", src="...", etc.)
+        # where straight quotes inside tags are expected alongside typographic quotes in text
+        if re.search(r'<[^>]+="[^"]*"', translation):
+            return
+        
         # Detect mixed quote styles
         straight_quotes = translation.count('"') + translation.count("'")
-        curly_quotes = translation.count('"') + translation.count('"') + translation.count(''') + translation.count(''')
-        german_quotes = translation.count('„') + translation.count('"')
+        curly_quotes = translation.count('\u201c') + translation.count('\u201d') + translation.count('\u2018') + translation.count('\u2019')
+        german_quotes = translation.count('\u201e') + translation.count('\u201c')
         
         quote_styles = sum(1 for c in [straight_quotes, curly_quotes, german_quotes] if c > 0)
         if quote_styles > 1:
@@ -750,10 +757,18 @@ class L10nLinter:
                 context=source[:50].replace('\n', '\\n')
             ))
     
+    @staticmethod
+    def _strip_html_entities(text: str) -> str:
+        """Remove HTML entities like &amp; &lt; &gt; &quot; to avoid false accelerator matches."""
+        return re.sub(r'&[a-zA-Z]+;', '', text)
+
     def _check_accelerators(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check keyboard accelerator consistency."""
-        source_accels = self.ACCELERATOR_PATTERN.findall(source)
-        trans_accels = self.ACCELERATOR_PATTERN.findall(translation)
+        # Strip HTML entities before checking — &amp; is not an accelerator
+        source_clean = self._strip_html_entities(source)
+        trans_clean = self._strip_html_entities(translation)
+        source_accels = self.ACCELERATOR_PATTERN.findall(source_clean)
+        trans_accels = self.ACCELERATOR_PATTERN.findall(trans_clean)
         
         # Check if accelerator exists in source but not translation
         if source_accels and not trans_accels:

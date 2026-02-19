@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.0] - 2026-02-19
+
+### Fixed
+- **duplicate** rule now respects `msgctxt` — entries with same msgid but different msgctxt are no longer flagged as duplicates (reported by Anders Jonsson)
+- **mixed-quotes** no longer triggers on strings with HTML attributes (`href="..."`) where straight quotes inside tags are expected alongside typographic quotes in text
+- **keyboard-shortcut-missing** no longer treats HTML entities (`&amp;`, `&lt;`, etc.) as keyboard accelerators
+
 ## [1.15.6] - 2026-02-15
 
 ### Changed

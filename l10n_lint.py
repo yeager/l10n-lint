@@ -548,8 +548,18 @@ class L10nLinter:
                     context=source[:50]
                 ))
     
+    # Msgids where length checks are meaningless (translators put their own info)
+    LENGTH_SKIP_MSGIDS = frozenset([
+        'translator-credits', 'translator_credits',
+        'translation-credits', 'translation_credits',
+    ])
+
     def _check_length(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for length issues."""
+        # Skip meta-strings where translators write their own content
+        if source.strip() in self.LENGTH_SKIP_MSGIDS:
+            return
+        
         # Only warn about too-long if translation is significantly longer than source
         if len(translation) > self.max_length and len(translation) > len(source) * 1.5:
             result.add(LintIssue(

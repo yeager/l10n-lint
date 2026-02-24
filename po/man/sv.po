@@ -31,20 +31,19 @@ msgstr "L10N-LINT"
 #: data/man/l10n-lint.1:1
 #, no-wrap
 msgid "February 2026"
-msgstr ""
+msgstr "Februari 2026"
 
 #. type: TH
 #: data/man/l10n-lint.1:1
-#, fuzzy, no-wrap
-#| msgid "l10n-lint Manual"
+#, no-wrap
 msgid "l10n-lint 1.15.7"
-msgstr "Manual för l10n-lint"
+msgstr "l10n-lint 1.15.7"
 
 #. type: TH
 #: data/man/l10n-lint.1:1
 #, no-wrap
 msgid "User Commands"
-msgstr ""
+msgstr "Användarkommandon"
 
 #. type: SH
 #: data/man/l10n-lint.1:2
@@ -54,10 +53,8 @@ msgstr "NAMN"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:4
-#, fuzzy
-#| msgid "l10n-lint - Linter for localization files"
 msgid "l10n-lint - lint and validate PO/XLIFF/TS translation files"
-msgstr "l10n-lint - Linter för lokaliseringsfiler"
+msgstr "l10n-lint - linta och validera PO/XLIFF/TS-översättningsfiler"
 
 #. type: SH
 #: data/man/l10n-lint.1:4
@@ -67,10 +64,8 @@ msgstr "SYNOPSIS"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:7
-#, fuzzy
-#| msgid "B<l10n-lint> [I<OPTIONS>] [I<PATHS...>]"
 msgid "B<l10n-lint> [I<OPTIONS>] [I<PATHS>...]"
-msgstr "B<l10n-lint> [I<OPTIONS>] [I<SÖKVÄGAR...>]"
+msgstr "B<l10n-lint> [I<FLAGGOR>] [I<SÖKVÄGAR>...]"
 
 #. type: SH
 #: data/man/l10n-lint.1:7
@@ -87,6 +82,11 @@ msgid ""
 "local files, directories (recursively), or fetch files directly from GitHub "
 "repositories."
 msgstr ""
+"B<l10n-lint> kontrollerar översättningsfiler (PO, XLIFF, TS) för vanliga fel "
+"såsom saknade formatangivelser, inkonsekvent interpunktion, oöversatta "
+"poster, alltför långa översättningar, kodningsproblem och mycket mer. Det "
+"kan söka av lokala filer, kataloger (rekursivt) eller hämta filer direkt "
+"från GitHub-arkiv."
 
 #. type: Plain text
 #: data/man/l10n-lint.1:17
@@ -95,23 +95,26 @@ msgid ""
 "to switch to JSON, HTML, GitHub Actions annotations, or GNU/Emacs-compatible "
 "output."
 msgstr ""
+"Som standard genererar l10n-lint en läsbar textrapport. Använd B<--format> "
+"för att växla till JSON, HTML, GitHub Actions-anteckningar eller GNU/Emacs-"
+"kompatibel utdata."
 
 #. type: Plain text
 #: data/man/l10n-lint.1:19
 msgid "Exit codes: 0 = no errors, 1 = errors found, 2 = usage error."
-msgstr ""
+msgstr "Avslutningskoder: 0 = inga fel, 1 = fel upptäckta, 2 = användningsfel."
 
 #. type: SH
 #: data/man/l10n-lint.1:19
 #, no-wrap
 msgid "POSITIONAL ARGUMENTS"
-msgstr ""
+msgstr "POSITIONELLA ARGUMENT"
 
 #. type: TP
 #: data/man/l10n-lint.1:20
 #, no-wrap
 msgid "I<PATHS>"
-msgstr ""
+msgstr "I<SÖKVÄGAR>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:26
@@ -120,6 +123,9 @@ msgid ""
 "recursively for .po, .xliff, and .ts files (unless B<--no-recursive> is "
 "set). If omitted, reads from the current directory."
 msgstr ""
+"Filer eller kataloger som ska lintas. När kataloger anges söker l10n-lint "
+"rekursivt efter .po-, .xliff- och .ts-filer (om inte B<--no-recursive> är "
+"inställt). Om detta utelämnas läses från den aktuella katalogen."
 
 #. type: SH
 #: data/man/l10n-lint.1:26
@@ -140,6 +146,10 @@ msgid ""
 "URL. The repository is cloned to a temporary directory and scanned for "
 "translation files. Combine with B<--path> to limit the search scope."
 msgstr ""
+"Lintar ett GitHub-arkiv direkt. Accepterar I<ägare/arkiv> eller en "
+"fullständig GitHub-URL. Arkivet klonas till en tillfällig katalog och "
+"genomsöks efter översättningsfiler. Kombinera med B<--path> för att begränsa "
+"sökområdet."
 
 #. type: TP
 #: data/man/l10n-lint.1:33
@@ -154,6 +164,9 @@ msgid ""
 "linted. For example, B<--github user/repo --path po/> limits scanning to the "
 "I<po/> directory. Has no effect on local paths."
 msgstr ""
+"Sökvägsfilter inom ett GitHub-arkiv. Endast filer under denna sökväg "
+"kontrolleras. Till exempel begränsar B<--github ägare/arkiv --path po/> "
+"genomsökningen till katalogen I<po/>. Har ingen effekt på lokala sökvägar."
 
 #. type: TP
 #: data/man/l10n-lint.1:38
@@ -169,6 +182,10 @@ msgid ""
 "B<github> (GitHub Actions annotation format for CI), B<gnu> (Emacs-"
 "compatible file:line:col format)."
 msgstr ""
+"Utdataformat. Alternativ: B<text> (standard, läsbart för människor), B<json> "
+"(strukturerad utdata för skript), B<html> (fristående HTML-rapport), "
+"B<github> (GitHub Actions-annotationsformat för CI), B<gnu> (Emacs-"
+"kompatibelt format: fil:rad:kolumn)."
 
 #. type: TP
 #: data/man/l10n-lint.1:44
@@ -182,6 +199,8 @@ msgid ""
 "Save the report to a file instead of printing to stdout. Useful with B<--"
 "format html> for generating reports."
 msgstr ""
+"Spara rapporten i en fil istället för att skriva ut den till stdout. "
+"Användbart med B-<--format html> för att generera rapporter."
 
 #. type: TP
 #: data/man/l10n-lint.1:48
@@ -195,6 +214,8 @@ msgid ""
 "Maximum allowed translation length in characters. Translations exceeding "
 "this limit trigger a warning. Default: 500."
 msgstr ""
+"Maximal tillåten översättningslängd i tecken. Översättningar som överskrider "
+"denna gräns utlöser en varning. Standard: 500."
 
 #. type: TP
 #: data/man/l10n-lint.1:52
@@ -208,6 +229,8 @@ msgid ""
 "Do not descend into subdirectories when scanning. Only files directly in the "
 "given paths are linted."
 msgstr ""
+"Gå inte in i underkataloger vid genomsökning. Endast filer som finns direkt "
+"i de angivna sökvägarna kontrolleras."
 
 #. type: TP
 #: data/man/l10n-lint.1:56
@@ -221,6 +244,9 @@ msgid ""
 "Treat warnings as errors. With this flag, warnings cause a non-zero exit "
 "code. Useful for CI pipelines that require zero warnings."
 msgstr ""
+"Behandla varningar som fel. Med denna flagga orsakar varningar en "
+"avslutningskod som inte är noll. Användbart för CI-pipelines som kräver noll "
+"varningar."
 
 #. type: TP
 #: data/man/l10n-lint.1:60
@@ -234,6 +260,8 @@ msgid ""
 "Show only a summary (total files, errors, warnings). Individual issue "
 "details are suppressed."
 msgstr ""
+"Visa endast en sammanfattning (totalt antal filer, fel, varningar). Detaljer "
+"om enskilda problem undertrycks."
 
 #. type: TP
 #: data/man/l10n-lint.1:64
@@ -247,6 +275,8 @@ msgid ""
 "Exit code only â produce no output at all. Designed for CI integration where "
 "only the exit code matters."
 msgstr ""
+"Endast avslutskod – genererar ingen utdata alls. Utformad för CI-integration "
+"där endast avslutskoden är viktig."
 
 #. type: TP
 #: data/man/l10n-lint.1:68
@@ -257,7 +287,7 @@ msgstr "B<--skip-fuzzy>"
 #. type: Plain text
 #: data/man/l10n-lint.1:71
 msgid "Do not warn about fuzzy (unreviewed) translations."
-msgstr ""
+msgstr "Varna inte för luddiga (ogranskade) översättningar."
 
 #. type: TP
 #: data/man/l10n-lint.1:71
@@ -269,6 +299,8 @@ msgstr "B<-V>, B<--verbose>"
 #: data/man/l10n-lint.1:74
 msgid "Show detailed progress information, including each file being scanned."
 msgstr ""
+"Visa detaljerad information om förloppet, inklusive varje fil som söks "
+"igenom."
 
 #. type: TP
 #: data/man/l10n-lint.1:74
@@ -282,20 +314,19 @@ msgid ""
 "Launch the GTK4/Adwaita graphical interface instead of running in CLI mode. "
 "Requires B<l10n-lint-gtk> to be installed."
 msgstr ""
+"Starta det grafiska GTK4/Adwaita-gränssnittet istället för att köra i CLI-"
+"läge. Kräver att B<l10n-lint-gtk> är installerat."
 
 #. type: TP
 #: data/man/l10n-lint.1:78
-#, fuzzy, no-wrap
-#| msgid "B<-q>, B<--quiet>"
+#, no-wrap
 msgid "B<-h>, B<--help>"
-msgstr "B<-q>, B<--quiet>"
+msgstr "B<-h>, B<--help>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:81
-#, fuzzy
-#| msgid "Show version number and exit."
 msgid "Show help message and exit."
-msgstr "Visa versionsnummer och avsluta."
+msgstr "Visa hjälpmeddelande och avsluta."
 
 #. type: TP
 #: data/man/l10n-lint.1:81
@@ -312,12 +343,12 @@ msgstr "Visa versionsnummer och avsluta."
 #: data/man/l10n-lint.1:84
 #, no-wrap
 msgid "CHECKS PERFORMED"
-msgstr ""
+msgstr "KONTROLLER SOM UTFÖRS"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:86
 msgid "l10n-lint performs the following checks on each translation entry:"
-msgstr ""
+msgstr "l10n-lint utför följande kontroller på varje översättningspost:"
 
 #. type: IP
 #: data/man/l10n-lint.1:86 data/man/l10n-lint.1:90 data/man/l10n-lint.1:93
@@ -325,7 +356,7 @@ msgstr ""
 #: data/man/l10n-lint.1:103 data/man/l10n-lint.1:106 data/man/l10n-lint.1:109
 #, no-wrap
 msgid "\\(bu"
-msgstr ""
+msgstr "\\(bu"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:90
@@ -333,6 +364,9 @@ msgid ""
 "B<Format specifiers> â verifies that printf-style (%s, %d, %1$s)  and Python-"
 "style ({0}, {name}) placeholders match between source and translation."
 msgstr ""
+"B<Formatangivare> â verifierar att platshållare i printf-stil (%s, %d, "
+"%1$s)  och Python-stil ({0}, {name}) matchar mellan källan och "
+"översättningen."
 
 #. type: Plain text
 #: data/man/l10n-lint.1:93
@@ -340,11 +374,13 @@ msgid ""
 "B<Punctuation> â checks that trailing punctuation (periods, colons, "
 "ellipsis) is consistent between source and translation."
 msgstr ""
+"B<Interpunktion> â kontrollerar att slutpunktsinterpunktion (punkter, kolon, "
+"ellipser) är konsekvent mellan källtexten och översättningen."
 
 #. type: Plain text
 #: data/man/l10n-lint.1:95
 msgid "B<Leading/trailing whitespace> â flags mismatched whitespace."
-msgstr ""
+msgstr "B<Ledande/efterföljande blanksteg> â flaggar felaktiga blanksteg."
 
 #. type: Plain text
 #: data/man/l10n-lint.1:98
@@ -352,6 +388,8 @@ msgid ""
 "B<Accelerator keys> â ensures &- or _-style keyboard accelerators are "
 "preserved."
 msgstr ""
+"B<Acceleratortangenter> â säkerställer att tangentbordsgenvägar av typen "
+"&amp;- eller _- bevaras."
 
 #. type: Plain text
 #: data/man/l10n-lint.1:101
@@ -359,11 +397,13 @@ msgid ""
 "B<XML/HTML tags> â verifies that markup tags in the source appear in the "
 "translation."
 msgstr ""
+"B<XML/HTML-taggar> â kontrollerar att markeringstaggar i källtexten "
+"förekommer i översättningen."
 
 #. type: Plain text
 #: data/man/l10n-lint.1:103
 msgid "B<Empty translations> â warns about msgid entries with empty msgstr."
-msgstr ""
+msgstr "B<Tomma översättningar> â varnar om msgid-poster med tom msgstr."
 
 #. type: Plain text
 #: data/man/l10n-lint.1:106
@@ -371,6 +411,8 @@ msgid ""
 "B<Fuzzy entries> â warns about unreviewed fuzzy translations (unless B<--"
 "skip-fuzzy> is used)."
 msgstr ""
+"B<Luddiga poster> â varnar för ogranskade, luddiga översättningar (om inte "
+"B<--skip-fuzzy> används)."
 
 #. type: Plain text
 #: data/man/l10n-lint.1:109
@@ -378,50 +420,53 @@ msgid ""
 "B<Overly long translations> â flags translations exceeding B<--max-length> "
 "characters."
 msgstr ""
+"B<För långa översättningar> â flaggar översättningar som överskrider B<--max-"
+"length> tecken."
 
 #. type: Plain text
 #: data/man/l10n-lint.1:111
 msgid "B<Encoding issues> â detects invalid UTF-8 sequences."
-msgstr ""
+msgstr "B<Kodningsproblem> â upptäcker ogiltiga UTF-8-sekvenser."
 
 #. type: SH
 #: data/man/l10n-lint.1:111
 #, no-wrap
 msgid "EXIT STATUS"
-msgstr ""
+msgstr "AVSLUTSSTATUS"
 
 #. type: TP
 #: data/man/l10n-lint.1:112
 #, no-wrap
 msgid "B<0>"
-msgstr ""
+msgstr "B<0>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:115
 msgid "No errors found."
-msgstr ""
+msgstr "Inga fel hittades."
 
 #. type: TP
 #: data/man/l10n-lint.1:115
 #, no-wrap
 msgid "B<1>"
-msgstr ""
+msgstr "B<1>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:118
 msgid "One or more errors found (or warnings, if B<--strict> is used)."
 msgstr ""
+"Ett eller flera fel har hittats (eller varningar, om B<--strict> används)."
 
 #. type: TP
 #: data/man/l10n-lint.1:118
 #, no-wrap
 msgid "B<2>"
-msgstr ""
+msgstr "B<2>"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:121
 msgid "Usage error (invalid arguments, file not found)."
-msgstr ""
+msgstr "Användningsfel (ogiltiga argument, filen hittades inte)."
 
 #. type: SH
 #: data/man/l10n-lint.1:121
@@ -432,47 +477,46 @@ msgstr "EXEMPEL"
 #. type: Plain text
 #: data/man/l10n-lint.1:123
 msgid "Lint all PO files in the current directory:"
-msgstr ""
+msgstr "Linta alla PO-filer i den aktuella katalogen:"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:127
-#, fuzzy, no-wrap
-#| msgid "l10n-lint Manual"
+#, no-wrap
 msgid "l10n-lint .\n"
-msgstr "Manual för l10n-lint"
+msgstr "l10n-lint .\n"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:131
 msgid "Lint a GitHub repository:"
-msgstr ""
+msgstr "Linta ett GitHub-arkiv:"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:135
 #, no-wrap
 msgid "l10n-lint --github yeager/ubuntu-l10n --path po/\n"
-msgstr ""
+msgstr "l10n-lint --github yeager/ubuntu-l10n --path po/\n"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:139
 msgid "Generate an HTML report:"
-msgstr ""
+msgstr "Generera en HTML-rapport:"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:143
 #, no-wrap
 msgid "l10n-lint --format html --output report.html po/\n"
-msgstr ""
+msgstr "l10n-lint --format html --output report.html po/\n"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:147
 msgid "CI integration (strict, no output):"
-msgstr ""
+msgstr "CI-integration (strikt, ingen utdata):"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:151
 #, no-wrap
 msgid "l10n-lint --check --strict .\n"
-msgstr ""
+msgstr "l10n-lint --check --strict .\n"
 
 #. type: SH
 #: data/man/l10n-lint.1:153
@@ -483,7 +527,7 @@ msgstr "SE ÄVEN"
 #. type: Plain text
 #: data/man/l10n-lint.1:158
 msgid "B<po-translate>(1), B<tp-lint>(1), B<l10n-conv>(1), B<msgfmt>(1)"
-msgstr ""
+msgstr "B<po-translate>(1), B<tp-lint>(1), B<l10n-conv>(1), B<msgfmt>(1)"
 
 #. type: SH
 #: data/man/l10n-lint.1:158
@@ -504,18 +548,16 @@ msgstr "BUGGAR"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:162
-#, fuzzy
-#| msgid "Report bugs at https://github.com/yeager/l10n-lint/issues"
 msgid "Report bugs at: https://github.com/yeager/l10n-lint/issues"
-msgstr "Rapportera buggar på https://github.com/yeager/l10n-lint/issues"
+msgstr "Rapportera buggar på: https://github.com/yeager/l10n-lint/issues"
 
 #. type: SH
 #: data/man/l10n-lint.1:162
 #, no-wrap
 msgid "COPYRIGHT"
-msgstr ""
+msgstr "UPPHOVSRÄTT"
 
 #. type: Plain text
 #: data/man/l10n-lint.1:163
 msgid "Copyright \\(co 2026 Daniel Nylander. License: GPL-3.0-or-later."
-msgstr ""
+msgstr "Copyright \\(co 2026 Daniel Nylander. Licens: GPL-3.0-eller-senare."

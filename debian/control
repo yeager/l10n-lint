@@ -1,0 +1,24 @@
+Source: l10n-lint
+Section: devel
+Priority: optional
+Maintainer: Daniel Nylander <po@danielnylander.se>
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               python3-all,
+               python3-setuptools,
+               pybuild-plugin-pyproject
+Standards-Version: 4.7.0
+Homepage: https://github.com/yeager/l10n-lint
+Vcs-Git: https://github.com/yeager/l10n-lint.git
+Vcs-Browser: https://github.com/yeager/l10n-lint
+
+Package: l10n-lint
+Architecture: all
+Depends: ${python3:Depends},
+         ${misc:Depends}
+Description: Linter for localization files (.po, .ts)
+ l10n-lint checks PO and Qt TS translation files for common errors
+ such as missing format specifiers, inconsistent punctuation,
+ untranslated strings, and encoding issues.
+ .
+ It supports both command-line and GTK graphical interfaces.

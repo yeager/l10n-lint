@@ -21,3 +21,14 @@ __pycache__/
 .vscode/
 .idea/
 *.mo
+
+# Debian build
+.pybuild/
+debian/l10n-lint/
+debian/.debhelper/
+debian/files
+debian/*.debhelper.log
+debian/*.postinst.debhelper
+debian/*.prerm.debhelper
+debian/*.substvars
+debian/debhelper-build-stamp

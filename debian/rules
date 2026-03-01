@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME=l10n-lint
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_install:
+	dh_auto_install
+	install -D -m 644 man/en/l10n-lint.1 debian/l10n-lint/usr/share/man/man1/l10n-lint.1
+	install -D -m 644 man/en/l10n-lint-gtk.1 debian/l10n-lint/usr/share/man/man1/l10n-lint-gtk.1
+	install -D -m 644 man/sv/l10n-lint.1 debian/l10n-lint/usr/share/man/sv/man1/l10n-lint.1
+	install -D -m 644 man/sv/l10n-lint-gtk.1 debian/l10n-lint/usr/share/man/sv/man1/l10n-lint-gtk.1

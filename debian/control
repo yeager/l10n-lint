@@ -1,7 +1,7 @@
 Source: l10n-lint
 Section: devel
 Priority: optional
-Maintainer: Daniel Nylander <po@danielnylander.se>
+Maintainer: Daniel Nylander <daniel@danielnylander.se>
 Build-Depends: debhelper-compat (= 13),
                dh-python,
                python3-all,

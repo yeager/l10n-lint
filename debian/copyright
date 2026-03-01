@@ -1,18 +1,18 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: l10n-lint
-Upstream-Contact: Daniel Nylander <po@danielnylander.se>
+Upstream-Contact: Daniel Nylander <daniel@danielnylander.se>
 Source: https://github.com/yeager/l10n-lint
 
 Files: *
-Copyright: 2024-2026 Daniel Nylander <po@danielnylander.se>
+Copyright: 2024-2026 Daniel Nylander <daniel@danielnylander.se>
 License: GPL-3.0-or-later
 
 Files: io.github.yeager.l10n-lint.metainfo.xml
-Copyright: 2024-2026 Daniel Nylander <po@danielnylander.se>
+Copyright: 2024-2026 Daniel Nylander <daniel@danielnylander.se>
 License: CC0-1.0
 
 Files: debian/*
-Copyright: 2026 Daniel Nylander <po@danielnylander.se>
+Copyright: 2026 Daniel Nylander <daniel@danielnylander.se>
 License: GPL-3.0-or-later
 
 License: GPL-3.0-or-later

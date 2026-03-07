@@ -359,6 +359,8 @@ class L10nLinter:
         entries_count = 0
         # Initialize consistency map for this file
         self.consistency_map = {}
+        # Detect language for locale-specific checks
+        self._current_lang = self._detect_language_from_po(filepath, parser)
         
         for entry in parser.entries:
             line = entry.get('_line', 0)
@@ -488,6 +490,10 @@ class L10nLinter:
             # Check: Typos (via aspell)
             if msgstr:
                 self._check_typos(filepath, line, msgid, msgstr, result)
+            
+            # Check: Decimal separator (. → , in Swedish)
+            if msgstr:
+                self._check_decimal_separator(filepath, line, msgid, msgstr, result)
             
             # Check: Duplicates (use msgctxt+msgid as key to avoid false positives)
             msgctxt = entry.get('msgctxt', '')
@@ -1059,6 +1065,97 @@ class L10nLinter:
                     message=_("Number formatting may not be localized (e.g. 1,000 should be 1 000 in some locales)"),
                     context=source[:50]
                 ))
+
+    def _check_decimal_separator(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check that decimal points in numbers are localized to commas in Swedish.
+        
+        English: 1.5, 3.14, 0.001
+        Swedish: 1,5  3,14  0,001
+        
+        Skip: version numbers (2.0.1), IP addresses, filenames, format strings,
+              numbers identical in source and translation (likely intentional).
+        """
+        target_lang = getattr(self, '_current_lang', 'sv')
+        if not target_lang.startswith('sv'):
+            return
+        
+        # Find decimal numbers in translation: digit(s).digit(s)
+        # Must be preceded by space/start and followed by space/end/punctuation
+        decimal_pattern = re.compile(r'(?:^|(?<=[\s(=:,]))(\d+\.\d+)(?=[\s).,;:!?\n]|$)')
+        
+        trans_decimals = decimal_pattern.findall(translation)
+        if not trans_decimals:
+            return
+        
+        # Get decimals from source too
+        source_decimals = set(decimal_pattern.findall(source))
+        
+        for num in trans_decimals:
+            # Skip if same number exists in source (likely intentional: version, constant)
+            if num in source_decimals:
+                continue
+            
+            # Skip time formats: HH.MM where both parts are exactly 2 digits
+            # (00.00, 12.30, 23.59 — Swedish uses . for time)
+            parts = num.split('.')
+            if len(parts) == 2 and len(parts[0]) == 2 and len(parts[1]) == 2:
+                try:
+                    h, m = int(parts[0]), int(parts[1])
+                    if 0 <= h <= 23 and 0 <= m <= 59:
+                        continue
+                except ValueError:
+                    pass
+            
+            # Skip version-like numbers (more than one dot: 2.0.1, 3.14.1)
+            # Check if this number is part of a longer dotted sequence
+            ver_pattern = re.compile(re.escape(num) + r'\.\d')
+            if ver_pattern.search(translation):
+                continue
+            
+            # Skip if preceded by a dot (part of version: x.1.5)
+            idx = translation.find(num)
+            if idx > 0 and translation[idx-1] == '.':
+                continue
+            
+            # Skip format strings (%.2f, %3.1f)
+            if idx > 0 and translation[idx-1] == '%':
+                continue
+            
+            # Skip IP-like patterns (four dot-separated groups)
+            ip_pattern = re.compile(r'\d+\.\d+\.\d+\.\d+')
+            if ip_pattern.search(translation):
+                # Check if our number is part of it
+                for m in ip_pattern.finditer(translation):
+                    if m.start() <= idx < m.end():
+                        break
+                else:
+                    # Not part of IP, flag it
+                    result.add(LintIssue(
+                        file=filepath,
+                        line=line,
+                        severity=Severity.WARNING,
+                        rule="decimal-separator",
+                        message=_("Decimal point «{num}» should use comma in Swedish (e.g. {fix})").format(
+                            num=num, fix=num.replace('.', ',')),
+                        context=source[:60],
+                    ))
+                continue
+            
+            # Skip filenames (word.ext pattern)
+            if idx > 0:
+                before = translation[:idx]
+                if re.search(r'[a-zA-Z]$', before):
+                    continue  # looks like filename.ext
+            
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="decimal-separator",
+                message=_("Decimal point «{num}» should use comma in Swedish (e.g. {fix})").format(
+                    num=num, fix=num.replace('.', ',')),
+                context=source[:60],
+            ))
 
     def _check_currency_localization(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check currency format localization."""

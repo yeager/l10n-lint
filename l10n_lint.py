@@ -485,6 +485,10 @@ class L10nLinter:
             if msgstr:
                 self._check_consistency(filepath, line, msgid, msgstr, result)
             
+            # Check: Typos (via aspell)
+            if msgstr:
+                self._check_typos(filepath, line, msgid, msgstr, result)
+            
             # Check: Duplicates (use msgctxt+msgid as key to avoid false positives)
             msgctxt = entry.get('msgctxt', '')
             dup_key = (msgctxt, msgid)
@@ -1358,6 +1362,96 @@ class L10nLinter:
             if translation:  # Only store non-empty translations
                 self.consistency_map[source_key] = translation
 
+
+    # Pattern-based typo detection (no external dictionary needed)
+    # Doubled consonants that are likely typos (Swedish allows some doubles like ll, nn, ss, tt, etc.)
+    _TYPO_DOUBLED_RE = re.compile(
+        r'([bcdfghjkmpqvwxz])\1{2,}'  # Triple+ consonants are always wrong
+        r'|([^lnrstdgk])(\2)'  # Doubled consonants that are rare in Swedish (except l,n,r,s,t,d,g,k)
+        , re.IGNORECASE
+    )
+    # Common Swedish misspelling patterns (curated, low false positive)
+    _COMMON_TYPOS = {
+        # Doubled characters
+        'ogiltligt': 'ogiltigt', 'borttagninngsnivå': 'borttagningsnivå',
+        'innget': 'inget', 'inngen': 'ingen', 'meedd': 'med',
+        'fölljande': 'följande', 'tilllåta': 'tillåta', 'tilllåt': 'tillåt',
+        'annvändare': 'användare', 'annvänds': 'används', 'annvända': 'använda',
+        'innstallera': 'installera', 'elller': 'eller',
+        'upppil': 'uppil', 'upppilen': 'uppilen',
+        # Transpositions / missing chars
+        'defintions': 'definitions', 'definiton': 'definition',
+        'destintation': 'destination', 'altenativ': 'alternativ',
+        'kataolg': 'katalog', 'felakitg': 'felaktig', 'felaktgt': 'felaktigt',
+        'tillåttet': 'tillåtet', 'filnamm': 'filnamn',
+        'varabel': 'variabel', 'specifercera': 'specificera',
+        'konfiguartion': 'konfiguration', 'proccess': 'process',
+        'argumnet': 'argument', 'arguement': 'argument',
+        'övversätt': 'översätt', 'reedan': 'redan',
+        'inställnig': 'inställning', 'inställnignar': 'inställningar',
+        'standdard': 'standard', 'verision': 'version',
+        'kommmando': 'kommando', 'katalogg': 'katalog',
+        'aktvieras': 'aktiveras', 'aktvierad': 'aktiverad',
+        'uppkoplling': 'uppkoppling',
+        'rättighetter': 'rättigheter', 'utskift': 'utskrift',
+    }
+
+    def _check_typos(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for typos in translation using pattern-based detection."""
+        # Skip very short strings
+        if len(translation) < 8 or not any(c.isalpha() for c in translation):
+            return
+        
+        # Clean the translation
+        clean = re.sub(r'%[sd\d$.#+ -]*[sdifcpxXeEgGulLhqn]', ' ', translation)
+        clean = re.sub(r'<[^>]+>', ' ', clean)
+        clean = re.sub(r'\\[nt"\\]', ' ', clean)
+        clean = re.sub(r'\{[^}]+\}', ' ', clean)
+        clean = re.sub(r'&\w+;', ' ', clean)
+        
+        typos_found = []
+        
+        # Check for known common typos
+        words = re.findall(r'\b(\w+)\b', clean)
+        for w in words:
+            wl = w.lower()
+            if wl in self._COMMON_TYPOS:
+                typos_found.append(f"{w} → {self._COMMON_TYPOS[wl]}")
+        
+        # Check for highly suspicious patterns only (minimize false positives)
+        # Quadruple+ letters are always wrong (but skip date patterns and exclamations)
+        for m in re.finditer(r'\b([a-zåäö]*([a-zåäö])\2\2\2[a-zåäö]*)\b', clean):
+            word = m.group(1)
+            # Skip date/time format patterns (åååå=year, mmmm=month, dddd=day, etc.)
+            if re.match(r'^[åmdhs]+$', word, re.IGNORECASE):
+                continue
+            # Skip intentional exclamations in game/dialog text (neeeej, jooooo)
+            if re.match(r'^[a-zåäö]{1,3}([a-zåäö])\1{3,}[a-zåäö]?$', word):
+                continue
+            # Skip format placeholders (uxxxx, etc.)
+            if re.match(r'^[ux]+$', word):
+                continue
+            typos_found.append(word)
+        
+        # Specific doubled-error patterns (NOT valid compound boundaries)
+        # "nng" at non-boundary (e.g., "borttagninngsnivå" but NOT "inngång")
+        for m in re.finditer(r'\b([a-zåäö]*nng[a-zåäö]*)\b', clean):
+            word = m.group(1)
+            # Skip known valid: inngång → no, that's also wrong. "nng" is almost always a typo in Swedish
+            if len(word) > 5:
+                typos_found.append(word)
+        
+        if typos_found:
+            # Deduplicate and report first 3
+            unique = list(dict.fromkeys(typos_found))[:3]
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="typo",
+                message=_("Possible typo(s): {words}").format(words=', '.join(unique)),
+                context=source[:50]
+            ))
 
     def _check_plural_forms(self, filepath: str, parser: 'POParser', result: LintResult):
         """Check plural forms in header and entries."""

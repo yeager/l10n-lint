@@ -1,3 +1,12 @@
+l10n-lint (1.18.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * New checks: typo detection, decimal-separator for Swedish.
+  * Fix HTML tag mismatch false positives (<option> → <flagga>).
+  * Plural form checks (7 rules).
+
+ -- Daniel Nylander <daniel@danielnylander.se>  Sat, 07 Mar 2026 18:35:00 +0100
+
 l10n-lint (1.16.0-1) unstable; urgency=low
 
   * Initial release (Closes: #1129370)

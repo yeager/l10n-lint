@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.17.0"
+__version__ = "1.17.1"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -689,6 +689,28 @@ class L10nLinter:
                 context=source[:50]
             ))
         
+        # Missing trailing space: source ends with space but translation doesn't
+        if source.endswith(' ') and not translation.endswith(' ') and translation:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="missing-trailing-space",
+                message=_("Source ends with space but translation does not"),
+                context=translation[-50:]
+            ))
+        
+        # Missing leading space: source starts with space but translation doesn't
+        if source.startswith(' ') and not translation.startswith(' ') and translation:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="missing-leading-space",
+                message=_("Source starts with space but translation does not"),
+                context=translation[:50]
+            ))
+        
         # Double spaces — only between words (not leading indentation)
         # Skip when source also has double spaces (intentional formatting)
         has_double = False
@@ -1154,7 +1176,50 @@ class L10nLinter:
             'redaktör': ('redigerare', 'editor in software context'),
             'otydlig': ('luddig', 'fuzzy translation term'),
             'öppen källa': ('öppen källkod', 'open source'),
+            'repostera': ('skicka om', 'repost is not a Swedish word'),
+            'reposta': ('skicka om', 'repost is not a Swedish word'),
         }
+        
+        # Check mixed usage of omfång/omfattning for "range/scope"
+        if 'omfång' in translation.lower() and 'omfattning' not in translation.lower():
+            pass  # OK, using one consistently
+        # Flag "repostera/reposta" variants
+        for anglicism in ['forwarda', 'patcha', 'committa', 'pusha', 'mergea', 'fetcha', 'brancha', 'deploya']:
+            if anglicism in translation.lower():
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.WARNING,
+                    rule="terminology",
+                    message=_("Swedish: '{word}' is an anglicism, use Swedish equivalent").format(word=anglicism),
+                    context=translation[:80]
+                ))
+        
+        # Check "linje" when source says "line" in CLI context
+        source_lower = source.lower()
+        if 'line' in source_lower and 'linje' in translation.lower():
+            # In CLI/programming context, "line" should be "rad" not "linje"
+            if any(kw in source_lower for kw in ['line number', 'line ', 'lines', 'command line', 'on line']):
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.WARNING,
+                    rule="terminology",
+                    message=_("Swedish terminology: prefer 'rad' over 'linje' in CLI/programming context"),
+                    context=translation[:80]
+                ))
+        
+        # Check y/n → j/n
+        import re as _re
+        if _re.search(r'\by/n\b|\by/N\b|\bY/n\b|\bY/N\b', translation):
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="terminology",
+                message=_("Swedish: 'y/n' should be 'j/n' (ja/nej)"),
+                context=translation[:80]
+            ))
         
         translation_lower = translation.lower()
         for wrong_term, (correct_term, context_note) in terminology_rules.items():

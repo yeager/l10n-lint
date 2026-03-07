@@ -776,11 +776,18 @@ class L10nLinter:
     )
 
     def _check_html_tags(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
-        """Check for HTML tag mismatches."""
+        """Check for HTML tag mismatches.
+        
+        Only flags when both source and translation contain HTML-like tags,
+        to avoid false positives where <option> in source is descriptive
+        text translated to <flagga> in Swedish (not actual HTML).
+        """
         source_tags = sorted(self._REAL_HTML_TAG.findall(source))
         trans_tags = sorted(self._REAL_HTML_TAG.findall(translation))
         
-        if source_tags != trans_tags and source_tags:
+        # Skip if translation has no HTML tags at all — source tags are likely
+        # descriptive terms (e.g., <option> → <flagga>) not actual markup
+        if source_tags != trans_tags and source_tags and trans_tags:
             result.add(LintIssue(
                 file=filepath,
                 line=line,

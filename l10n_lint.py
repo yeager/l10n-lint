@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.17.1"
+__version__ = "1.17.2"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -499,6 +499,9 @@ class L10nLinter:
                 ))
             else:
                 seen_msgids[dup_key] = line
+        
+        # Check plural forms in header and entries
+        self._check_plural_forms(filepath, parser, result)
         
         result.entries_checked += entries_count
     
@@ -1354,6 +1357,210 @@ class L10nLinter:
         else:
             if translation:  # Only store non-empty translations
                 self.consistency_map[source_key] = translation
+
+
+    def _check_plural_forms(self, filepath: str, parser: 'POParser', result: LintResult):
+        """Check plural forms in header and entries."""
+        # Known correct plural forms per language
+        KNOWN_PLURALS = {
+            'sv': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'Swedish'},
+            'da': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'Danish'},
+            'de': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'German'},
+            'en': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'English'},
+            'es': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'Spanish'},
+            'fi': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'Finnish'},
+            'fr': {'nplurals': 2, 'formula': '(n > 1)', 'desc': 'French'},
+            'it': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'Italian'},
+            'nb': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'Norwegian Bokmål'},
+            'nb_NO': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'Norwegian Bokmål'},
+            'nl': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'Dutch'},
+            'pt_BR': {'nplurals': 2, 'formula': '(n > 1)', 'desc': 'Brazilian Portuguese'},
+            'pt': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'Portuguese'},
+            'pl': {'nplurals': 3, 'formula': '(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)', 'desc': 'Polish'},
+            'ru': {'nplurals': 3, 'formula': '(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)', 'desc': 'Russian'},
+            'ja': {'nplurals': 1, 'formula': '0', 'desc': 'Japanese'},
+            'ko': {'nplurals': 1, 'formula': '0', 'desc': 'Korean'},
+            'zh_CN': {'nplurals': 1, 'formula': '0', 'desc': 'Chinese Simplified'},
+            'zh_TW': {'nplurals': 1, 'formula': '0', 'desc': 'Chinese Traditional'},
+            'ar': {'nplurals': 6, 'formula': '(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5)', 'desc': 'Arabic'},
+            'cs': {'nplurals': 3, 'formula': '(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2', 'desc': 'Czech'},
+            'hu': {'nplurals': 2, 'formula': '(n != 1)', 'desc': 'Hungarian'},
+            'ro': {'nplurals': 3, 'formula': '(n==1 ? 0 : (n==0 || (n%100>0 && n%100<20)) ? 1 : 2)', 'desc': 'Romanian'},
+            'tr': {'nplurals': 2, 'formula': '(n > 1)', 'desc': 'Turkish'},
+        }
+
+        # Step 1: Parse header for Plural-Forms
+        header_nplurals = None
+        header_plural_formula = None
+        header_lang = None
+        
+        for entry in parser.entries[:5]:
+            if 'msgid' in entry and entry['msgid'] == '':
+                msgstr = entry.get('msgstr', '')
+                # Extract Plural-Forms header
+                plural_match = re.search(
+                    r'Plural-Forms:\s*nplurals\s*=\s*(\d+)\s*;\s*plural\s*=\s*([^;\\]+)',
+                    msgstr
+                )
+                if plural_match:
+                    header_nplurals = int(plural_match.group(1))
+                    header_plural_formula = plural_match.group(2).strip().rstrip(';').strip()
+                
+                # Extract Language header
+                lang_match = re.search(r'Language:\s*([a-zA-Z_]+)', msgstr)
+                if lang_match:
+                    header_lang = lang_match.group(1)
+                break
+        
+        # Detect language from filename if not in header
+        if not header_lang:
+            filename = Path(filepath).name.lower()
+            lang_match = re.search(r'\.([a-z]{2}(?:_[A-Z]{2})?)\.po$', filepath)
+            if lang_match:
+                header_lang = lang_match.group(1)
+        
+        # Step 2: Validate header Plural-Forms
+        if header_lang and header_lang in KNOWN_PLURALS:
+            expected = KNOWN_PLURALS[header_lang]
+            
+            if header_nplurals is None:
+                result.add(LintIssue(
+                    file=filepath,
+                    line=1,
+                    severity=Severity.ERROR,
+                    rule="plural-header-missing",
+                    message=_("Missing Plural-Forms header for {lang} (expected nplurals={n})").format(
+                        lang=expected['desc'], n=expected['nplurals']
+                    ),
+                    context="Plural-Forms header"
+                ))
+            elif header_nplurals != expected['nplurals']:
+                result.add(LintIssue(
+                    file=filepath,
+                    line=1,
+                    severity=Severity.ERROR,
+                    rule="plural-header-wrong",
+                    message=_("Wrong nplurals={got} for {lang} (expected nplurals={expected})").format(
+                        got=header_nplurals, lang=expected['desc'],
+                        expected=expected['nplurals']
+                    ),
+                    context=f"Plural-Forms: nplurals={header_nplurals}"
+                ))
+            
+            # Check formula for common languages
+            if header_plural_formula and header_nplurals == expected['nplurals']:
+                # Normalize whitespace for comparison
+                norm_got = re.sub(r'\s+', '', header_plural_formula)
+                norm_exp = re.sub(r'\s+', '', expected['formula'])
+                # For simple 2-form languages, check the common patterns
+                if expected['nplurals'] == 2:
+                    valid_formulas = {
+                        '(n!=1)', 'n!=1', '(n>1)', 'n>1',
+                        '(n!=1);', 'n!=1;', '(n>1);', 'n>1;'
+                    }
+                    if header_lang in ('fr', 'pt_BR', 'tr'):
+                        valid_formulas = {'(n>1)', 'n>1', '(n>1);', 'n>1;'}
+                    else:
+                        valid_formulas = {'(n!=1)', 'n!=1', '(n!=1);', 'n!=1;'}
+                    
+                    if norm_got.rstrip(';') not in {f.rstrip(';') for f in valid_formulas}:
+                        result.add(LintIssue(
+                            file=filepath,
+                            line=1,
+                            severity=Severity.WARNING,
+                            rule="plural-formula-suspicious",
+                            message=_("Suspicious plural formula for {lang}: got '{got}', expected '{exp}'").format(
+                                lang=expected['desc'],
+                                got=header_plural_formula,
+                                exp=expected['formula']
+                            ),
+                            context="Plural-Forms"
+                        ))
+        
+        # Step 3: Check individual plural entries
+        expected_nplurals = header_nplurals or (
+            KNOWN_PLURALS.get(header_lang, {}).get('nplurals') if header_lang else None
+        )
+        
+        for entry in parser.entries:
+            msgid = entry.get('msgid', '')
+            msgid_plural = entry.get('msgid_plural', '')
+            line = entry.get('_line', 0)
+            flags = entry.get('_flags', [])
+            
+            if not msgid or not msgid_plural:
+                continue
+            
+            if 'fuzzy' in flags:
+                continue
+            
+            # Count msgstr[N] entries
+            plural_forms = {}
+            for key in entry:
+                m = re.match(r'msgstr\[(\d+)\]', key)
+                if m:
+                    idx = int(m.group(1))
+                    plural_forms[idx] = entry[key]
+            
+            if not plural_forms:
+                continue
+            
+            # Check: correct number of plural forms
+            if expected_nplurals:
+                max_idx = max(plural_forms.keys()) + 1
+                
+                if max_idx < expected_nplurals:
+                    result.add(LintIssue(
+                        file=filepath,
+                        line=line,
+                        severity=Severity.ERROR,
+                        rule="plural-forms-missing",
+                        message=_("Missing plural forms: got {got}, expected {exp} (nplurals={n})").format(
+                            got=max_idx, exp=expected_nplurals, n=expected_nplurals
+                        ),
+                        context=msgid[:50]
+                    ))
+                elif max_idx > expected_nplurals:
+                    result.add(LintIssue(
+                        file=filepath,
+                        line=line,
+                        severity=Severity.WARNING,
+                        rule="plural-forms-extra",
+                        message=_("Extra plural forms: got {got}, expected {exp} (nplurals={n})").format(
+                            got=max_idx, exp=expected_nplurals, n=expected_nplurals
+                        ),
+                        context=msgid[:50]
+                    ))
+            
+            # Check: empty plural forms (all should be filled)
+            for idx in range(expected_nplurals or max(plural_forms.keys()) + 1):
+                if idx in plural_forms and not plural_forms[idx]:
+                    result.add(LintIssue(
+                        file=filepath,
+                        line=line,
+                        severity=Severity.ERROR,
+                        rule="plural-form-empty",
+                        message=_("Empty msgstr[{idx}] in plural entry").format(idx=idx),
+                        context=msgid[:50]
+                    ))
+            
+            # Check: placeholders consistent across all plural forms
+            if plural_forms:
+                source_placeholders = set(re.findall(r'%[sd%]|%\d*\$?[sd]|\{[^}]+\}', msgid))
+                for idx, translation in plural_forms.items():
+                    if translation:
+                        trans_placeholders = set(re.findall(r'%[sd%]|%\d*\$?[sd]|\{[^}]+\}', translation))
+                        if source_placeholders and trans_placeholders != source_placeholders:
+                            result.add(LintIssue(
+                                file=filepath,
+                                line=line,
+                                severity=Severity.ERROR,
+                                rule="plural-placeholder-mismatch",
+                                message=_("Placeholder mismatch in msgstr[{idx}]: source has {src}, translation has {trans}").format(
+                                    idx=idx, src=source_placeholders, trans=trans_placeholders
+                                ),
+                                context=msgid[:50]
+                            ))
 
 
 def find_l10n_files(path: str, recursive: bool = True) -> Generator[str, None, None]:

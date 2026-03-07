@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.16.0"
+__version__ = "1.17.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -354,8 +354,11 @@ class L10nLinter:
     def _lint_po(self, filepath: str, content: str, result: LintResult):
         """Lint a .po file."""
         parser = POParser(content, filepath)
+        self.po_parser = parser  # Store for access in check methods
         seen_msgids = {}
         entries_count = 0
+        # Initialize consistency map for this file
+        self.consistency_map = {}
         
         for entry in parser.entries:
             line = entry.get('_line', 0)
@@ -465,6 +468,22 @@ class L10nLinter:
             # Check: Option value consistency
             if msgstr:
                 self._check_option_values(filepath, line, msgid, msgstr, result)
+            
+            # Check: Swedish terminology consistency
+            if msgstr:
+                self._check_terminology(filepath, line, msgid, msgstr, result)
+            
+            # Check: Domain-specific terminology
+            if msgstr:
+                self._check_domain_terminology(filepath, line, msgid, msgstr, result)
+            
+            # Check: False friends
+            if msgstr:
+                self._check_false_friends(filepath, line, msgid, msgstr, result)
+            
+            # Check: Internal consistency
+            if msgstr:
+                self._check_consistency(filepath, line, msgid, msgstr, result)
             
             # Check: Duplicates (use msgctxt+msgid as key to avoid false positives)
             msgctxt = entry.get('msgctxt', '')
@@ -865,6 +884,12 @@ class L10nLinter:
     _IDENTIFIER_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_.\-]+$')
     _FORMAT_ONLY_RE = re.compile(r'^[%\-\d.#+ *]*[sdifcpxXeEgGulLhq]+$')
     _PATH_RE = re.compile(r'^[/~]|^[a-z]+://')
+    # Enhanced false positive detection patterns
+    _EMAIL_RE = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    _URL_RE = re.compile(r'^https?://[^\s]+$')
+    _FILEPATH_RE = re.compile(r'^[/\\]|^[a-zA-Z]:[/\\]|^\./|^\.\./|^~/')
+    _FORMAT_SPECIFIER_RE = re.compile(r'^%[sd%]$|^%\d*\.\d*[sd]$|^%\d+\$[sd]$')
+    _PROGRAMMING_KEYWORD_RE = re.compile(r'^(null|true|false|void|int|str|string|bool|boolean|float|double|long|short|char|byte|const|static|public|private|protected|if|else|for|while|switch|case|break|continue|return|import|from|class|def|function|var|let|const)$', re.IGNORECASE)
     _BRAND_WORDS = {
         'canon', 'epson', 'hp', 'nikon', 'sony', 'samsung', 'fuji', 'fujifilm',
         'kodak', 'olympus', 'pentax', 'panasonic', 'leica', 'ricoh', 'sigma',
@@ -892,6 +917,17 @@ class L10nLinter:
         if self._ALLCAPS_RE.match(s) and len(s) <= 30:
             return True
         if self._IDENTIFIER_RE.match(s) and ' ' not in s:
+            return True
+        # Enhanced false positive detection (from task requirements)
+        if self._EMAIL_RE.match(s):
+            return True
+        if self._URL_RE.match(s):
+            return True
+        if self._FILEPATH_RE.match(s):
+            return True
+        if self._FORMAT_SPECIFIER_RE.match(s):
+            return True
+        if self._PROGRAMMING_KEYWORD_RE.match(s):
             return True
         words = s.split()
         if words and words[0].startswith('-'):
@@ -1063,6 +1099,196 @@ class L10nLinter:
                 ),
                 context=source[:50]
             ))
+
+    def _detect_language_from_po(self, filepath: str, po_parser: 'POParser') -> str:
+        """Detect target language from PO file header or filename."""
+        # Check for Language header in PO file
+        for entry in po_parser.entries[:5]:  # Check first few entries for header
+            if 'msgid' in entry and entry['msgid'] == '':
+                msgstr = entry.get('msgstr', '')
+                # Look for Language: sv or similar
+                if 'Language:' in msgstr:
+                    lang_match = re.search(r'Language:\s*([a-z]{2,3})', msgstr)
+                    if lang_match:
+                        return lang_match.group(1)
+        
+        # Fall back to filename detection
+        filename = Path(filepath).name.lower()
+        if '.sv.' in filename or filename.endswith('.sv.po'):
+            return 'sv'
+        # Add more languages as needed
+        return ''
+
+    def _detect_domain_from_content(self, source_text: str) -> str:
+        """Detect domain from source text content."""
+        source_lower = source_text.lower()
+        
+        # Music domain keywords
+        music_keywords = {'staff', 'note', 'chord', 'tempo', 'clef', 'measure', 'bar', 'scale', 'key'}
+        if any(keyword in source_lower for keyword in music_keywords):
+            return 'music'
+        
+        # Web platform domain keywords
+        web_keywords = {'tracker', 'repository', 'commit', 'merge', 'branch', 'pull request', 'issue'}
+        if any(keyword in source_lower for keyword in web_keywords):
+            return 'web'
+        
+        # Mail domain keywords
+        mail_keywords = {'envelope', 'relay', 'bounce', 'smtp', 'pop3', 'imap', 'mailbox'}
+        if any(keyword in source_lower for keyword in mail_keywords):
+            return 'mail'
+        
+        return ''
+
+    def _check_terminology(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for common Swedish terminology mistakes."""
+        if not hasattr(self, 'po_parser'):
+            return
+        
+        lang = self._detect_language_from_po(filepath, self.po_parser)
+        if lang != 'sv':
+            return
+        
+        # Swedish terminology rules
+        terminology_rules = {
+            'redaktör': ('redigerare', 'editor in software context'),
+            'otydlig': ('luddig', 'fuzzy translation term'),
+            'öppen källa': ('öppen källkod', 'open source'),
+        }
+        
+        translation_lower = translation.lower()
+        for wrong_term, (correct_term, context_note) in terminology_rules.items():
+            if wrong_term in translation_lower:
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.WARNING,
+                    rule="terminology",
+                    message=_("Swedish terminology: prefer '{correct}' over '{wrong}' ({context})").format(
+                        correct=correct_term, wrong=wrong_term, context=context_note
+                    ),
+                    context=translation[:80]
+                ))
+
+    def _check_domain_terminology(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for domain-specific terminology mistakes."""
+        if not hasattr(self, 'po_parser'):
+            return
+        
+        lang = self._detect_language_from_po(filepath, self.po_parser)
+        if lang != 'sv':
+            return
+        
+        domain = self._detect_domain_from_content(source)
+        if not domain:
+            return
+        
+        translation_lower = translation.lower()
+        
+        if domain == 'music':
+            music_rules = {
+                'personal': ('notsystem/notrad', 'staff (music)'),
+                'belopp': ('värde', 'amount (music)'),
+                'stoppning': ('utfyllnad', 'padding'),
+                'rörelse': ('sats', 'movement (music)'),
+                'röst': ('stämma', 'voice (music part)'),
+                'slips': ('bindebåge', 'tie (music)'),
+            }
+            
+            for wrong_term, (correct_term, context_note) in music_rules.items():
+                if wrong_term in translation_lower:
+                    result.add(LintIssue(
+                        file=filepath,
+                        line=line,
+                        severity=Severity.WARNING,
+                        rule="domain-terminology",
+                        message=_("Music domain terminology: prefer '{correct}' over '{wrong}' ({context})").format(
+                            correct=correct_term, wrong=wrong_term, context=context_note
+                        ),
+                        context=translation[:80]
+                    ))
+        
+        elif domain == 'web':
+            web_rules = {
+                'spårare': ('ärendehanterare', 'tracker (issue)'),
+            }
+            
+            for wrong_term, (correct_term, context_note) in web_rules.items():
+                if wrong_term in translation_lower:
+                    result.add(LintIssue(
+                        file=filepath,
+                        line=line,
+                        severity=Severity.WARNING,
+                        rule="domain-terminology",
+                        message=_("Web platform terminology: prefer '{correct}' over '{wrong}' ({context})").format(
+                            correct=correct_term, wrong=wrong_term, context=context_note
+                        ),
+                        context=translation[:80]
+                    ))
+
+    def _check_false_friends(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for Swedish-English false friends."""
+        if not hasattr(self, 'po_parser'):
+            return
+        
+        lang = self._detect_language_from_po(filepath, self.po_parser)
+        if lang != 'sv':
+            return
+        
+        false_friends = {
+            'actual': ('aktuell', 'faktisk/verklig'),
+            'eventually': ('eventuellt', 'slutligen/till slut'),
+            'patron': ('patron', 'kund/beskyddare'),
+            'billion': ('biljon', 'miljard'),
+            'chef': ('chef', 'kock'),  # Only in cooking context
+        }
+        
+        source_lower = source.lower()
+        translation_lower = translation.lower()
+        
+        for english_word, (wrong_swedish, correct_swedish) in false_friends.items():
+            if english_word in source_lower and wrong_swedish in translation_lower:
+                # Special handling for chef - only flag in cooking context
+                if english_word == 'chef' and not any(cook_word in source_lower for cook_word in ['cook', 'kitchen', 'recipe', 'food']):
+                    continue
+                
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.WARNING,
+                    rule="false-friends",
+                    message=_("False friend: '{english}' should be '{correct}', not '{wrong}'").format(
+                        english=english_word, correct=correct_swedish, wrong=wrong_swedish
+                    ),
+                    context=f"{source[:40]} → {translation[:40]}"
+                ))
+
+    def _check_consistency(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check internal consistency within the file."""
+        if not hasattr(self, 'consistency_map'):
+            self.consistency_map = {}
+        
+        # Skip very short or technical strings
+        if len(source) < 10 or not any(c.isalpha() for c in source):
+            return
+        
+        # Use source as key, excluding msgctxt for now (could be enhanced)
+        source_key = source.strip()
+        
+        if source_key in self.consistency_map:
+            existing_translation = self.consistency_map[source_key]
+            if existing_translation != translation and translation:
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.INFO,
+                    rule="consistency",
+                    message=_("Inconsistent translation: same source has different translations"),
+                    context=f"'{source[:40]}' → '{existing_translation[:30]}' vs '{translation[:30]}'"
+                ))
+        else:
+            if translation:  # Only store non-empty translations
+                self.consistency_map[source_key] = translation
 
 
 def find_l10n_files(path: str, recursive: bool = True) -> Generator[str, None, None]:
@@ -1463,6 +1689,11 @@ def main():
     parser.add_argument('--check', action='store_true', help=_('Exit code only, no output (for CI)'))
     parser.add_argument('--skip-fuzzy', action='store_true', help=_('Ignore fuzzy warnings'))
     parser.add_argument('--disable', metavar='RULES', help=_('Comma-separated list of rule names to disable (e.g. trailing-whitespace,keyboard-shortcut-missing)'))
+    parser.add_argument('--checks', metavar='RULES', help=_('Comma-separated list of specific checks to run (e.g. terminology,false-friends,consistency)'))
+    parser.add_argument('--skip-checks', metavar='RULES', help=_('Comma-separated list of specific checks to skip (e.g. terminology,domain-terminology)'))
+    parser.add_argument('--terminology', action='store_true', default=True, help=_('Enable terminology checks (default: enabled)'))
+    parser.add_argument('--no-terminology', action='store_false', dest='terminology', help=_('Disable terminology checks'))
+    parser.add_argument('--glossary', metavar='FILE', help=_('Load custom glossary file (TSV format: wrong\tcorrect\tcontext)'))
     parser.add_argument('--verbose', '-V', action='store_true', help=_('Show detailed progress'))
     parser.add_argument('--gtk', '-G', action='store_true', help=_('Launch GTK graphical interface'))
     parser.add_argument('-h', '--help', action='help', help=_('Show this help message and exit'))
@@ -1532,6 +1763,29 @@ def main():
     disabled = set()
     if hasattr(args, 'disable') and args.disable:
         disabled = {r.strip() for r in args.disable.split(',')}
+    
+    # Handle new CLI arguments for terminology checks
+    terminology_disabled = set()
+    
+    # If --no-terminology, disable all terminology checks
+    if hasattr(args, 'terminology') and not args.terminology:
+        terminology_disabled.update(['terminology', 'domain-terminology', 'false-friends', 'consistency'])
+    
+    # Handle --skip-checks
+    if hasattr(args, 'skip_checks') and args.skip_checks:
+        terminology_disabled.update(r.strip() for r in args.skip_checks.split(','))
+    
+    # Handle --checks (only run specific checks)
+    if hasattr(args, 'checks') and args.checks:
+        all_terminology_checks = {'terminology', 'domain-terminology', 'false-friends', 'consistency'}
+        specified_checks = {r.strip() for r in args.checks.split(',')}
+        # Disable checks that were not specified
+        terminology_disabled.update(all_terminology_checks - specified_checks)
+    
+    # Merge with existing disabled rules
+    disabled.update(terminology_disabled)
+    
+    # TODO: Handle --glossary if needed in future versions
     
     linter = L10nLinter(config={
         'max_length': args.max_length,

@@ -671,14 +671,15 @@ class L10nLinter:
             ))
         
         # Double spaces — only between words (not leading indentation)
+        # Skip when source also has double spaces (intentional formatting)
         has_double = False
-        for tline in translation.split('\n'):
-            stripped = tline.lstrip()
-            if '  ' in stripped:
-                # Check it's between word characters (not just formatting)
-                if re.search(r'\S  +\S', stripped):
-                    has_double = True
-                    break
+        if '  ' not in source:
+            for tline in translation.split('\n'):
+                stripped = tline.lstrip()
+                if '  ' in stripped:
+                    if re.search(r'\w  +\w', stripped):
+                        has_double = True
+                        break
         if has_double:
             result.add(LintIssue(
                 file=filepath,
@@ -699,7 +700,7 @@ class L10nLinter:
         # Detect mixed quote styles
         straight_quotes = translation.count('"') + translation.count("'")
         curly_quotes = translation.count('\u201c') + translation.count('\u201d') + translation.count('\u2018') + translation.count('\u2019')
-        german_quotes = translation.count('\u201e') + translation.count('\u201c')
+        german_quotes = translation.count('\u201e')  # Only „ (U+201E), don't re-count chars in curly_quotes
         
         quote_styles = sum(1 for c in [straight_quotes, curly_quotes, german_quotes] if c > 0)
         if quote_styles > 1:
@@ -712,10 +713,18 @@ class L10nLinter:
                 context=source[:50]
             ))
     
+    # Real HTML tags only (exclude man page B<>, I<>, shell redirects, math comparisons)
+    _REAL_HTML_TAG = re.compile(
+        r'</?(?:a|b|i|u|p|br|hr|em|tt|li|ul|ol|dl|dt|dd|td|th|tr|div|span|pre|code|strong|'
+        r'table|thead|tbody|img|font|center|blockquote|h[1-6]|sup|sub|small|big|'
+        r'input|select|option|form|label|textarea|button)(?:\s[^>]*)?>',
+        re.IGNORECASE
+    )
+
     def _check_html_tags(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for HTML tag mismatches."""
-        source_tags = sorted(self.HTML_TAG_PATTERN.findall(source))
-        trans_tags = sorted(self.HTML_TAG_PATTERN.findall(translation))
+        source_tags = sorted(self._REAL_HTML_TAG.findall(source))
+        trans_tags = sorted(self._REAL_HTML_TAG.findall(translation))
         
         if source_tags != trans_tags and source_tags:
             result.add(LintIssue(
@@ -850,20 +859,93 @@ class L10nLinter:
                 context=source[:50]
             ))
     
+    # Patterns for false positive detection in source-equals-translation
+    _CAMELCASE_RE = re.compile(r'^[A-Z][a-z]+(?:[A-Z][a-z]+)+$')
+    _ALLCAPS_RE = re.compile(r'^[A-Z][A-Z0-9_\-./: ]{0,60}$')
+    _IDENTIFIER_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_.\-]+$')
+    _FORMAT_ONLY_RE = re.compile(r'^[%\-\d.#+ *]*[sdifcpxXeEgGulLhq]+$')
+    _PATH_RE = re.compile(r'^[/~]|^[a-z]+://')
+    _BRAND_WORDS = {
+        'canon', 'epson', 'hp', 'nikon', 'sony', 'samsung', 'fuji', 'fujifilm',
+        'kodak', 'olympus', 'pentax', 'panasonic', 'leica', 'ricoh', 'sigma',
+    }
+    _COMMON_ENGLISH_SRC_EQ = {
+        'the', 'is', 'are', 'was', 'were', 'been', 'have', 'has', 'had',
+        'this', 'that', 'will', 'would', 'could', 'should', 'for', 'with',
+        'from', 'into', 'your', 'you', 'can', 'not', 'and', 'but', 'which',
+        'when', 'where', 'what', 'how', 'why', 'also', 'only', 'must', 'may',
+    }
+
+    def _is_likely_false_positive_src_eq(self, source: str) -> bool:
+        """Check if source-equals-translation is likely a false positive."""
+        s = source.strip()
+        if len(s) <= 3:
+            return True
+        if not any(c.isalpha() for c in s):
+            return True
+        if self._FORMAT_ONLY_RE.match(s):
+            return True
+        if self._PATH_RE.match(s):
+            return True
+        if self._CAMELCASE_RE.match(s):
+            return True
+        if self._ALLCAPS_RE.match(s) and len(s) <= 30:
+            return True
+        if self._IDENTIFIER_RE.match(s) and ' ' not in s:
+            return True
+        words = s.split()
+        if words and words[0].startswith('-'):
+            return True
+        if len(words) == 1:
+            if s[0].isupper():
+                return True
+            if s.islower() and len(s) <= 15 and s.lower() not in self._COMMON_ENGLISH_SRC_EQ:
+                return True
+        if len(words) == 2 and all(w[0].isupper() for w in words if w):
+            return True
+        if any(w.lower() in self._BRAND_WORDS for w in words):
+            return True
+        special_chars = sum(1 for c in s if c in '=|<>[]{}()@#$')
+        if special_chars >= 2:
+            return True
+        placeholders = self.PRINTF_PATTERN.findall(s)
+        alpha_len = sum(1 for c in s if c.isalpha())
+        if placeholders and alpha_len < 10:
+            return True
+        if re.match(r'^[\d.,x\u00d7X\s]+(?:DPI|dpi|mm|cm|in|pt|px|lpi)\b', s):
+            return True
+        if re.match(r'^[\d.,xX\u00d7\s\-]+(?:\s+(?:in|mm|cm))?\s*(?:label|sheet)?$', s.strip()):
+            return True
+        paper_keywords = {'iso', 'jis', 'ansi', 'letter', 'legal', 'tabloid', 'executive', 'super', 'folio'}
+        if len(words) <= 4 and any(w.lower() in paper_keywords for w in words):
+            return True
+        if re.search(r'version\s+[\d.]+', s, re.IGNORECASE):
+            return True
+        if alpha_len < len(s) * 0.3 and len(s) > 3:
+            return True
+        if '@' in s or '${' in s:
+            return True
+        if re.match(r'^(?:Extra|Channel|Slot|Tray|Bin|Mode|Type|Level)\s+\d+$', s):
+            return True
+        return False
+
     def _check_source_equals_translation(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check if translation is identical to source."""
-        # Skip short strings and strings with only special chars/numbers
         if len(source) < 5 or not any(c.isalpha() for c in source):
             return
-        
         if source == translation:
+            if self._is_likely_false_positive_src_eq(source):
+                return
+            words = set(w.lower() for w in re.findall(r'[a-zA-Z]+', source))
+            has_english = bool(words & self._COMMON_ENGLISH_SRC_EQ)
+            severity = Severity.WARNING if len(source) > 30 and has_english else Severity.INFO
             result.add(LintIssue(
                 file=filepath,
                 line=line,
-                severity=Severity.INFO,
+                severity=severity,
                 rule="source-equals-translation",
                 message=_("Translation is identical to source (possibly untranslated)"),
-                context=source[:50]
+                context=source[:80]
             ))
     
     def _check_option_values(self, filepath: str, line: int, source: str, translation: str, result: LintResult):

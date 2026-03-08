@@ -1,0 +1,124 @@
+# Test file for Weblate-inspired quality checks
+# Tests the 10 new checks added in version 1.19.0
+
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: sv\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Rule: zero-width-space (zero-width characters in translation)
+msgid "Normal text"
+msgstr "Normal text med​osynligt tecken"
+
+msgid "Another test"
+msgstr "Test med‎‏LTR/RTL marks"
+
+msgid "BOM test"
+msgstr "﻿Text med BOM"
+
+# Rule: end-stop-mismatch (source ends with period, translation doesn't)
+msgid "Save the document."
+msgstr "Spara dokumentet"
+
+# Rule: end-stop-mismatch (translation has period, source doesn't)
+msgid "Close window"
+msgstr "Stäng fönster."
+
+# Rule: end-stop-mismatch (should ignore short strings)
+msgid "OK."
+msgstr "OK"
+
+# Rule: end-stop-mismatch (should ignore abbreviations like Mr.)
+msgid "Contact Mr. Johnson for details."
+msgstr "Kontakta Mr. Johnson för detaljer"
+
+# Rule: end-stop-mismatch (should allow ellipsis mapping)
+msgid "Loading..."
+msgstr "Laddar…"
+
+# Rule: ellipsis (three dots should be typographic ellipsis)
+msgid "Please wait"
+msgstr "Vänta..."
+
+# Rule: xml-tags-mismatch (missing tag in translation)
+msgid "This is <b>bold</b> and <i>italic</i> text"
+msgstr "Detta är <b>fet</b> text"
+
+# Rule: xml-tags-mismatch (extra tag in translation)
+msgid "Simple text"
+msgstr "Enkel <b>text</b>"
+
+# Rule: xml-tags-mismatch (different tag case)
+msgid "Text with <B>bold</B>"
+msgstr "Text med <b>fet</b>"
+
+# Rule: duplicate-words (should catch triple words)
+msgid "Single word"
+msgstr "Samma samma samma ord"
+
+# Rule: duplicate-words (should catch regular duplicates)
+msgid "The message"
+msgstr "Ett ett meddelande"
+
+# Rule: duplicate-words (should allow Swedish exceptions)
+msgid "Preposition test"
+msgstr "Text med i i början"
+
+msgid "Another preposition"
+msgstr "Text med på på slutet"
+
+# Rule: same-plurals (plural forms identical but source differs)
+msgid "File"
+msgid_plural "Files"
+msgstr[0] "Fil"
+msgstr[1] "Fil"
+
+# Rule: same-plurals (should not warn when source is also identical)
+msgid "Sheep"
+msgid_plural "Sheep"
+msgstr[0] "Får"
+msgstr[1] "Får"
+
+# Rule: punctuation-mismatch (missing colon)
+msgid "Select option:"
+msgstr "Välj alternativ"
+
+# Rule: punctuation-mismatch (missing exclamation)
+msgid "Error!"
+msgstr "Fel"
+
+# Rule: punctuation-mismatch (missing question mark)
+msgid "Are you sure?"
+msgstr "Är du säker"
+
+# Rule: punctuation-mismatch (missing semicolon)
+msgid "First action; second action"
+msgstr "Första åtgärd, andra åtgärd"
+
+# Rule: url-preservation (missing URL in translation)
+msgid "Visit our website at https://example.com for more info"
+msgstr "Besök vår webbplats för mer information"
+
+# Rule: url-preservation (changed URL in translation)
+msgid "Download from https://original.com/file.zip"
+msgstr "Ladda ner från https://different.com/file.zip"
+
+# Rule: escaped-newline-count (different \\n count)
+msgid "First line\\\\nSecond line\\\\nThird line"
+msgstr "Första raden\\\\nAndra raden"
+
+msgid "No newlines here"
+msgstr "Inga rader här\\\\nMen här"
+
+# Rule: max-length-ratio (translation too long)
+msgid "Short text"
+msgstr "Detta är en mycket mycket mycket lång svensk översättning som är betydligt längre än källtexten och överstiger tredubbelt förhållande"
+
+# Should NOT trigger max-length-ratio (source too short)
+msgid "Hi"
+msgstr "Hej då kompis"
+
+# Should NOT trigger max-length-ratio (reasonable ratio)
+msgid "This is a reasonable length source text"
+msgstr "Detta är en rimlig längd på källtext"

@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.19.0] - 2026-03-07
+
+### Added
+- **Weblate-inspired quality checks** — 10 new checks based on Weblate's quality framework:
+  - `zero-width-space` — Detects invisible Unicode characters (zero-width space, LTR/RTL marks, BOM) added in translation
+  - `end-stop-mismatch` — Ensures period punctuation matches between source and translation (with abbreviation exceptions)
+  - `ellipsis` — Suggests typographic ellipsis (…) instead of three dots (...) 
+  - `xml-tags-mismatch` — Verifies XML/HTML tags match between source and translation
+  - `duplicate-words` — Enhanced duplicate detection with Swedish exceptions ("i i", "på på") and triple-word detection
+  - `same-plurals` — Warns when all plural forms are identical but source forms differ
+  - `punctuation-mismatch` — Extended punctuation matching for :, ;, !, ? characters
+  - `url-preservation` — Ensures URLs from source are preserved in translation
+  - `escaped-newline-count` — Validates \\n count matches between source and translation
+  - `max-length-ratio` — Warns when translation exceeds 3x source length (excluding short strings)
+
 ## [1.16.0] - 2026-02-19
 
 ### Fixed

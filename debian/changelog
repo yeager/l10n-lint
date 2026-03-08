@@ -1,3 +1,10 @@
+l10n-lint (1.19.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Updated README with installation and translation info.
+
+ -- Daniel Nylander <daniel@danielnylander.se>  Sun, 08 Mar 2026 10:30:00 +0100
+
 l10n-lint (1.18.0-1) unstable; urgency=medium
 
   * New upstream release.

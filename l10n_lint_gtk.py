@@ -57,9 +57,9 @@ APP_ID = "se.danielnylander.l10n-lint"
 # Translation setup - use same domain and locale as CLI
 DOMAIN = "l10n-lint"
 _possible_locale_dirs = [
+    Path(__file__).parent / "locale",  # Project locale (development/pip install -e)
     Path("/usr/share/l10n-lint/locale"),
     Path("/usr/share/locale"),  # Standard system locale (RPM/Fedora)
-    Path(__file__).parent / "locale",
 ]
 LOCALE_DIR = None
 for _dir in _possible_locale_dirs:

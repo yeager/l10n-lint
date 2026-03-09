@@ -94,11 +94,11 @@ msgstr "Översättningen har efterföljande blanksteg"
 
 #: l10n_lint.py:751
 msgid "Source ends with space but translation does not"
-msgstr ""
+msgstr "Källan slutar med mellanslag men översättningen gör det inte"
 
 #: l10n_lint.py:762
 msgid "Source starts with space but translation does not"
-msgstr ""
+msgstr "Källan börjar med mellanslag, men översättningen gör det inte"
 
 #: l10n_lint.py:782
 msgid "Translation contains double spaces between words"
@@ -164,7 +164,7 @@ msgstr ""
 #: l10n_lint.py:1184 l10n_lint.py:1201
 #, python-brace-format
 msgid "Decimal point «{num}» should use comma in Swedish (e.g. {fix})"
-msgstr ""
+msgstr "Decimalkomma «{num}» ska vara kommatecken på svenska (t.ex. {fix})"
 
 #: l10n_lint.py:1221
 msgid "Currency format may need localization"
@@ -191,77 +191,82 @@ msgstr ""
 #: l10n_lint.py:1344
 #, python-brace-format
 msgid "Swedish: '{word}' is an anglicism, use Swedish equivalent"
-msgstr ""
+msgstr "Svenska: '{word}' är en anglicism, använd motsvarande svensk term"
 
 #: l10n_lint.py:1358
 msgid ""
 "Swedish terminology: prefer 'rad' over 'linje' in CLI/programming context"
 msgstr ""
+"Svensk terminologi: föredra \"rad\" framför \"linje\" i "
+"CLI/programmeringssammanhang"
 
 #: l10n_lint.py:1370
 msgid "Swedish: 'y/n' should be 'j/n' (ja/nej)"
-msgstr ""
+msgstr "Svenska: \"y/n\" bör vara \"j/n\" (ja/nej)"
 
 #: l10n_lint.py:1382
 #, python-brace-format
 msgid "Swedish terminology: prefer '{correct}' over '{wrong}' ({context})"
 msgstr ""
+"Svenska terminologi: föredra '{correct}' framför '{wrong}' ({context})"
 
 #: l10n_lint.py:1420
 #, python-brace-format
 msgid ""
 "Music domain terminology: prefer '{correct}' over '{wrong}' ({context})"
 msgstr ""
+"Musikdomänterminologi: föredra '{correct}' framför '{wrong}' ({context})"
 
 #: l10n_lint.py:1438
 #, python-brace-format
 msgid ""
 "Web platform terminology: prefer '{correct}' over '{wrong}' ({context})"
 msgstr ""
+"Webbplattformsterminologi: föredra '{correct}' framför '{wrong}' ({context})"
 
 #: l10n_lint.py:1475
 #, python-brace-format
 msgid "False friend: '{english}' should be '{correct}', not '{wrong}'"
-msgstr ""
+msgstr "Falsk vän: '{english}' ska vara '{correct}', inte '{wrong}'"
 
 #: l10n_lint.py:1501
 msgid "Inconsistent translation: same source has different translations"
-msgstr ""
+msgstr "Inkonsekvent översättning: samma källa har olika översättningar"
 
 #: l10n_lint.py:1595
 #, python-brace-format
 msgid "Possible typo(s): {words}"
-msgstr ""
+msgstr "Möjliga stavfel: {words}"
 
 #: l10n_lint.py:1669
 #, python-brace-format
 msgid "Missing Plural-Forms header for {lang} (expected nplurals={n})"
-msgstr ""
+msgstr "Saknar Plural-Forms-rubrik för {lang} (förväntade nplurals={n})"
 
 #: l10n_lint.py:1680
 #, python-brace-format
 msgid "Wrong nplurals={got} for {lang} (expected nplurals={expected})"
-msgstr ""
+msgstr "Felaktig nplurals={got} för {lang} (förväntat nplurals={expected})"
 
 #: l10n_lint.py:1709
 #, python-brace-format
 msgid "Suspicious plural formula for {lang}: got '{got}', expected '{exp}'"
-msgstr ""
+msgstr "Misstänkt pluralformel för {lang}: fick '{got}', förväntade '{exp}'"
 
 #: l10n_lint.py:1755
 #, python-brace-format
 msgid "Missing plural forms: got {got}, expected {exp} (nplurals={n})"
-msgstr ""
+msgstr "Saknade pluralformer: fick {got}, förväntade {exp} (nplurals={n})"
 
 #: l10n_lint.py:1766
 #, python-brace-format
 msgid "Extra plural forms: got {got}, expected {exp} (nplurals={n})"
-msgstr ""
+msgstr "Extra pluralformer: fick {got}, förväntade {exp} (nplurals={n})"
 
 #: l10n_lint.py:1780
 #, python-brace-format
 msgid "Empty msgstr[{idx}] in plural entry"
-msgstr ""
+msgstr "Tom msgstr[{idx}] i pluralinmatning"
 
 #: l10n_lint.py:1796
 #, python-brace-format
@@ -269,73 +274,82 @@ msgid ""
 "Placeholder mismatch in msgstr[{idx}]: source has {src}, translation has "
 "{trans}"
 msgstr ""
+"Platshållare stämmer inte överens i msgstr[{idx}]: källan har {src}, "
+"översättningen har {trans}"
 
 #: l10n_lint.py:1826
 #, python-brace-format
 msgid "Translation contains zero-width characters not in source: {chars}"
 msgstr ""
+"Översättningen innehåller tecken med nollbredd som inte finns i källtexten: "
+"{chars}"
 
 #: l10n_lint.py:1864
 msgid "Source ends with period but translation does not"
-msgstr ""
+msgstr "Källan slutar med punkt, men översättningen gör det inte"
 
 #: l10n_lint.py:1873
 msgid "Translation ends with period but source does not"
-msgstr ""
+msgstr "Översättningen slutar med punkt, men källtexten gör det inte"
 
 #: l10n_lint.py:1885
 msgid "Use typographic ellipsis (…) instead of three dots (...)"
-msgstr ""
+msgstr "Använd typografiska ellipser (…) istället för tre punkter (...)"
 
 #: l10n_lint.py:1908
 #, python-brace-format
 msgid "XML/HTML tags mismatch: source has {src}, translation has {trans}"
 msgstr ""
+"XML/HTML-taggar stämmer inte överens: källan har {src}, översättningen har "
+"{trans}"
 
 #: l10n_lint.py:1926
 #, python-brace-format
 msgid "Triple duplicate word: '{word}'"
-msgstr ""
+msgstr "Trippelduplicerat ord: '{word}'"
 
 #: l10n_lint.py:1941
 #, python-brace-format
 msgid "Duplicate word: '{word}'"
-msgstr ""
+msgstr "Duplicerat ord: '{word}'"
 
 #: l10n_lint.py:1968
 msgid "All plural forms are identical, but source forms differ"
-msgstr ""
+msgstr "Alla pluralformer är identiska, men källformerna skiljer sig åt"
 
 #: l10n_lint.py:1999
 #, python-brace-format
 msgid "Source ends with '{punct}' but translation does not"
-msgstr ""
+msgstr "Källan slutar med '{punct}' men översättningen gör det inte"
 
 #: l10n_lint.py:2009
 #, python-brace-format
 msgid "Translation ends with '{punct}' but source does not"
-msgstr ""
+msgstr "Översättningen slutar med \"{punct}\", men källtexten gör det inte"
 
 #: l10n_lint.py:2019
 #, python-brace-format
 msgid "Source contains '{punct}' but translation does not"
-msgstr ""
+msgstr "Källan innehåller '{punct}' men översättningen gör det inte"
 
 #: l10n_lint.py:2036
 #, python-brace-format
 msgid "URLs missing in translation: {urls}"
-msgstr ""
+msgstr "URL:er som saknas i översättningen: {urls}"
 
 #: l10n_lint.py:2051
 #, python-brace-format
 msgid ""
 "Escaped newline count mismatch: source has {src}, translation has {trans}"
 msgstr ""
+"Antal escape-nyrader stämmer inte: källtexten har {src}, översättningen har "
+"{trans}"
 
 #: l10n_lint.py:2069
 #, python-brace-format
 msgid "Translation is {ratio:.1f}x longer than source (max 3x recommended)"
 msgstr ""
+"Översättningen är {ratio:.1f}x längre än källtexten (max 3x rekommenderas)"
 
 #: l10n_lint.py:2148
 #, python-brace-format
@@ -441,30 +455,36 @@ msgid ""
 "Comma-separated list of rule names to disable (e.g. trailing-"
 "whitespace,keyboard-shortcut-missing)"
 msgstr ""
+"Kommaseparerad lista över regelnamn som ska inaktiveras (t.ex. trailing-"
+"whitespace,keyboard-shortcut-missing)"
 
 #: l10n_lint.py:2472
 msgid ""
 "Comma-separated list of specific checks to run (e.g. terminology,false-"
 "friends,consistency)"
 msgstr ""
+"Kommaseparerad lista över specifika kontroller som ska utföras (t.ex. "
+"terminologi, falska vänner, konsistens)"
 
 #: l10n_lint.py:2473
 msgid ""
 "Comma-separated list of specific checks to skip (e.g. terminology,domain-"
 "terminology)"
 msgstr ""
+"Kommaseparerad lista över specifika kontroller som ska hoppas över (t.ex. "
+"terminologi, domänterminologi)"
 
 #: l10n_lint.py:2474
 msgid "Enable terminology checks (default: enabled)"
-msgstr ""
+msgstr "Aktivera terminologikontroller (standard: aktiverat)"
 
 #: l10n_lint.py:2475
 msgid "Disable terminology checks"
-msgstr ""
+msgstr "Inaktivera terminologikontroller"
 
 #: l10n_lint.py:2476
 msgid "Load custom glossary file (TSV format: wrong\tcorrect\tcontext)"
-msgstr ""
+msgstr "Läs in anpassad ordlista (TSV-format: felaktig\tkorrekt\tsammanhang)"
 
 #: l10n_lint.py:2477
 msgid "Show detailed progress"

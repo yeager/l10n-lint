@@ -1,100 +1,96 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Daniel Nylander
-# This file is distributed under the same license as the l10n-lint-gtk package.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 # Translators:
 # Daniel Nylander <po@danielnylander.se>, 2026
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: l10n-lint-gtk\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-08 10:44+0100\n"
 "PO-Revision-Date: 2026-02-15 07:20+0000\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>, 2026\n"
-"Language-Team: Swedish (https://app.transifex.com/danielnylander/teams/"
-"304710/sv/)\n"
-"Language: sv\n"
+"Language-Team: Swedish (https://app.transifex.com/danielnylander/teams/304710/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: sv\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: l10n_lint.py:332
 #, python-brace-format
 msgid "Could not read file: {error}"
-msgstr ""
+msgstr "Kunde inte läsa filen: {error}"
 
 #: l10n_lint.py:349
 #, python-brace-format
 msgid "Unknown file format: {ext}"
-msgstr ""
+msgstr "Okänd filformat: {ext}"
 
 #: l10n_lint.py:392 l10n_lint.py:406
-#, fuzzy
 msgid "Missing translation (empty msgstr)"
-msgstr "Saknade översättningar"
+msgstr "Saknad översättning (tom msgstr)"
 
 #: l10n_lint.py:417
 msgid "Fuzzy translation needs review"
-msgstr ""
+msgstr "Luddig översättning behöver granskas"
 
 #: l10n_lint.py:546
 #, python-brace-format
 msgid "Duplicate msgid (first seen at line {line})"
-msgstr ""
+msgstr "Duplicerat msgid (första förekomsten i rad {line})"
 
 #: l10n_lint.py:576
-#, fuzzy
 msgid "Unfinished/missing translation"
-msgstr "Saknade översättningar"
+msgstr "Oavslutad/saknad översättning"
 
 #: l10n_lint.py:587
-#, fuzzy
 msgid "Vanished translation (source removed)"
-msgstr "Varna om översättningen är identisk med källtexten"
+msgstr "Försvunnen översättning (källan borttagen)"
 
 #: l10n_lint.py:618
 #, python-brace-format
 msgid ""
 "Placeholder mismatch ({name}): source has {source}, translation has {trans}"
 msgstr ""
+"Platshållare stämmer inte överens ({name}): källan har {source}, "
+"översättningen har {trans}"
 
 #: l10n_lint.py:643
 #, python-brace-format
 msgid "Translation is very long ({length} chars, max {max})"
-msgstr ""
+msgstr "Översättningen är mycket lång ({length} tecken, max {max})"
 
 #: l10n_lint.py:655
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Translation is {ratio:.1f}x longer than source"
-msgstr "Varna om översättningen är mycket längre/kortare än källtexten"
+msgstr "Översättningen är {ratio:.1f} gånger längre än källtexten"
 
 #: l10n_lint.py:668
 #, python-brace-format
 msgid "Translation is suspiciously short ({ratio:.1f}x of source)"
-msgstr ""
+msgstr "Översättningen är misstänkt kort ({ratio:.1f}x av källtexten)"
 
 #: l10n_lint.py:697
 #, python-brace-format
 msgid "Missing ending punctuation (source ends with '{char}')"
-msgstr ""
+msgstr "Saknad slutpunkt (källan slutar med '{char}')"
 
 #: l10n_lint.py:706
-#, fuzzy
 msgid "Extra ending punctuation (source has none)"
-msgstr "Kontrollera att avslutande skiljetecken stämmer överens"
+msgstr "Extra slutpunkt (källan har ingen)"
 
 #: l10n_lint.py:726
 msgid "Source starts with uppercase, translation with lowercase"
-msgstr ""
+msgstr "Källan börjar med versaler, översättningen med gemener"
 
 #: l10n_lint.py:740
-#, fuzzy
 msgid "Translation has trailing whitespace"
-msgstr "Kontrollera ledande/efterföljande blanksteg"
+msgstr "Översättningen har efterföljande blanksteg"
 
 #: l10n_lint.py:751
 msgid "Source ends with space but translation does not"
@@ -106,61 +102,64 @@ msgstr ""
 
 #: l10n_lint.py:782
 msgid "Translation contains double spaces between words"
-msgstr ""
+msgstr "Översättningen innehåller dubbla mellanslag mellan ord"
 
 #: l10n_lint.py:805
 msgid "Translation has mixed quote styles"
-msgstr ""
+msgstr "Översättningen har blandade citatstilar"
 
 #: l10n_lint.py:835
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "HTML tags mismatch: source has {source}, translation has {trans}"
 msgstr ""
-"Verifiera att HTML-taggarna stämmer överens mellan källa och översättning"
+"HTML-taggar stämmer inte överens: källan har {source}, översättningen har "
+"{trans}"
 
 #: l10n_lint.py:863
 #, python-brace-format
 msgid "Escape character count mismatch: {details}"
-msgstr ""
+msgstr "Felaktig antal escape-tecken: {details}"
 
 #: l10n_lint.py:889
 msgid "Keyboard accelerator missing in translation"
-msgstr ""
+msgstr "Tangentbordsgenväg saknas i översättningen"
 
 #: l10n_lint.py:901
 #, python-brace-format
 msgid "Nordic character '{char}' used as keyboard accelerator"
-msgstr ""
+msgstr "Nordiskt tecken '{char}' används som tangentbordsgenväg"
 
 #: l10n_lint.py:919
 #, python-brace-format
 msgid "Numbers {nums} from source missing in translation"
-msgstr ""
+msgstr "Siffrorna {nums} från källan saknas i översättningen"
 
 #: l10n_lint.py:943
 #, python-brace-format
 msgid "Translation may contain untranslated English: {words}"
-msgstr ""
+msgstr "Översättningen kan innehålla oröstat engelska: {words}"
 
 #: l10n_lint.py:958
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Repeated word: '{word}'"
-msgstr "Upprepade ord"
+msgstr "Upprepat ord: '{word}'"
 
 #: l10n_lint.py:1064
 msgid "Translation is identical to source (possibly untranslated)"
-msgstr ""
+msgstr "Översättningen är identisk med källtexten (möjligen oöversatt)"
 
 #: l10n_lint.py:1093
 #, python-brace-format
 msgid "Option value '{value}' from source not found in translation"
-msgstr ""
+msgstr "Alternativvärdet '{value}' från källan hittades inte i översättningen"
 
 #: l10n_lint.py:1111
 msgid ""
 "Number formatting may not be localized (e.g. 1,000 should be 1 000 in some "
 "locales)"
 msgstr ""
+"Talformateringen kanske inte är lokaliserad (t.ex. 1 000 ska vara 1 000 i "
+"vissa språkversioner)."
 
 #: l10n_lint.py:1184 l10n_lint.py:1201
 #, python-brace-format
@@ -169,22 +168,25 @@ msgstr ""
 
 #: l10n_lint.py:1221
 msgid "Currency format may need localization"
-msgstr ""
+msgstr "Valutaförmatet kan behöva lokaliseras"
 
 #: l10n_lint.py:1237
 msgid "Date format may not be localized"
-msgstr ""
+msgstr "Datumformatet kan inte lokaliseras"
 
 #: l10n_lint.py:1252
 #, python-brace-format
 msgid "Newline count mismatch: source has {src}, translation has {trans}"
 msgstr ""
+"Antalet radbrytningar stämmer inte överens: källtexten har {src}, "
+"översättningen har {trans}"
 
 #: l10n_lint.py:1269
 #, python-brace-format
 msgid ""
 "Python format string mismatch: source has {src}, translation has {trans}"
 msgstr ""
+"Python-formatsträngkonflikt: källan har {src}, översättningen har {trans}"
 
 #: l10n_lint.py:1344
 #, python-brace-format
@@ -207,12 +209,14 @@ msgstr ""
 
 #: l10n_lint.py:1420
 #, python-brace-format
-msgid "Music domain terminology: prefer '{correct}' over '{wrong}' ({context})"
+msgid ""
+"Music domain terminology: prefer '{correct}' over '{wrong}' ({context})"
 msgstr ""
 
 #: l10n_lint.py:1438
 #, python-brace-format
-msgid "Web platform terminology: prefer '{correct}' over '{wrong}' ({context})"
+msgid ""
+"Web platform terminology: prefer '{correct}' over '{wrong}' ({context})"
 msgstr ""
 
 #: l10n_lint.py:1475
@@ -284,10 +288,9 @@ msgid "Use typographic ellipsis (…) instead of three dots (...)"
 msgstr ""
 
 #: l10n_lint.py:1908
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "XML/HTML tags mismatch: source has {src}, translation has {trans}"
 msgstr ""
-"Verifiera att HTML-taggarna stämmer överens mellan källa och översättning"
 
 #: l10n_lint.py:1926
 #, python-brace-format
@@ -319,9 +322,9 @@ msgid "Source contains '{punct}' but translation does not"
 msgstr ""
 
 #: l10n_lint.py:2036
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "URLs missing in translation: {urls}"
-msgstr "Saknade översättningar"
+msgstr ""
 
 #: l10n_lint.py:2051
 #, python-brace-format
@@ -337,32 +340,32 @@ msgstr ""
 #: l10n_lint.py:2148
 #, python-brace-format
 msgid "Warning: Could not fetch {path}: {error}"
-msgstr ""
+msgstr "Varning: Kunde inte hämta {path}: {error}"
 
 #: l10n_lint.py:2166
 #, python-brace-format
 msgid "Invalid URL scheme: {scheme}"
-msgstr ""
+msgstr "Ogiltigt URL-schema: {scheme}"
 
 #: l10n_lint.py:2174
 #, python-brace-format
 msgid "URL must point to a .po or .ts file, got: {ext}"
-msgstr ""
+msgstr "URL måste peka på en .po- eller .ts-fil, fick: {ext}"
 
 #: l10n_lint.py:2408
 #, python-brace-format
 msgid "✅ {count} file(s) checked, no issues found."
-msgstr ""
+msgstr "✅ {count} fil(er) kontrollerade, inga problem hittades."
 
 #: l10n_lint.py:2419
 #, python-brace-format
 msgid "  {icon} Line {line}: [{rule}] {message}"
-msgstr ""
+msgstr "  {icon} Rad {line}: [{rule}] {message}"
 
 #: l10n_lint.py:2423
 #, python-brace-format
 msgid "     Context: \"{context}...\""
-msgstr ""
+msgstr "     Kontext: \"{context}...\""
 
 #: l10n_lint.py:2425
 #, python-brace-format
@@ -370,55 +373,52 @@ msgid ""
 "\n"
 "📊 Summary: {files} file(s), {errors} error(s), {warnings} warning(s)"
 msgstr ""
+"\n"
+"📊 Sammanfattning: {files} fil(er), {errors} fel, {warnings} varningar"
 
 #: l10n_lint.py:2437
-#, fuzzy
 msgid "positional arguments"
-msgstr "Flaggvärden"
+msgstr "positionsargument"
 
 #: l10n_lint.py:2438 l10n_lint.py:2439
-#, fuzzy
 msgid "options"
-msgstr "Alternativ"
+msgstr "flaggor"
 
 #: l10n_lint.py:2447
-#, fuzzy
 msgid "l10n-lint - Linter for localization files (.po, .ts)"
-msgstr "Grafisk linter för lokaliseringsfiler (.po, .ts)"
+msgstr "l10n-lint – Linter för lokaliseringsfiler (.po, .ts)"
 
 #: l10n_lint.py:2450
 msgid "Examples:"
-msgstr ""
+msgstr "Exempel:"
 
 #: l10n_lint.py:2460
 msgid "Files or directories to lint"
-msgstr ""
+msgstr "Filer eller kataloger som ska lintas"
 
 #: l10n_lint.py:2461
 msgid "GitHub repository (owner/repo or URL)"
-msgstr ""
+msgstr "GitHub-arkiv (ägare/arkiv eller URL)"
 
 #: l10n_lint.py:2462
 msgid "Path filter for GitHub repos"
-msgstr ""
+msgstr "Sökfilter för GitHub-repositorier"
 
 #: l10n_lint.py:2463
 msgid "Output format (gnu = Emacs-compatible file:line:col format)"
-msgstr ""
+msgstr "Utdataformat (gnu = Emacs-kompatibelt fil:rad:kolumnformat)"
 
 #: l10n_lint.py:2464
-#, fuzzy
 msgid "Save report to file"
-msgstr "Välj fil"
+msgstr "Spara rapporten i en fil"
 
 #: l10n_lint.py:2465
 msgid "Max translation length (default: 500)"
-msgstr ""
+msgstr "Maximal översättningslängd (standard: 500)"
 
 #: l10n_lint.py:2466
-#, fuzzy
 msgid "Don't search subdirectories"
-msgstr "Sök i underkataloger"
+msgstr "Sök inte i underkataloger"
 
 #: l10n_lint.py:2467 l10n_lint_gtk.py:1339
 msgid "Treat warnings as errors"
@@ -426,15 +426,15 @@ msgstr "Behandla varningar som fel"
 
 #: l10n_lint.py:2468
 msgid "Show only summary"
-msgstr ""
+msgstr "Visa endast sammanfattning"
 
 #: l10n_lint.py:2469
 msgid "Exit code only, no output (for CI)"
-msgstr ""
+msgstr "Endast avslutskod, ingen utdata (för CI)"
 
 #: l10n_lint.py:2470
 msgid "Ignore fuzzy warnings"
-msgstr ""
+msgstr "Ignorera luddiga varningar"
 
 #: l10n_lint.py:2471
 msgid ""
@@ -468,252 +468,253 @@ msgstr ""
 
 #: l10n_lint.py:2477
 msgid "Show detailed progress"
-msgstr ""
+msgstr "Visa detaljerat förlopp"
 
 #: l10n_lint.py:2478
 msgid "Launch GTK graphical interface"
-msgstr ""
+msgstr "Starta grafiskt GTK-gränssnitt"
 
 #: l10n_lint.py:2479
 msgid "Show this help message and exit"
-msgstr ""
+msgstr "Visa detta hjälpmeddelande och avsluta"
 
 #: l10n_lint.py:2481
 msgid "Show version number and exit"
-msgstr ""
+msgstr "Visa versionsnummer och avsluta"
 
 #: l10n_lint.py:2507
 msgid ""
 "Error: GTK interface not found. Install l10n-lint-gtk or run from source "
 "directory."
 msgstr ""
+"Fel: GTK-gränssnittet hittades inte. Installera l10n-lint-gtk eller kör från"
+" källkatalogen."
 
 #: l10n_lint.py:2510
 #, python-brace-format
 msgid "Error launching GTK interface: {error}"
-msgstr ""
+msgstr "Fel vid start av GTK-gränssnitt: {error}"
 
 #: l10n_lint.py:2528
 #, python-brace-format
 msgid "⏱️  Elapsed time: {elapsed:.2f}s"
-msgstr ""
+msgstr "⏱️ Förfluten tid: {elapsed:.2f}s"
 
 #: l10n_lint.py:2530
 #, python-brace-format
 msgid "🔧 l10n-lint {version} starting..."
-msgstr ""
+msgstr "🔧 l10n-lint {version} startar..."
 
 #: l10n_lint.py:2531
 #, python-brace-format
 msgid "   Max length: {max}"
-msgstr ""
+msgstr "   Maximal längd: {max}"
 
 #: l10n_lint.py:2532
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "   Length ratio: {ratio}x"
-msgstr "Längdförhållande"
+msgstr "   Längdförhållande: {ratio}x"
 
 #: l10n_lint.py:2533
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "   Strict mode: {strict}"
-msgstr "Strikt läge"
+msgstr "   Strikt läge: {strict}"
 
 #: l10n_lint.py:2534
 #, python-brace-format
 msgid "   Output format: {fmt}"
-msgstr ""
+msgstr "   Utdataformat: {fmt}"
 
 #: l10n_lint.py:2535
 #, python-brace-format
 msgid "   Recursive: {rec}"
-msgstr ""
+msgstr "   Rekursiv: {rec}"
 
 #: l10n_lint.py:2537
 #, python-brace-format
 msgid "   Locale dir: {dir}"
-msgstr ""
+msgstr "   Locale-katalog: {dir}"
 
 #: l10n_lint.py:2538
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "   Language: {lang}"
-msgstr "Språkteam"
+msgstr "   Språk: {lang}"
 
 #: l10n_lint.py:2540
 msgid "   Locale: not found (using English)"
-msgstr ""
+msgstr "   Locale: hittades inte (använder engelska)"
 
 #: l10n_lint.py:2578
 msgid "🌐 GitHub mode"
-msgstr ""
+msgstr "🌐 GitHub-läge"
 
 #: l10n_lint.py:2579
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "🔍 Fetching from GitHub: {repo}"
-msgstr "Hämtar från GitHub..."
+msgstr "🔍 Hämtar från GitHub: {repo}"
 
 #: l10n_lint.py:2581
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "   Path filter: {path}"
-msgstr "Sökvägen hittades inte: {path}"
+msgstr "   Sökvägsfilter: {path}"
 
 #: l10n_lint.py:2584
-#, fuzzy
 msgid "   Connecting to GitHub API..."
-msgstr "Hämtar från GitHub..."
+msgstr "   Ansluter till GitHub API..."
 
 #: l10n_lint.py:2589 l10n_lint.py:2670
 #, python-brace-format
 msgid "  [{n}] {path}"
-msgstr ""
+msgstr "  [{n}] {path}"
 
 #: l10n_lint.py:2590 l10n_lint.py:2671
 #, python-brace-format
 msgid "       Size: {size} bytes"
-msgstr ""
+msgstr "       Storlek: {size} byte"
 
 #: l10n_lint.py:2596 l10n_lint.py:2635 l10n_lint.py:2677
 #, python-brace-format
 msgid "       Entries: {count}"
-msgstr ""
+msgstr "       Poster: {count}"
 
 #: l10n_lint.py:2597 l10n_lint.py:2636 l10n_lint.py:2678
 #, python-brace-format
 msgid "       Parsed in {elapsed:.3f}s"
-msgstr ""
+msgstr "       Tolkades på {elapsed:.3f}s"
 
 #: l10n_lint.py:2599 l10n_lint.py:2638 l10n_lint.py:2680
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "       ⚠️  Found {count} issue(s)"
-msgstr "Hittade {count} problem"
+msgstr "       ⚠️ Hittade {count} problem"
 
 #: l10n_lint.py:2601 l10n_lint.py:2640 l10n_lint.py:2682
 msgid "       ✓ No issues"
-msgstr ""
+msgstr "       ✓ Inga problem"
 
 #: l10n_lint.py:2603
 #, python-brace-format
 msgid "   Fetched {count} file(s) in {elapsed:.2f}s"
-msgstr ""
+msgstr "   Hämtade {count} filer på {elapsed:.2f}s"
 
 #: l10n_lint.py:2606
 #, python-brace-format
 msgid "❌ GitHub error: {error}"
-msgstr ""
+msgstr "❌ GitHub-fel: {error}"
 
 #: l10n_lint.py:2617
 msgid "🌐 URL mode"
-msgstr ""
+msgstr "🌐 URL-läge"
 
 #: l10n_lint.py:2622
 #, python-brace-format
 msgid "  [{n}] {url}"
-msgstr ""
+msgstr "  [{n}] {url}"
 
 #: l10n_lint.py:2626
 #, python-brace-format
 msgid "       Fetched: {name} ({size} bytes) in {elapsed:.3f}s"
-msgstr ""
+msgstr "       Hämtade: {name} ({size} byte) på {elapsed:.3f}s"
 
 #: l10n_lint.py:2642
 #, python-brace-format
 msgid "❌ URL error for {url}: {error}"
-msgstr ""
+msgstr "❌ URL-fel för {url}: {error}"
 
 #: l10n_lint.py:2648
 #, python-brace-format
 msgid "Could not fetch URL: {error}"
-msgstr ""
+msgstr "Kunde inte hämta URL: {error}"
 
 #: l10n_lint.py:2652
 #, python-brace-format
 msgid "   Total URL files: {count}"
-msgstr ""
+msgstr "   Totalt antal URL-filer: {count}"
 
 #: l10n_lint.py:2656
 msgid "📁 Local mode"
-msgstr ""
+msgstr "📁 Lokalt läge"
 
 #: l10n_lint.py:2659
 #, python-brace-format
 msgid "📂 Scanning: {path}"
-msgstr ""
+msgstr "📂 Söker igenom: {path}"
 
 #: l10n_lint.py:2663
 #, python-brace-format
 msgid "   Found {count} file(s) in {elapsed:.3f}s"
-msgstr ""
+msgstr "   Hittade {count} fil(er) på {elapsed:.3f}s"
 
 #: l10n_lint.py:2684
 #, python-brace-format
 msgid "   Total local files: {count}"
-msgstr ""
+msgstr "   Totalt antal lokala filer: {count}"
 
 #: l10n_lint.py:2693
 msgid "📊 Summary:"
-msgstr ""
+msgstr "📊 Sammanfattning:"
 
 #: l10n_lint.py:2694
 #, python-brace-format
 msgid "   Files checked: {count}"
-msgstr ""
+msgstr "   Kontrollerade filer: {count}"
 
 #: l10n_lint.py:2695
 #, python-brace-format
 msgid "   Entries checked: {count}"
-msgstr ""
+msgstr "   Kontrollerade poster: {count}"
 
 #: l10n_lint.py:2696
 #, python-brace-format
 msgid "   Errors: {count}"
-msgstr ""
+msgstr "   Fel: {count}"
 
 #: l10n_lint.py:2697
 #, python-brace-format
 msgid "   Warnings: {count}"
-msgstr ""
+msgstr "   Varningar: {count}"
 
 #: l10n_lint.py:2698
 #, python-brace-format
 msgid "   Info: {count}"
-msgstr ""
+msgstr "   Info: {count}"
 
 #: l10n_lint.py:2703
 msgid "   Issues by rule:"
-msgstr ""
+msgstr "   Problem efter regel:"
 
 #: l10n_lint.py:2705
 #, python-brace-format
 msgid "     - {rule}: {count}"
-msgstr ""
+msgstr "     - {rule}: {count}"
 
 #: l10n_lint.py:2707
 #, python-brace-format
 msgid "     ... and {more} more rules"
-msgstr ""
+msgstr "     ... och {more} fler regler"
 
 #: l10n_lint.py:2713
 msgid "   Processing speed:"
-msgstr ""
+msgstr "   Bearbetningshastighet:"
 
 #: l10n_lint.py:2714
 #, python-brace-format
 msgid "     - {speed:.1f} files/sec"
-msgstr ""
+msgstr "     - {speed:.1f} filer/s"
 
 #: l10n_lint.py:2716
 #, python-brace-format
 msgid "     - {speed:.1f} entries/sec"
-msgstr ""
+msgstr "     - {speed:.1f} poster/s"
 
 #: l10n_lint.py:2725
 #, python-brace-format
 msgid "📊 {files} file(s), {errors} error(s), {warnings} warning(s)"
-msgstr ""
+msgstr "📊 {files} fil(er), {errors} fel, {warnings} varningar"
 
 #: l10n_lint.py:2732
 #, python-brace-format
 msgid "📄 Report saved to: {file}"
-msgstr ""
+msgstr "📄 Rapport sparad till: {file}"
 
 #: l10n_lint_gtk.py:92
 msgid "Missing translations"

@@ -466,6 +466,10 @@ class L10nLinter:
             if msgstr:
                 self._check_repeated_words(filepath, line, msgid, msgstr, result)
             
+            # Check: Cross-newline duplicate words
+            if msgstr:
+                self._check_cross_newline_duplicates(filepath, line, msgid, msgstr, result)
+            
             # Check: Source equals translation
             if msgstr:
                 self._check_source_equals_translation(filepath, line, msgid, msgstr, result)
@@ -958,6 +962,33 @@ class L10nLinter:
                 message=_("Repeated word: '{word}'").format(word=words[0]),
                 context=source[:50]
             ))
+    
+    def _check_cross_newline_duplicates(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Check for words duplicated across newline boundaries (e.g. 'word\\nword')."""
+        lines = translation.split('\n')
+        for i in range(len(lines) - 1):
+            end_words = lines[i].rstrip().split()
+            start_words = lines[i + 1].lstrip().split()
+            if not end_words or not start_words:
+                continue
+            end_word = end_words[-1].strip('.,;:!?"\'()[]{}')
+            start_word = start_words[0].strip('.,;:!?"\'()[]{}')
+            # Skip short words (prepositions etc.), markdown headers, list markers, digits
+            if (len(end_word) < 3 or len(start_word) < 3
+                    or end_word.startswith('#') or end_word.startswith('-')
+                    or end_word.startswith('*') or end_word.startswith('>')
+                    or end_word.isdigit()):
+                continue
+            if end_word.lower() == start_word.lower():
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.WARNING,
+                    rule="cross-newline-duplicate",
+                    message=_("Word '{word}' duplicated across line break").format(word=end_word),
+                    context=source[:50]
+                ))
+                break  # One report per entry is enough
     
     # Patterns for false positive detection in source-equals-translation
     _CAMELCASE_RE = re.compile(r'^[A-Z][a-z]+(?:[A-Z][a-z]+)+$')

@@ -1376,6 +1376,41 @@ class L10nLinter:
                     context=translation[:80]
                 ))
         
+        # Check Swedish menu terms: "Fil" as menu name must be "Arkiv"
+        if source.strip() == 'File' and translation.strip() == 'Fil':
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.ERROR,
+                rule="terminology",
+                message=_("Swedish menu: 'File' menu must be 'Arkiv', not 'Fil'"),
+                context=translation[:80]
+            ))
+        
+        # Other menu term checks
+        menu_terms = {
+            'Edit': ('Redigera', 'Redigera'),
+            'View': ('Visa', 'Visa'),
+            'Tools': ('Verktyg', 'Verktyg'),
+            'Help': ('Hjälp', 'Hjälp'),
+            'Settings': ('Inställningar', 'Inställningar'),
+            'Preferences': ('Inställningar', 'Inställningar'),
+        }
+        src_stripped = source.strip()
+        tr_stripped = translation.strip()
+        if src_stripped in menu_terms:
+            expected, _ = menu_terms[src_stripped]
+            if tr_stripped and tr_stripped != expected and len(tr_stripped) < 30:
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.WARNING,
+                    rule="terminology",
+                    message=_("Swedish menu: '{src}' should be '{expected}', got '{got}'").format(
+                        src=src_stripped, expected=expected, got=tr_stripped),
+                    context=translation[:80]
+                ))
+
         # Check "linje" when source says "line" in CLI context
         source_lower = source.lower()
         if 'line' in source_lower and 'linje' in translation.lower():

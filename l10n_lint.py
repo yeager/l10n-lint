@@ -1399,7 +1399,7 @@ class L10nLinter:
         src_stripped = source.strip()
         tr_stripped = translation.strip()
         if src_stripped in menu_terms:
-            expected, _ = menu_terms[src_stripped]
+            expected, _desc = menu_terms[src_stripped]
             if tr_stripped and tr_stripped != expected and len(tr_stripped) < 30:
                 result.add(LintIssue(
                     file=filepath,
@@ -1426,8 +1426,8 @@ class L10nLinter:
                 ))
         
         # Check y/n → j/n
-        import re as _re
-        if _re.search(r'\by/n\b|\by/N\b|\bY/n\b|\bY/N\b', translation):
+        
+        if re.search(r'\by/n\b|\by/N\b|\bY/n\b|\bY/N\b', translation):
             result.add(LintIssue(
                 file=filepath,
                 line=line,

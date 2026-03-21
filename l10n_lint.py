@@ -245,6 +245,7 @@ class L10nLinter:
     # Regex patterns for placeholder detection
     PRINTF_PATTERN = re.compile(r'%[-+0 #]*\d*\.?\d*[hlL]?[diouxXeEfFgGaAcspn%]')
     PYTHON_FORMAT = re.compile(r'\{(\d+|[a-zA-Z_][a-zA-Z0-9_]*)?(?:![rsa])?(?::[^}]*)?\}')
+    PYTHON_NAMED = re.compile(r'%\([a-zA-Z_][a-zA-Z0-9_]*\)[sdfgiou]')  # %(name)s %(hotkey)s
     QT_PATTERN = re.compile(r'%\d+')
     
     # HTML tag pattern
@@ -608,6 +609,7 @@ class L10nLinter:
         for name, pattern in [
             ('printf', self.PRINTF_PATTERN),
             ('python-format', self.PYTHON_FORMAT),
+            ('python-named', self.PYTHON_NAMED),
             ('qt-format', self.QT_PATTERN),
         ]:
             source_matches = sorted(pattern.findall(source))
@@ -1849,10 +1851,10 @@ class L10nLinter:
             
             # Check: placeholders consistent across all plural forms
             if plural_forms:
-                source_placeholders = set(re.findall(r'%[sd%]|%\d*\$?[sd]|\{[^}]+\}', msgid))
+                source_placeholders = set(re.findall(r'%[sd%]|%\d*\$?[sd]|\{[^}]+\}|%\([^)]+\)[sdf]', msgid))
                 for idx, translation in plural_forms.items():
                     if translation:
-                        trans_placeholders = set(re.findall(r'%[sd%]|%\d*\$?[sd]|\{[^}]+\}', translation))
+                        trans_placeholders = set(re.findall(r'%[sd%]|%\d*\$?[sd]|\{[^}]+\}|%\([^)]+\)[sdf]', translation))
                         if source_placeholders and trans_placeholders != source_placeholders:
                             result.add(LintIssue(
                                 file=filepath,

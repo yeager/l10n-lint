@@ -1,31 +1,61 @@
 # l10n-lint
 
-![Version](https://img.shields.io/badge/version-1.20.2-blue)
+[![Version](https://img.shields.io/badge/version-1.20.2-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.20.2)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
-## Description
+l10n-lint checks gettext PO and Qt TS translation files for missing translations,
+invalid syntax, placeholder mismatches, plural errors and inconsistent formatting.
+Use the command line in CI or the GTK4 desktop interface for interactive review.
+Swedish-specific checks cover spelling patterns, terminology and localization conventions.
 
-A comprehensive linter for localization files (`.po`, `.ts`). Finds missing translations, placeholder mismatches, terminology errors, and 20+ other common issues.
+[Download 1.20.2](https://github.com/yeager/l10n-lint/releases/tag/v1.20.2)
+· [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
-Built with Python as part of the professional L10n Tool Suite, l10n-lint provides essential quality assurance for translation projects, helping maintain consistency and accuracy across multilingual applications.
+Version **1.20.2** fixes false spelling warnings for `yyyy` date tokens ([#6](https://github.com/yeager/l10n-lint/issues/6))
+and requires context for Swedish `View` and `line` terminology recommendations ([#7](https://github.com/yeager/l10n-lint/issues/7)).
 
 ## Features
 
-- **A shared registry of built-in checks** covering placeholders, formatting, terminology, consistency, and more
-- **Swedish terminology validation** — catches common translation mistakes (e.g., "redaktör" → "redigerare")
-- **Domain-specific rules** — music, web platform, and mail terminology
-- **False friends detection** — flags Swedish–English false cognates
-- **Consistency checking** — ensures the same source term gets the same translation
-- **Multiple output formats** — text, JSON, HTML, GNU (Emacs-compatible), GitHub Actions
-- **GTK4 GUI** — graphical interface for desktop use
-- **GitHub integration** — lint repositories directly via `--github owner/repo`
-- **Custom glossaries** — load your own term lists via `--glossary`
-- **CI-friendly** — `--check` mode with exit codes, `--quiet` for summaries
+- Validate PO/TS syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
+- Share diagnostic IDs and input handling between the CLI and GTK4 interface.
+- Scan local files, directories, remote PO/TS URLs and GitHub repositories.
+- Select individual rules or groups, configure severities and load custom TSV glossaries.
+- Store project settings in `pyproject.toml` and baseline existing findings.
+- Compare translations with a source catalog to find missing or obsolete entries.
+- Preview and apply conservative whitespace and ellipsis fixes to local PO files.
+- Export text, JSON, HTML, GNU, GitHub Actions annotations or SARIF 2.1.0.
 
 ## Installation
 
-### APT (Debian/Ubuntu)
+### Install the current release
+
+Download the package for your system from [release 1.20.2](https://github.com/yeager/l10n-lint/releases/tag/v1.20.2).
+The release includes `.deb`, `.rpm`, a Python wheel, a source archive and `SHA256SUMS`.
+
+| System | Download | Install command |
+|--------|----------|-----------------|
+| Debian / Ubuntu | [Debian package](https://github.com/yeager/l10n-lint/releases/download/v1.20.2/l10n-lint_1.20.2-1_all.deb) | `sudo apt install ./l10n-lint_1.20.2-1_all.deb` |
+| Fedora | [RPM package](https://github.com/yeager/l10n-lint/releases/download/v1.20.2/l10n-lint-1.20.2-1.noarch.rpm) | `sudo dnf install ./l10n-lint-1.20.2-1.noarch.rpm` |
+
+For the Python CLI, download the [wheel](https://github.com/yeager/l10n-lint/releases/download/v1.20.2/l10n_lint-1.20.2-py3-none-any.whl)
+and use Python 3.9 or newer in a virtual environment:
+
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install ./l10n_lint-1.20.2-py3-none-any.whl
+l10n-lint --version
+```
+
+The Python package installs both launchers. The GUI additionally needs PyGObject,
+GTK4 and libadwaita from your system; launch it with `l10n-lint-gtk`.
+The virtual-environment instructions above are sufficient for the CLI.
+
+External APT/RPM repositories and PyPI may contain an older version. GitHub releases
+provide the packages verified for the version shown here.
+
+### APT repository (Debian/Ubuntu)
 
 Install the repository's current public key and scope it to this source:
 
@@ -46,27 +76,14 @@ The current key's primary fingerprint is
 `7CEE83C9C621B18667DD1BFECAED4975DAB053A8`; its signing subkey is
 `37986EFBED62D629C0CF268EE318C7DE3DA87C5B` (the key reported in issue #2).
 
-The APT index may lag GitHub releases. To install the latest published version,
-download its `.deb` from [Releases](https://github.com/yeager/l10n-lint/releases)
-and run `sudo apt install ./l10n-lint_VERSION-1_all.deb`.
-
-### DNF (Fedora)
-```bash
-sudo dnf config-manager --add-repo https://yeager.github.io/rpm-repo/yeager-l10n.repo
-sudo dnf install l10n-lint
-```
-
-### pip
-```bash
-pip install l10n-lint
-```
-
 ## Building from source
 
 ```bash
 git clone https://github.com/yeager/l10n-lint
 cd l10n-lint
-pip install -e .
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e .
 ```
 
 ## Usage
@@ -79,6 +96,9 @@ l10n-lint translations/sv.po
 # Lint a directory recursively
 l10n-lint ./po/
 
+# Open the GTK4 interface
+l10n-lint-gtk
+
 # Lint a GitHub repository
 l10n-lint --github yeager/l10n-lint
 ```
@@ -89,7 +109,10 @@ Advanced options:
 l10n-lint -f html -o report.html ./translations/
 
 # JSON output for CI pipelines
-l10n-lint -f json -o results.json .
+l10n-lint -f json -o results.json ./translations/
+
+# SARIF output for code-scanning integrations
+l10n-lint -f sarif -o results.sarif ./translations/
 
 # Run only specific checks
 l10n-lint --checks terminology,false-friends,consistency sv.po
@@ -98,39 +121,53 @@ l10n-lint --checks terminology,false-friends,consistency sv.po
 l10n-lint --check --strict .
 ```
 
-See the manual for complete options:
+The target language is detected from PO metadata or Qt TS attributes, with a filename
+fallback for PO files. Use `--language sv` to override detection when needed.
+
+See the manual or CLI help for complete options:
 ```bash
 man l10n-lint
 l10n-lint --help
 ```
 
-## Checks Available
+## Checks and rule selection
 
-| # | Check | Description |
-|---|-------|-------------|
-| 1 | `placeholders` | Format string mismatches (`%s`, `%d`, `{0}`, etc.) |
-| 2 | `length` | Translations significantly longer/shorter than source |
-| 3 | `punctuation` | Trailing punctuation differences |
-| 4 | `capitalization` | Leading capitalization mismatches |
-| 5 | `whitespace` | Leading/trailing whitespace, double spaces |
-| 6 | `quotes` | Quote style consistency |
-| 7 | `html-tags` | HTML tag mismatches between source and translation |
-| 8 | `escapes` | Escape sequence mismatches (`\n`, `\t`, etc.) |
-| 9 | `accelerators` | Keyboard accelerator (`&`, `_`) mismatches |
-| 10 | `numerics` | Number changes between source and translation |
-| 11 | `untranslated` | Empty or fuzzy translations |
-| 12 | `repeated-words` | Repeated consecutive words |
-| 13 | `source-equals-translation` | Translation identical to source (smart filtering) |
-| 14 | `option-values` | CLI option/flag consistency |
-| 15 | `number-localization` | Number format localization |
-| 16 | `currency-localization` | Currency format issues |
-| 17 | `date-format` | Date format localization |
-| 18 | `newline-mismatch` | Newline count differences |
-| 19 | `python-format` | Python-style format string validation |
-| 20 | **`terminology`** | Swedish term consistency |
-| 21 | **`domain-terminology`** | Domain-specific terms — music, web, mail |
-| 22 | **`false-friends`** | Swedish–English false cognates |
-| 23 | **`consistency`** | Same source → same translation within a file |
+Use `l10n-lint --list-rules` for every diagnostic ID, default severity and language
+scope. These are some useful rule groups and individual IDs:
+
+| Rules or groups | What they check |
+|-----------------|-----------------|
+| `placeholders` | Typed printf arguments, Python fields and Qt placeholders |
+| `plural-forms` | Plural headers, formulas and translation variants |
+| `missing-translation`, `fuzzy` | Empty translations and entries awaiting review |
+| `untranslated-words`, `source-equals-translation` | Possible untranslated text |
+| `length`, `whitespace` | Length limits, missing boundary spaces and extra whitespace |
+| `punctuation`, `capitalization`, `quotes` | Text formatting and consistency |
+| `html-tags`, `xml-tags-mismatch`, `url-preservation` | Markup and URLs |
+| `escapes`, `newline-mismatch`, `accelerators` | Escapes, newlines and shortcuts |
+| `numerics`, `option-values` | Numbers and command-line option values |
+| `typo`, `terminology`, `false-friends` | Swedish spelling patterns and word choices |
+| `domain-terminology` | Swedish terminology for music and issue-tracking contexts |
+| `date-format`, `number-localization`, `currency-localization` | Swedish formatting conventions |
+| `consistency`, `duplicate` | Inconsistent translations and duplicate catalog entries |
+| `glossary` | Project-specific TSV terminology |
+| `catalog-missing`, `catalog-obsolete`, `catalog-plural-changed` | Differences from `--reference` |
+
+### Format flags and documentation text
+
+Explicit `c-format` and `python-format` flags enable full printf validation,
+including space flags such as `% d`. Without those flags, only clear conversion
+syntax is inferred: prose such as `100% coverage` or `50 % anger` is not a
+printf argument. Real `%s`, positional/named arguments and width/precision
+specifications are still checked. Use an explicit flag for ambiguous cases
+such as `%dpx` or a conversion immediately after a numeric literal.
+
+Python-format checks ignore reST `:math:` roles (including suffix role syntax)
+and inline literal brace delimiters such as ` ``{`` ` and ` ``}`` `. Complete
+fields such as ` ``{name}`` ` and real placeholders outside those constructs
+remain checked, even in a message that also contains mathematics. These
+exclusions affect format parsing only; the original text is retained for
+other checks and reports.
 
 ### Context for Swedish checks
 
@@ -152,34 +189,9 @@ context; geometric lines and unrelated compounds such as `riktlinjer` are ignore
 | `html` | `-f html` | Shareable reports |
 | `gnu` | `-f gnu` | Emacs `compile-mode` compatible |
 | `github` | `-f github` | GitHub Actions annotations |
+| `sarif` | `-f sarif` | SARIF 2.1.0 code-scanning reports |
 
-## Translation
-
-Translations are managed on Transifex: https://app.transifex.com/danielnylander/l10n-lint/
-
-Currently supported: Swedish, Danish, German, Spanish, Finnish, French, Italian, Norwegian Bokmål, Dutch, Polish, Portuguese (Brazil)
-
-Contributions welcome!
-
-## Changelog
-
-- **1.20.2**: Recognize year tokens in typo checks; require context for ambiguous Swedish terminology
-- **1.20.1**: Fix false format errors in percentage prose and reST documentation; repair APT setup
-- **1.20.0**: Reliable parsing, shared rules, project configuration, baselines, catalog comparison, previewed fixes and SARIF
-- **1.19.0**: Enhanced check accuracy
-- **1.17.0**: Added terminology intelligence, domain-specific rules, false friends detection
-- **1.16.0**: 76% reduction in false positives (26,576 → 6,308 issues)
-- **1.15.x**: GTK4 GUI, GitHub integration, custom glossaries
-- **1.14.x**: Multiple output formats, CI integration
-
-## License
-
-GPL-3.0-or-later
-
-## Author
-
-Daniel Nylander (daniel@danielnylander.se)
-## Project configuration and rule selection
+## Project configuration
 
 The CLI reads `[tool.l10n-lint]` from the nearest `pyproject.toml`, searching
 from the current working directory upwards. Use `--config FILE` to select one
@@ -308,22 +320,45 @@ python -m build
 ```
 
 CI runs regression tests on Python 3.9, 3.11 and 3.14 and installs the built wheel
-into a fresh environment for a CLI smoke test outside the checkout. GTK worker logic is covered by regression tests, and a separate Xvfb job opens
-the window/preferences and displays a URL lint result. Manually check desktop
-integration when changing widgets.
+into a fresh environment for CLI smoke tests outside the checkout. Version 1.20.2
+passed **191 tests** on each Python version, including the reported date-token,
+terminology, percentage and reST cases. GNU gettext validates the documentation
+fixtures. A separate Xvfb job opens the GTK window/preferences and displays a URL
+lint result. Debian and RPM packages also pass CLI checks against the release source.
 
-### Format flags and documentation text
+For local GTK verification, install the system GTK dependencies and Xvfb, then run:
 
-Explicit `c-format` and `python-format` flags enable full printf validation,
-including space flags such as `% d`. Without those flags, only clear conversion
-syntax is inferred: prose such as `100% coverage` or `50 % anger` is not a
-printf argument. Real `%s`, positional/named arguments and width/precision
-specifications are still checked. Use an explicit flag for ambiguous cases
-such as `%dpx` or a conversion immediately after a numeric literal.
+```sh
+xvfb-run -a /usr/bin/python3 tests/gtk_smoke.py
+```
 
-Python-format checks ignore reST `:math:` roles (including suffix role syntax)
-and inline literal brace delimiters such as ` ``{`` ` and ` ``}`` `. Complete
-fields such as ` ``{name}`` ` and real placeholders outside those constructs
-remain checked, even in a message that also contains mathematics. These
-exclusions affect format parsing only; the original text is retained for
-other checks and reports.
+Check desktop integration when changing widgets.
+
+## Translation
+
+Translations are managed on Transifex: https://app.transifex.com/danielnylander/l10n-lint/
+
+Currently supported: Swedish, Danish, German, Spanish, Finnish, French, Italian, Norwegian Bokmål, Dutch, Polish, Portuguese (Brazil)
+
+Contributions welcome!
+
+## Changelog
+
+- **1.20.2**: Recognize year tokens in typo checks; require context for ambiguous Swedish terminology
+- **1.20.1**: Fix false format errors in percentage prose and reST documentation; repair APT setup
+- **1.20.0**: Reliable parsing, shared rules, project configuration, baselines, catalog comparison, previewed fixes and SARIF
+- **1.19.0**: Enhanced check accuracy
+- **1.17.0**: Added terminology intelligence, domain-specific rules, false friends detection
+- **1.16.0**: 76% reduction in false positives (26,576 → 6,308 issues)
+- **1.15.x**: GTK4 GUI, GitHub integration, custom glossaries
+- **1.14.x**: Multiple output formats, CI integration
+
+See [CHANGELOG.md](CHANGELOG.md) for the full release history.
+
+## License
+
+[GPL-3.0-or-later](LICENSE)
+
+## Author
+
+Daniel Nylander (daniel@danielnylander.se)

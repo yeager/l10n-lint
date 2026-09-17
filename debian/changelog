@@ -1,3 +1,10 @@
+l10n-lint (1.20.2-1) unstable; urgency=medium
+
+  * Fix date-token typo warnings and contextual Swedish terminology checks.
+  * Add PO/Qt TS regressions and installed-package verification.
+
+ -- Daniel Nylander <daniel@danielnylander.se>  Thu, 17 Sep 2026 12:05:08 +0200
+
 l10n-lint (1.20.1-1) unstable; urgency=medium
 
   * Fix false format errors in prose percentages and reST documentation.

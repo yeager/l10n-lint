@@ -1,6 +1,6 @@
 # l10n-lint
 
-![Version](https://img.shields.io/badge/version-1.20.1-blue)
+![Version](https://img.shields.io/badge/version-1.20.2-blue)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -132,6 +132,17 @@ l10n-lint --help
 | 22 | **`false-friends`** | Swedish–English false cognates |
 | 23 | **`consistency`** | Same source → same translation within a file |
 
+### Context for Swedish checks
+
+Date-format tokens such as `yyyy` in `dd/mm/yyyy` are excluded from spelling
+heuristics. Date and placeholder checks still run on the original text.
+
+The `View` → `Visa` menu recommendation requires an explicit `menu` or `menubar`
+context in PO `msgctxt` or the Qt TS context/comment. Without that evidence, `View`
+may be a noun, for example a color-management view translated as `Vy`.
+The `linje` → `rad` recommendation requires a command-line or code/text-line
+context; geometric lines and unrelated compounds such as `riktlinjer` are ignored.
+
 ## Output Formats
 
 | Format | Flag | Use case |
@@ -152,6 +163,7 @@ Contributions welcome!
 
 ## Changelog
 
+- **1.20.2**: Recognize year tokens in typo checks; require context for ambiguous Swedish terminology
 - **1.20.1**: Fix false format errors in percentage prose and reST documentation; repair APT setup
 - **1.20.0**: Reliable parsing, shared rules, project configuration, baselines, catalog comparison, previewed fixes and SARIF
 - **1.19.0**: Enhanced check accuracy

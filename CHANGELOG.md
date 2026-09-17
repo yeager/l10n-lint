@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.2] - 2026-09-17
+
+- Exclude the `yyyy` year token from typo warnings without hiding spelling mistakes or changing date/placeholder validation (#6).
+- Require an explicit menu context before recommending `Visa` for `View` (#7).
+- Restrict `linje` → `rad` recommendations to command-line and code/text-line contexts; preserve geometric terminology and unrelated compounds (#7).
+- Add PO/Qt TS regressions and installed-package checks for both reports.
+
 ## [1.20.1] - 2026-09-17
 
 - Fix false printf mismatches for prose percentages without format flags (#3, #5).

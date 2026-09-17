@@ -46,6 +46,12 @@
   <url type="vcs-browser">https://github.com/yeager/l10n-lint</url>
 
   <releases>
+    <release version="1.20.2" date="2026-09-17">
+      <description>
+        <p>Recognize date tokens in typo checks and use context for ambiguous Swedish terminology.</p>
+        <p>Preserve format validation and add PO, Qt TS and installed-package regression tests.</p>
+      </description>
+    </release>
     <release version="1.20.1" date="2026-09-17">
       <description>
         <p>Fix false format errors in prose percentages and reStructuredText mathematics and code examples.</p>

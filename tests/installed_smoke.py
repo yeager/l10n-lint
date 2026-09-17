@@ -20,4 +20,19 @@ with tempfile.TemporaryDirectory() as directory:
     findings = json.loads(run.stdout)['runs'][0]['results']
     assert any(i['ruleId'] == 'placeholder-mismatch' for i in findings)
     assert subprocess.run([str(command), '--check', str(root / 'missing.po')], cwd=root).returncode == 2
+    for source, translation, context, expected in [
+        ('Date: yyyy-mm-dd', 'Datum: yyyy-mm-dd', '', 0),
+        ('View', 'Vy', 'Color Management', 0),
+        ('View', 'Vy', 'menu', 1),
+        ('sweep-line solver', 'sveplinjelösaren', '', 0),
+        ('Command-line options', 'Alternativ för kommandolinjen', '', 1),
+        ('Date: yyyy-mm-dd', 'Kommmando yyyy-mm-dd', '', 1),
+    ]:
+        file.write_text(
+            ('msgctxt ' + json.dumps(context) + '\n' if context else '')
+            + 'msgid ' + json.dumps(source) + '\nmsgstr '
+            + json.dumps(translation, ensure_ascii=False) + '\n', encoding='utf-8')
+        run = subprocess.run([str(command), '--checks', 'typo,terminology', '--strict', '--check', str(file)],
+                             cwd=root, capture_output=True, text=True)
+        assert run.returncode == expected, (source, run.stdout, run.stderr)
 print('Installed wheel smoke tests passed')

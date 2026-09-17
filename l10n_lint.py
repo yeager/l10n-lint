@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.20.1"
+__version__ = "1.20.2"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -1398,7 +1398,11 @@ class L10nLinter:
         }
         src_stripped = source.strip()
         tr_stripped = translation.strip()
-        if src_stripped in menu_terms:
+        # "View" also names a viewport or color-management transform. Only
+        # enforce the menu verb when the catalog explicitly identifies a menu.
+        message_context = getattr(self, '_message_context', '').replace('_', ' ')
+        view_menu = re.search(r'\b(?:menu|menubar)\b', message_context, re.IGNORECASE)
+        if src_stripped in menu_terms and (src_stripped != 'View' or view_menu):
             expected, _desc = menu_terms[src_stripped]
             if tr_stripped and tr_stripped != expected and len(tr_stripped) < 30:
                 result.add(LintIssue(
@@ -1411,19 +1415,28 @@ class L10nLinter:
                     context=translation[:80]
                 ))
 
-        # Check "linje" when source says "line" in CLI context
-        source_lower = source.lower()
-        if 'line' in source_lower and 'linje' in translation.lower():
-            # In CLI/programming context, "line" should be "rad" not "linje"
-            if any(kw in source_lower for kw in ['line number', 'line ', 'lines', 'command line', 'on line']):
-                result.add(LintIssue(
-                    file=filepath,
-                    line=line,
-                    severity=Severity.WARNING,
-                    rule="terminology",
-                    message=_("Swedish terminology: prefer 'rad' over 'linje' in CLI/programming context"),
-                    context=translation[:80]
-                ))
+        # A geometric line is a "linje". Require evidence of a text/code line,
+        # and do not mistake compounds such as "riktlinjer" for that term.
+        code_line = re.search(
+            r'\b(?:command[- ]lines?|lines? of (?:source )?code|(?:source|code)[- ]lines?)\b',
+            source, re.IGNORECASE)
+        code_context = re.search(
+            r'\b(?:cli|terminal|console|shell|source[- ]code|'
+            r'(?:code|text|script)[- ]editor|compiler|syntax error)\b',
+            source + ' ' + message_context, re.IGNORECASE)
+        plain_line = re.search(r'(?<![\w-])lines?(?![\w-])', source, re.IGNORECASE)
+        translated_line = re.search(
+            r'\b(?:kommando|kod|källkods)?linje(?:n|ns|r|rs|rna|rnas)?\b',
+            translation, re.IGNORECASE)
+        if translated_line and (code_line or (plain_line and code_context)):
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="terminology",
+                message=_("Swedish terminology: prefer 'rad' over 'linje' in CLI/programming context"),
+                context=translation[:80]
+            ))
         
         # Check y/n → j/n
         
@@ -1625,8 +1638,9 @@ class L10nLinter:
         # Quadruple+ letters are always wrong (but skip date patterns and exclamations)
         for m in re.finditer(r'\b([a-zåäö]*([a-zåäö])\2\2\2[a-zåäö]*)\b', clean):
             word = m.group(1)
-            # Skip date/time format patterns (åååå=year, mmmm=month, dddd=day, etc.)
-            if re.match(r'^[åmdhs]+$', word, re.IGNORECASE):
+            # yyyy is a year token too; keep the exemption at word boundaries
+            # so repeated letters inside actual words still receive diagnostics.
+            if word == 'yyyy' or re.fullmatch(r'[åmdhs]+', word, re.IGNORECASE):
                 continue
             # Skip intentional exclamations in game/dialog text (neeeej, jooooo)
             if re.match(r'^[a-zåäö]{1,3}([a-zåäö])\1{3,}[a-zåäö]?$', word):

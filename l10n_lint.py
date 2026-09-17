@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.20.2"
+__version__ = "1.20.3"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -600,6 +600,11 @@ class L10nLinter:
             if entry['_type'] in ('vanished', 'obsolete'):
                 result.add(LintIssue(filepath, line, Severity.INFO, 'vanished',
                                      'Translation source was removed', source))
+                continue
+            # Qt catalogs can contain structural keys with no source or target
+            # text. They are not translatable messages and must not be reported
+            # as missing translations.
+            if not source.strip() and all(not value.strip() for value in entry['_translations']):
                 continue
             result.entries_checked += 1
             self._message_context = entry['_context']
@@ -1376,17 +1381,6 @@ class L10nLinter:
                     context=translation[:80]
                 ))
         
-        # Check Swedish menu terms: "Fil" as menu name must be "Arkiv"
-        if source.strip() == 'File' and translation.strip() == 'Fil':
-            result.add(LintIssue(
-                file=filepath,
-                line=line,
-                severity=Severity.ERROR,
-                rule="terminology",
-                message=_("Swedish menu: 'File' menu must be 'Arkiv', not 'Fil'"),
-                context=translation[:80]
-            ))
-        
         # Other menu term checks
         menu_terms = {
             'Edit': ('Redigera', 'Redigera'),
@@ -1401,8 +1395,19 @@ class L10nLinter:
         # "View" also names a viewport or color-management transform. Only
         # enforce the menu verb when the catalog explicitly identifies a menu.
         message_context = getattr(self, '_message_context', '').replace('_', ' ')
-        view_menu = re.search(r'\b(?:menu|menubar)\b', message_context, re.IGNORECASE)
-        if src_stripped in menu_terms and (src_stripped != 'View' or view_menu):
+        menu_context = re.search(r'\b(?:menu|menubar)\b', message_context, re.IGNORECASE)
+        # "File" is also a label and a command category. Require the same
+        # explicit menu evidence as View before enforcing Arkiv.
+        if source.strip() == 'File' and translation.strip() == 'Fil' and menu_context:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.ERROR,
+                rule="terminology",
+                message=_("Swedish menu: 'File' menu must be 'Arkiv', not 'Fil'"),
+                context=translation[:80]
+            ))
+        if src_stripped in menu_terms and (src_stripped != 'View' or menu_context):
             expected, _desc = menu_terms[src_stripped]
             if tr_stripped and tr_stripped != expected and len(tr_stripped) < 30:
                 result.add(LintIssue(

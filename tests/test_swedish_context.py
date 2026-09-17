@@ -1,4 +1,4 @@
-"""Regressions for date tokens (#6) and contextual Swedish terminology (#7)."""
+"""Regressions for Swedish checks, including Qt keys and menu context."""
 import json
 from pathlib import Path
 import subprocess
@@ -59,6 +59,11 @@ def test_date_and_placeholder_validation_remains_active():
     ('View', 'Vy', 'main_menu', True),
     ('View', 'Vy', 'Menu bar', True),
     ('View', 'Visa', 'menu', False),
+    ('File', 'Fil', '', False),
+    ('File', 'Fil', 'command category', False),
+    ('File', 'Fil', 'menu', True),
+    ('File', 'Fil', 'main_menu', True),
+    ('File', 'Arkiv', 'menu', False),
     ('sweep-line solver', 'sveplinjelösaren', '', False),
     ('sweep-line solver', 'lösaren för svepande linjer', '', False),
     ('Draw lines', 'Rita linjer', '', False),
@@ -87,6 +92,30 @@ def test_context_does_not_leak_between_entries():
     result = L10nLinter(disabled_rules=set(RULES) - {'terminology'}).lint_file(
         'sv.po', first + '\n' + second)
     assert len(result.issues) == 1
+
+
+def test_empty_ts_key_is_not_a_missing_translation():
+    text = ('<TS language="sv"><context><name>FreeCAD</name><message>'
+            '<source></source><translation></translation></message></context></TS>')
+    result = L10nLinter().lint_file('FreeCAD_sv.ts', text)
+    assert result.entries_checked == 0
+    assert not result.issues
+
+
+def test_empty_ts_translation_for_real_source_is_still_reported():
+    text = ('<TS language="sv"><context><name>FreeCAD</name><message>'
+            '<source>File</source><translation></translation></message></context></TS>')
+    result = L10nLinter().lint_file('FreeCAD_sv.ts', text)
+    assert result.entries_checked == 1
+    assert [issue.rule for issue in result.issues] == ['missing-translation']
+
+
+def test_ts_context_name_identifies_a_file_menu():
+    text = ('<TS language="sv"><context><name>Main Menu</name><message>'
+            '<source>File</source><translation>Fil</translation>'
+            '</message></context></TS>')
+    result = L10nLinter(disabled_rules=set(RULES) - {'terminology'}).lint_file('FreeCAD_sv.ts', text)
+    assert [issue.rule for issue in result.issues] == ['terminology']
 
 
 def test_reported_examples_pass_strict_cli(tmp_path):

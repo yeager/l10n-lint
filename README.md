@@ -1,6 +1,6 @@
 # l10n-lint
 
-[![Version](https://img.shields.io/badge/version-1.20.2-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.20.2)
+[![Version](https://img.shields.io/badge/version-1.20.3-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.20.3)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -9,11 +9,11 @@ invalid syntax, placeholder mismatches, plural errors and inconsistent formattin
 Use the command line in CI or the GTK4 desktop interface for interactive review.
 Swedish-specific checks cover spelling patterns, terminology and localization conventions.
 
-[Download 1.20.2](https://github.com/yeager/l10n-lint/releases/tag/v1.20.2)
+[Download 1.20.3](https://github.com/yeager/l10n-lint/releases/tag/v1.20.3)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
-Version **1.20.2** fixes false spelling warnings for `yyyy` date tokens ([#6](https://github.com/yeager/l10n-lint/issues/6))
-and requires context for Swedish `View` and `line` terminology recommendations ([#7](https://github.com/yeager/l10n-lint/issues/7)).
+Version **1.20.3** ignores intentionally empty Qt TS keys and requires menu context
+before recommending `File` → `Arkiv` ([#8](https://github.com/yeager/l10n-lint/issues/8)).
 
 ## Features
 
@@ -30,21 +30,21 @@ and requires context for Swedish `View` and `line` terminology recommendations (
 
 ### Install the current release
 
-Download the package for your system from [release 1.20.2](https://github.com/yeager/l10n-lint/releases/tag/v1.20.2).
+Download the package for your system from [release 1.20.3](https://github.com/yeager/l10n-lint/releases/tag/v1.20.3).
 The release includes `.deb`, `.rpm`, a Python wheel, a source archive and `SHA256SUMS`.
 
 | System | Download | Install command |
 |--------|----------|-----------------|
-| Debian / Ubuntu | [Debian package](https://github.com/yeager/l10n-lint/releases/download/v1.20.2/l10n-lint_1.20.2-1_all.deb) | `sudo apt install ./l10n-lint_1.20.2-1_all.deb` |
-| Fedora | [RPM package](https://github.com/yeager/l10n-lint/releases/download/v1.20.2/l10n-lint-1.20.2-1.noarch.rpm) | `sudo dnf install ./l10n-lint-1.20.2-1.noarch.rpm` |
+| Debian / Ubuntu | [Debian package](https://github.com/yeager/l10n-lint/releases/download/v1.20.3/l10n-lint_1.20.3-1_all.deb) | `sudo apt install ./l10n-lint_1.20.3-1_all.deb` |
+| Fedora | [RPM package](https://github.com/yeager/l10n-lint/releases/download/v1.20.3/l10n-lint-1.20.3-1.noarch.rpm) | `sudo dnf install ./l10n-lint-1.20.3-1.noarch.rpm` |
 
-For the Python CLI, download the [wheel](https://github.com/yeager/l10n-lint/releases/download/v1.20.2/l10n_lint-1.20.2-py3-none-any.whl)
+For the Python CLI, download the [wheel](https://github.com/yeager/l10n-lint/releases/download/v1.20.3/l10n_lint-1.20.3-py3-none-any.whl)
 and use Python 3.9 or newer in a virtual environment:
 
 ```sh
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install ./l10n_lint-1.20.2-py3-none-any.whl
+python -m pip install ./l10n_lint-1.20.3-py3-none-any.whl
 l10n-lint --version
 ```
 
@@ -179,6 +179,9 @@ context in PO `msgctxt` or the Qt TS context/comment. Without that evidence, `Vi
 may be a noun, for example a color-management view translated as `Vy`.
 The `linje` → `rad` recommendation requires a command-line or code/text-line
 context; geometric lines and unrelated compounds such as `riktlinjer` are ignored.
+Likewise, `File` → `Arkiv` applies only where PO `msgctxt` or Qt TS context/comment
+identifies a menu. A label or command category may correctly use `Fil`. Empty Qt TS
+source and translation pairs are structural keys and are ignored.
 
 ## Output Formats
 
@@ -320,9 +323,7 @@ python -m build
 ```
 
 CI runs regression tests on Python 3.9, 3.11 and 3.14 and installs the built wheel
-into a fresh environment for CLI smoke tests outside the checkout. Version 1.20.2
-passed **191 tests** on each Python version, including the reported date-token,
-terminology, percentage and reST cases. GNU gettext validates the documentation
+into a fresh environment for CLI smoke tests outside the checkout. GNU gettext validates the documentation
 fixtures. A separate Xvfb job opens the GTK window/preferences and displays a URL
 lint result. Debian and RPM packages also pass CLI checks against the release source.
 
@@ -344,6 +345,7 @@ Contributions welcome!
 
 ## Changelog
 
+- **1.20.3**: Ignore intentionally empty Qt TS keys; require menu context for `File` → `Arkiv`
 - **1.20.2**: Recognize year tokens in typo checks; require context for ambiguous Swedish terminology
 - **1.20.1**: Fix false format errors in percentage prose and reST documentation; repair APT setup
 - **1.20.0**: Reliable parsing, shared rules, project configuration, baselines, catalog comparison, previewed fixes and SARIF

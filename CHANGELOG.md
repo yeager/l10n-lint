@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.20.3] - 2026-09-17
+
+- Ignore intentionally empty Qt TS source/translation keys instead of reporting missing translations (#8).
+- Require an explicit menu context before requiring `File` → `Arkiv`; preserve valid labels and command categories translated as `Fil` (#8).
+- Add Qt TS and contextual-terminology regressions for the FreeCAD reports.
+
 ## [1.20.2] - 2026-09-17
 
 - Exclude the `yyyy` year token from typo warnings without hiding spelling mistakes or changing date/placeholder validation (#6).

@@ -1,3 +1,10 @@
+l10n-lint (1.20.3-1) unstable; urgency=medium
+
+  * Ignore intentionally empty Qt TS keys and contextualize File menu checks.
+  * Add FreeCAD Qt TS regression coverage.
+
+ -- Daniel Nylander <daniel@danielnylander.se>  Thu, 17 Sep 2026 13:30:00 +0200
+
 l10n-lint (1.20.2-1) unstable; urgency=medium
 
   * Fix date-token typo warnings and contextual Swedish terminology checks.

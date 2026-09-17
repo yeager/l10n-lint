@@ -46,6 +46,12 @@
   <url type="vcs-browser">https://github.com/yeager/l10n-lint</url>
 
   <releases>
+    <release version="1.20.3" date="2026-09-17">
+      <description>
+        <p>Ignore intentionally empty Qt translation keys and contextualize the Swedish File menu recommendation.</p>
+        <p>Add FreeCAD Qt TS regression coverage without hiding genuine missing translations.</p>
+      </description>
+    </release>
     <release version="1.20.2" date="2026-09-17">
       <description>
         <p>Recognize date tokens in typo checks and use context for ambiguous Swedish terminology.</p>

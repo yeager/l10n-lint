@@ -35,4 +35,17 @@ with tempfile.TemporaryDirectory() as directory:
         run = subprocess.run([str(command), '--checks', 'typo,terminology', '--strict', '--check', str(file)],
                              cwd=root, capture_output=True, text=True)
         assert run.returncode == expected, (source, run.stdout, run.stderr)
+    ts = root / 'FreeCAD_sv.ts'
+    for content, expected in [
+        ('<TS language="sv"><context><name>FreeCAD</name><message>'
+         '<source></source><translation></translation></message></context></TS>', 0),
+        ('<TS language="sv"><context><name>Property</name><message>'
+         '<source>File</source><translation>Fil</translation></message></context></TS>', 0),
+        ('<TS language="sv"><context><name>Main Menu</name><message>'
+         '<source>File</source><translation>Fil</translation></message></context></TS>', 2),
+    ]:
+        ts.write_text(content, encoding='utf-8')
+        run = subprocess.run([str(command), '--checks', 'terminology', '--strict', '--check', str(ts)],
+                             cwd=root, capture_output=True, text=True)
+        assert run.returncode == expected, (content, run.stdout, run.stderr)
 print('Installed wheel smoke tests passed')

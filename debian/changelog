@@ -1,3 +1,11 @@
+l10n-lint (1.20.1-1) unstable; urgency=medium
+
+  * Fix false format errors in prose percentages and reST documentation.
+  * Update APT signing-key and source setup instructions.
+  * Add documentation regressions and gettext validation.
+
+ -- Daniel Nylander <daniel@danielnylander.se>  Thu, 17 Sep 2026 14:00:00 +0200
+
 l10n-lint (1.20.0-1) unstable; urgency=medium
 
   * Validate PO/TS syntax, every plural form and typed placeholders.

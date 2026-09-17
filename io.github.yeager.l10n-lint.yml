@@ -32,4 +32,4 @@ modules:
     sources:
       - type: git
         url: https://github.com/yeager/l10n-lint.git
-        tag: v1.20.0
+        tag: v1.20.1

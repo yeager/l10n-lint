@@ -46,6 +46,12 @@
   <url type="vcs-browser">https://github.com/yeager/l10n-lint</url>
 
   <releases>
+    <release version="1.20.1" date="2026-09-17">
+      <description>
+        <p>Fix false format errors in prose percentages and reStructuredText mathematics and code examples.</p>
+        <p>Update APT signing-key and installation instructions.</p>
+      </description>
+    </release>
     <release version="1.20.0" date="2026-09-17">
       <description>
         <p>Improved PO and Qt validation, shared lint rules and reliable remote scans.</p>

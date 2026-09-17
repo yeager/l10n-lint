@@ -1,5 +1,5 @@
 Name:           l10n-lint
-Version:        1.20.0
+Version:        1.20.1
 Release:        1%{?dist}
 Summary:        Linter for localization files
 License:        GPL-3.0-or-later
@@ -73,6 +73,9 @@ update-desktop-database /usr/share/applications 2>/dev/null || true
 %license LICENSE
 
 %changelog
+* Thu Sep 17 2026 Daniel Nylander <daniel@danielnylander.se> - 1.20.1-1
+- Fix prose percentage and reST format false positives; update APT documentation.
+
 * Thu Sep 17 2026 Daniel Nylander <daniel@danielnylander.se> - 1.20.0-1
 - Validate syntax and placeholders; add project workflows and SARIF.
 - Install private Python modules and compiled translations.

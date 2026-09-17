@@ -20,7 +20,52 @@ PRINTF = re.compile(
     r'(?P<length>hh|ll|[hlLjzt])?(?P<type>[diouxXfFeEgGaAcspn%])')
 
 
-def placeholder_signature(text, kind):
+# reST math roles are literal mathematics, not str.format expressions. Both
+# prefix and suffix role syntax are valid. Escaped backticks stay inside a role.
+REST_MATH = re.compile(
+    r'(?<![\w\\]):math:`(?:\\.|[^`])+`'
+    r'|(?<![`\\])`(?:\\.|[^`])+`:math:(?!\w)')
+REST_LITERAL = re.compile(r'(?<![`\\])``([^`]+)``(?!`)')
+
+
+def python_format_text(text):
+    """Mask only reST math and inline literal brace delimiters for format checks.
+
+    Keep complete fields such as ``{name}`` visible: documentation markup can
+    surround real runtime placeholders, and must not hide translation mistakes.
+    Other lint rules continue to receive the original, unmodified message.
+    """
+    text = REST_MATH.sub(lambda match: ' ' * len(match.group()), text)
+    def literal(match):
+        body = match.group(1)
+        if body.strip() and not body.strip(' {}\t\r\n') and '{}' not in body:
+            return ' ' * len(match.group())
+        return match.group()
+    return REST_LITERAL.sub(literal, text)
+
+
+def _unambiguous_printf(match, text):
+    """Unflagged messages need stronger evidence than '% coverage' or '10%s'."""
+    token = match.group()
+    if any(char.isspace() for char in token):
+        return False
+    # Positional/named arguments and explicit width/precision are strong signals,
+    # even when followed by a literal unit (e.g. %1$dpx or %.2fms).
+    if match['position'] or match['name'] or match['width'] or match['precision'] is not None:
+        return True
+    if match.end() < len(text) and (text[match.end()].isalnum() or text[match.end()] == '_'):
+        return False
+    # A percent sign following a number is normally a prose percentage. An
+    # explicit PO format flag opts into ambiguous conversions in these strings.
+    previous = match.start() - 1
+    while previous >= 0 and text[previous].isspace():
+        previous -= 1
+    if previous >= 0 and text[previous].isdigit():
+        return False
+    return True
+
+
+def placeholder_signature(text, kind, *, explicit=True):
     """Compare argument identities/types/counts, allowing explicit reordering."""
     if kind == 'qt':
         return sorted(Counter(re.findall(r'%(?:L?(?:[1-9]\d?|n))', text)).items())
@@ -28,7 +73,7 @@ def placeholder_signature(text, kind):
         args, sequential = [], 1
         # %% consumes no argument and must not be reconsidered as a placeholder.
         for match in PRINTF.finditer(text):
-            if match['type'] == '%':
+            if match['type'] == '%' or (not explicit and not _unambiguous_printf(match, text)):
                 continue
             for field in ('width', 'precision'):
                 value = match[field] or ''

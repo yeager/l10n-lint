@@ -1,6 +1,6 @@
 # l10n-lint
 
-![Version](https://img.shields.io/badge/version-1.20.0-blue)
+![Version](https://img.shields.io/badge/version-1.20.1-blue)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -26,11 +26,29 @@ Built with Python as part of the professional L10n Tool Suite, l10n-lint provide
 ## Installation
 
 ### APT (Debian/Ubuntu)
+
+Install the repository's current public key and scope it to this source:
+
 ```bash
-echo "deb https://yeager.github.io/debian-repo stable main" | sudo tee /etc/apt/sources.list.d/yeager-l10n.list
-curl -fsSL https://yeager.github.io/debian-repo/yeager-l10n.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/yeager-l10n.gpg
-sudo apt update && sudo apt install l10n-lint
+key_file=$(mktemp)
+curl -fsSL https://yeager.github.io/debian-repo/yeager-repo-key.asc -o "$key_file" &&
+  sudo install -D -m 0644 "$key_file" /etc/apt/keyrings/yeager-l10n.asc
+rm -f "$key_file"
+echo "deb [signed-by=/etc/apt/keyrings/yeager-l10n.asc] https://yeager.github.io/debian-repo ./" | sudo tee /etc/apt/sources.list.d/yeager-l10n.list
+sudo apt update
+sudo apt install l10n-lint
 ```
+
+This replaces the earlier `stable main` entry in `yeager-l10n.list`. If you put
+that entry in another file, replace it there instead; keep only one Yeager
+source definition. The obsolete `yeager-l10n.gpg` URL no longer exists.
+The current key's primary fingerprint is
+`7CEE83C9C621B18667DD1BFECAED4975DAB053A8`; its signing subkey is
+`37986EFBED62D629C0CF268EE318C7DE3DA87C5B` (the key reported in issue #2).
+
+The APT index may lag GitHub releases. To install the latest published version,
+download its `.deb` from [Releases](https://github.com/yeager/l10n-lint/releases)
+and run `sudo apt install ./l10n-lint_VERSION-1_all.deb`.
 
 ### DNF (Fedora)
 ```bash
@@ -134,6 +152,7 @@ Contributions welcome!
 
 ## Changelog
 
+- **1.20.1**: Fix false format errors in percentage prose and reST documentation; repair APT setup
 - **1.20.0**: Reliable parsing, shared rules, project configuration, baselines, catalog comparison, previewed fixes and SARIF
 - **1.19.0**: Enhanced check accuracy
 - **1.17.0**: Added terminology intelligence, domain-specific rules, false friends detection
@@ -280,3 +299,19 @@ CI runs regression tests on Python 3.9, 3.11 and 3.14 and installs the built whe
 into a fresh environment for a CLI smoke test outside the checkout. GTK worker logic is covered by regression tests, and a separate Xvfb job opens
 the window/preferences and displays a URL lint result. Manually check desktop
 integration when changing widgets.
+
+### Format flags and documentation text
+
+Explicit `c-format` and `python-format` flags enable full printf validation,
+including space flags such as `% d`. Without those flags, only clear conversion
+syntax is inferred: prose such as `100% coverage` or `50 % anger` is not a
+printf argument. Real `%s`, positional/named arguments and width/precision
+specifications are still checked. Use an explicit flag for ambiguous cases
+such as `%dpx` or a conversion immediately after a numeric literal.
+
+Python-format checks ignore reST `:math:` roles (including suffix role syntax)
+and inline literal brace delimiters such as ` ``{`` ` and ` ``}`` `. Complete
+fields such as ` ``{name}`` ` and real placeholders outside those constructs
+remain checked, even in a message that also contains mathematics. These
+exclusions affect format parsing only; the original text is retained for
+other checks and reports.

@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.20.0"
+__version__ = "1.20.1"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -611,7 +611,9 @@ class L10nLinter:
                     self._check_translation(filepath, line, source, value, result)
 
     def _check_placeholders(self, filepath, line, source, translation, result):
-        from l10n_project import placeholder_signature
+        from l10n_project import placeholder_signature, python_format_text
+        python_source = python_format_text(source)
+        python_translation = python_format_text(translation)
         flags = getattr(self, '_format_flags', set())
         if 'qt-format' in flags:
             kinds = ['qt']
@@ -621,7 +623,7 @@ class L10nLinter:
             kinds = ['python']
         else:
             kinds = ['printf']
-            if self.PYTHON_BRACE_FORMAT.search(source) or self.PYTHON_BRACE_FORMAT.search(translation):
+            if self.PYTHON_BRACE_FORMAT.search(python_source) or self.PYTHON_BRACE_FORMAT.search(python_translation):
                 kinds.append('python')
             if re.search(r'%L?(?:[1-9]\d?|n)(?![\w.$])', source + ' ' + translation):
                 kinds.append('qt')
@@ -632,8 +634,9 @@ class L10nLinter:
         for kind in kinds:
             rule = 'python-format' if kind == 'python' else 'placeholder-mismatch'
             try:
-                before = placeholder_signature(source, kind)
-                after = placeholder_signature(translation, kind)
+                explicit = bool(flags & {'c-format', 'python-format'})
+                before = placeholder_signature(python_source if kind == 'python' else source, kind, explicit=explicit)
+                after = placeholder_signature(python_translation if kind == 'python' else translation, kind, explicit=explicit)
             except ValueError as exc:
                 result.add(LintIssue(filepath, line, Severity.ERROR, rule,
                                      f"Invalid {kind} format: {exc}", source))

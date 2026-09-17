@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.20.1] - 2026-09-17
+
+- Fix false printf mismatches for prose percentages without format flags (#3, #5).
+- Preserve full printf checks for explicitly flagged entries and infer unambiguous conversions in unflagged entries.
+- Exclude reST math roles and inline literal brace delimiters from Python-format parsing, while still checking real fields inside code spans and beside markup (#4).
+- Replace the missing APT key URL with the current key and a scoped signed-by source, including migration instructions (#2).
+- Add documentation-format regressions and gettext validation to the Python test matrix.
+
 ## [1.20.0] - 2026-09-17
 
 - Reject invalid PO/TS syntax and missing inputs; never silently pass incomplete scans.

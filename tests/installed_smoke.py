@@ -23,10 +23,10 @@ with tempfile.TemporaryDirectory() as directory:
     for source, translation, context, expected in [
         ('Date: yyyy-mm-dd', 'Datum: yyyy-mm-dd', '', 0),
         ('View', 'Vy', 'Color Management', 0),
-        ('View', 'Vy', 'menu', 1),
+        ('View', 'Vy', 'menu', 2),
         ('sweep-line solver', 'sveplinjelösaren', '', 0),
-        ('Command-line options', 'Alternativ för kommandolinjen', '', 1),
-        ('Date: yyyy-mm-dd', 'Kommmando yyyy-mm-dd', '', 1),
+        ('Command-line options', 'Alternativ för kommandolinjen', '', 2),
+        ('Date: yyyy-mm-dd', 'Kommmando yyyy-mm-dd', '', 2),
     ]:
         file.write_text(
             ('msgctxt ' + json.dumps(context) + '\n' if context else '')

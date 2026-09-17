@@ -38,7 +38,7 @@ _possible_module_paths = [
 try:
     from l10n_lint import (
         L10nLinter, LintResult, LintIssue, Severity,
-        find_l10n_files, fetch_url_file, is_url,
+        find_l10n_files, fetch_url_file, is_url, RULES, resolve_rules, lint_inputs,
         __version__ as LINT_VERSION
     )
 except ImportError:
@@ -47,11 +47,11 @@ except ImportError:
             sys.path.insert(0, str(path))
     from l10n_lint import (
         L10nLinter, LintResult, LintIssue, Severity,
-        find_l10n_files, fetch_url_file, is_url,
+        find_l10n_files, fetch_url_file, is_url, RULES, resolve_rules, lint_inputs,
         __version__ as LINT_VERSION
     )
 
-__version__ = "1.3.1"
+__version__ = LINT_VERSION
 APP_ID = "se.danielnylander.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI
@@ -88,25 +88,8 @@ except Exception:
 
 
 # All available lint rules with descriptions
-LINT_RULES = {
-    "missing-translation": (_("Missing translations"), _("Check for empty msgstr/unfinished translations"), True),
-    "fuzzy": (_("Fuzzy entries"), _("Flag entries marked as fuzzy/needs review"), True),
-    "placeholder": (_("Placeholder mismatch"), _("Check %s, %d, {0}, {name} consistency"), True),
-    "length": (_("Length ratio"), _("Warn if translation is much longer/shorter than source"), True),
-    "punctuation": (_("Punctuation"), _("Check ending punctuation matches"), False),
-    "capitalization": (_("Capitalization"), _("Check initial letter case matches"), False),
-    "whitespace": (_("Whitespace"), _("Check leading/trailing whitespace"), True),
-    "quotes": (_("Quote consistency"), _("Check quote characters are consistent"), False),
-    "html-tags": (_("HTML tags"), _("Verify HTML tags match between source and translation"), True),
-    "escapes": (_("Escape sequences"), _("Check \\n, \\t, etc. are preserved"), True),
-    "accelerators": (_("Accelerators"), _("Check &amp; keyboard accelerators"), False),
-    "numerics": (_("Numeric values"), _("Check numbers are preserved"), False),
-    "untranslated": (_("Untranslated words"), _("Detect English words left in translation"), False),
-    "repeated-words": (_("Repeated words"), _("Find duplicated words like 'the the'"), False),
-    "source-equals-translation": (_("Same as source"), _("Warn if translation equals source"), False),
-    "option-values": (_("Option values"), _("Check option/parameter values preserved"), False),
-    "duplicate": (_("Duplicate entries"), _("Find duplicate msgids"), True),
-}
+LINT_RULES = {rule: (_(spec.description), _(spec.description), spec.default)
+              for rule, spec in RULES.items()}
 
 
 def load_settings():
@@ -121,6 +104,15 @@ def load_settings():
     if config_file.exists():
         try:
             data = json.loads(config_file.read_text())
+            if 'enabled_rules' in data:
+                # Migrate historical group names without losing valid selections.
+                migrated = set()
+                for rule in data['enabled_rules']:
+                    try:
+                        migrated.update(resolve_rules([rule]))
+                    except ValueError:
+                        pass
+                data['enabled_rules'] = sorted(migrated)
             defaults.update(data)
         except Exception:
             pass
@@ -954,6 +946,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
             pass
     
     def _on_lint_clicked(self, button):
+        self.settings = load_settings()
         path = self.path_entry.get_text()
         if not path:
             return
@@ -970,7 +963,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
             metadata = FileMetadata(path)
             self.metadata_panel.update(metadata)
             self.metadata_panel.set_visible(True)
-        elif p.is_dir():
+        else:
             self.metadata_panel.set_visible(False)
         
         # Clear previous results
@@ -996,53 +989,18 @@ class L10nLintWindow(Adw.ApplicationWindow):
     
     def _run_lint(self, path):
         try:
-            linter = L10nLinter()
-            result = LintResult()
-            
-            # Set linter options based on settings
-            enabled_rules = set(self.settings.get("enabled_rules", []))
-            
-            p = Path(path)
-            if p.is_dir():
-                files = list(find_l10n_files(path, recursive=self.settings.get("recursive", True)))
-                total = len(files)
-                for i, file_path in enumerate(files):
-                    file_result = linter.lint_file(file_path)
-                    # Filter issues by enabled rules
-                    for issue in file_result.issues:
-                        if issue.rule in enabled_rules or not enabled_rules:
-                            result.issues.append(issue)
-                    result.files_checked += file_result.files_checked
-                    GLib.idle_add(self._update_progress, (i + 1) / total, file_path)
-            elif p.is_file():
-                file_result = linter.lint_file(path)
-                # Filter issues by enabled rules
-                for issue in file_result.issues:
-                    if issue.rule in enabled_rules or not enabled_rules:
-                        result.issues.append(issue)
-                result.files_checked = file_result.files_checked
-            elif is_url(path):
-                temp_path, content = fetch_url_file(path)
-                file_result = linter.lint_file(temp_path)
-                for issue in file_result.issues:
-                    issue.file = path
-                    if issue.rule in enabled_rules or not enabled_rules:
-                        result.issues.append(issue)
-            elif "/" in path and not path.startswith("/"):
-                # GitHub repo
-                GLib.idle_add(self.status_label.set_text, _("Fetching from GitHub..."))
-                from l10n_lint import lint_github_repo
-                github_result = lint_github_repo(path, "")
-                for issue in github_result.issues:
-                    if issue.rule in enabled_rules or not enabled_rules:
-                        result.issues.append(issue)
-                result.files_checked = github_result.files_checked
-            else:
-                result.issues.append(LintIssue(
-                    file=path, line=0, severity=Severity.ERROR,
-                    rule="path", message=_("Path not found: {path}").format(path=path)
-                ))
-            
+            enabled = resolve_rules(self.settings.get('enabled_rules', list(RULES)))
+            config = {'length_ratio': self.settings.get('max_length_ratio', 3.0)}
+            if self.settings.get('strict_mode'):
+                config['severity'] = {rule: 'error' for rule, spec in RULES.items() if spec.severity == 'warning'}
+            is_repo = (path.startswith('https://github.com/') or
+                       (not Path(path).exists() and re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', path)))
+            result = lint_inputs(
+                paths=[] if is_repo else [path], github=path if is_repo else None,
+                config=config, disabled_rules=set(RULES) - enabled,
+                recursive=self.settings.get('recursive', True),
+                progress=lambda current: GLib.idle_add(self.status_label.set_text, _('Linting {path}...').format(path=current)))
+
             GLib.idle_add(self._show_results, result)
         except Exception as e:
             result = LintResult()
@@ -1443,7 +1401,7 @@ class L10nLintApp(Adw.Application):
         self.do_activate()
         if files:
             win = self.props.active_window
-            win.path_entry.set_text(files[0].get_path())
+            win.path_entry.set_text(files[0].get_path() or files[0].get_uri())
             win._on_lint_clicked(None)
     
     def on_quit(self, action, param):
@@ -1529,9 +1487,9 @@ class L10nLintApp(Adw.Application):
         about.present(self.props.active_window)
 
 
-def main():
+def main(argv=None):
     app = L10nLintApp()
-    return app.run(sys.argv)
+    return app.run(sys.argv if argv is None else argv)
 
 
 if __name__ == "__main__":

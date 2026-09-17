@@ -23,8 +23,8 @@ Version: $VER
 Section: devel
 Priority: optional
 Architecture: all
-Depends: python3 (>= 3.10), python3-polib
-Recommends: python3-gi
+Depends: python3 (>= 3.10), python3-tomli
+Recommends: python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1
 Maintainer: Daniel Nylander <daniel@danielnylander.se>
 Homepage: https://github.com/yeager/l10n-lint
 Description: Linter for localization files
@@ -43,6 +43,8 @@ install -m 755 "$SRCDIR/l10n_lint_gtk.py" "$DEST/usr/bin/l10n-lint-gtk"
 # Python module (so l10n-lint-gtk can import l10n_lint)
 mkdir -p "$DEST/usr/lib/python3/dist-packages"
 install -m 644 "$SRCDIR/l10n_lint.py" "$DEST/usr/lib/python3/dist-packages/l10n_lint.py"
+
+install -m 644 "$SRCDIR/l10n_project.py" "$SRCDIR/print_helper.py" "$SRCDIR/l10n_lint_gtk.py" "$DEST/usr/lib/python3/dist-packages/"
 
 # Desktop file
 install -m 644 "$SRCDIR/io.github.yeager.l10n-lint.desktop" "$DEST/usr/share/applications/"

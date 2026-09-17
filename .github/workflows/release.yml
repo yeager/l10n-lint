@@ -37,7 +37,7 @@ jobs:
           mkdir -p ${ROOT}/usr/share/man/man1
 
           # Main script
-          cp l10n_lint.py ${ROOT}/usr/lib/python3/dist-packages/
+          cp l10n_lint.py l10n_project.py print_helper.py ${ROOT}/usr/lib/python3/dist-packages/
           cat > ${ROOT}/usr/bin/l10n-lint << 'WRAPPER'
           #!/usr/bin/python3
           import sys
@@ -111,7 +111,8 @@ jobs:
           Version: ${VER}-1
           Architecture: all
           Maintainer: Daniel Nylander <daniel@danielnylander.se>
-          Depends: python3 (>= 3.9)
+          Depends: python3 (>= 3.9), python3-tomli
+          Recommends: python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1
           Section: devel
           Priority: optional
           Homepage: https://github.com/yeager/${PKG}

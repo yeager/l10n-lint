@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from l10n_lint import L10nLinter, LintResult, Severity
 
-def test_check(check_method, test_cases, expected_rule):
+def check_cases(check_method, test_cases, expected_rule):
     """Helper to test a check method with multiple test cases."""
     linter = L10nLinter()
     
@@ -20,16 +20,16 @@ def test_check(check_method, test_cases, expected_rule):
         issues = [issue for issue in result.issues if issue.rule == expected_rule]
         if should_trigger and not issues:
             print(f"❌ FAIL: {expected_rule} should trigger for: {repr(source)} -> {repr(translation)}")
-            return False
+            raise AssertionError("Lint check returned unexpected results")
         elif not should_trigger and issues:
             print(f"❌ FAIL: {expected_rule} should NOT trigger for: {repr(source)} -> {repr(translation)}")
-            return False
+            raise AssertionError("Lint check returned unexpected results")
         elif should_trigger:
             print(f"✅ PASS: {expected_rule} correctly triggered for: {repr(source)} -> {repr(translation)}")
         else:
             print(f"✅ PASS: {expected_rule} correctly did not trigger for: {repr(source)} -> {repr(translation)}")
     
-    return True
+    return None
 
 def test_zero_width_space():
     """Test zero-width space detection."""
@@ -42,7 +42,7 @@ def test_zero_width_space():
         ("Text\u200B", "Text\u200B", False),  # Both have same zero-width char
     ]
     
-    return test_check(L10nLinter._check_zero_width_space, test_cases, "zero-width-space")
+    return check_cases(L10nLinter._check_zero_width_space, test_cases, "zero-width-space")
 
 def test_end_stop_mismatch():
     """Test end stop mismatch detection."""
@@ -56,7 +56,7 @@ def test_end_stop_mismatch():
         ("Save file.", "Spara fil.", False),  # Both have period
     ]
     
-    return test_check(L10nLinter._check_end_stop_mismatch, test_cases, "end-stop-mismatch")
+    return check_cases(L10nLinter._check_end_stop_mismatch, test_cases, "end-stop-mismatch")
 
 def test_ellipsis():
     """Test ellipsis style check."""
@@ -67,7 +67,7 @@ def test_ellipsis():
         ("Normal text", "Normal text", False),  # No ellipsis
     ]
     
-    return test_check(L10nLinter._check_ellipsis, test_cases, "ellipsis")
+    return check_cases(L10nLinter._check_ellipsis, test_cases, "ellipsis")
 
 def test_xml_tags_mismatch():
     """Test XML/HTML tags mismatch detection."""
@@ -79,7 +79,7 @@ def test_xml_tags_mismatch():
         ("Text with <B>bold</B>", "Text med <b>fet</b>", True),  # Case mismatch
     ]
     
-    return test_check(L10nLinter._check_xml_tags_mismatch, test_cases, "xml-tags-mismatch")
+    return check_cases(L10nLinter._check_xml_tags_mismatch, test_cases, "xml-tags-mismatch")
 
 def test_duplicate_words():
     """Test enhanced duplicate word detection."""
@@ -92,7 +92,7 @@ def test_duplicate_words():
         ("Normal text", "normal text", False),  # No duplicates
     ]
     
-    return test_check(L10nLinter._check_duplicate_words, test_cases, "duplicate-words")
+    return check_cases(L10nLinter._check_duplicate_words, test_cases, "duplicate-words")
 
 def test_punctuation_mismatch():
     """Test punctuation mismatch detection."""
@@ -105,7 +105,7 @@ def test_punctuation_mismatch():
         ("Normal text", "Normal text", False),  # No punctuation
     ]
     
-    return test_check(L10nLinter._check_punctuation_mismatch, test_cases, "punctuation-mismatch")
+    return check_cases(L10nLinter._check_punctuation_mismatch, test_cases, "punctuation-mismatch")
 
 def test_url_preservation():
     """Test URL preservation check."""
@@ -117,7 +117,7 @@ def test_url_preservation():
         ("No URLs here", "Inga URLer här", False),  # No URLs
     ]
     
-    return test_check(L10nLinter._check_url_preservation, test_cases, "url-preservation")
+    return check_cases(L10nLinter._check_url_preservation, test_cases, "url-preservation")
 
 def test_escaped_newline_count():
     """Test escaped newline count check."""
@@ -129,7 +129,7 @@ def test_escaped_newline_count():
         ("no escapes", "inga escapes", False),  # No newlines
     ]
     
-    return test_check(L10nLinter._check_escaped_newline_count, test_cases, "escaped-newline-count")
+    return check_cases(L10nLinter._check_escaped_newline_count, test_cases, "escaped-newline-count")
 
 def test_max_length_ratio():
     """Test max length ratio check."""
@@ -140,7 +140,7 @@ def test_max_length_ratio():
         ("Reasonable length source", "Rimlig längd på måltext", False),  # Good ratio
     ]
     
-    return test_check(L10nLinter._check_max_length_ratio, test_cases, "max-length-ratio")
+    return check_cases(L10nLinter._check_max_length_ratio, test_cases, "max-length-ratio")
 
 def test_same_plurals():
     """Test same plurals check."""
@@ -156,7 +156,7 @@ def test_same_plurals():
     
     if not any(issue.rule == 'same-plurals' for issue in result1.issues):
         print("❌ FAIL: same-plurals should trigger when source plurals differ but translation plurals are identical")
-        return False
+        raise AssertionError("Lint check returned unexpected results")
     else:
         print("✅ PASS: same-plurals correctly triggered for different source, same translation")
     
@@ -170,11 +170,11 @@ def test_same_plurals():
     
     if any(issue.rule == 'same-plurals' for issue in result2.issues):
         print("❌ FAIL: same-plurals should NOT trigger when both source and translation plurals are identical")
-        return False
+        raise AssertionError("Lint check returned unexpected results")
     else:
         print("✅ PASS: same-plurals correctly did not trigger for same source, same translation")
     
-    return True
+    return None
 
 def run_all_tests():
     """Run all tests and report results."""
@@ -198,10 +198,11 @@ def run_all_tests():
     
     for test_name, test_func in tests:
         print(f"\n📋 {test_name}:")
-        if test_func():
+        try:
+            test_func()
             passed += 1
             print(f"   ✅ PASSED\n")
-        else:
+        except AssertionError:
             print(f"   ❌ FAILED\n")
     
     print(f"🏁 Results: {passed}/{total} tests passed")

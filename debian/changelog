@@ -1,3 +1,12 @@
+l10n-lint (1.20.0-1) unstable; urgency=medium
+
+  * Validate PO/TS syntax, every plural form and typed placeholders.
+  * Fix CLI rule selection, glossaries, and GTK URL/GitHub scans.
+  * Add project configuration, baselines, catalog comparison, fixes and SARIF.
+  * Add regression, installed-package and GTK smoke tests.
+
+ -- Daniel Nylander <daniel@danielnylander.se>  Thu, 17 Sep 2026 13:00:00 +0200
+
 l10n-lint (1.19.0-1) unstable; urgency=medium
 
   * New upstream release.

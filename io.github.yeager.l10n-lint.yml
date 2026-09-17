@@ -22,6 +22,9 @@ modules:
   - name: l10n-lint
     buildsystem: simple
     build-commands:
+      - install -Dm644 l10n_lint.py /app/bin/l10n_lint.py
+      - install -Dm644 l10n_project.py /app/bin/l10n_project.py
+      - install -Dm644 print_helper.py /app/bin/print_helper.py
       - install -Dm755 l10n_lint.py /app/bin/l10n-lint
       - install -Dm755 l10n_lint_gtk.py /app/bin/l10n-lint-gtk
       - install -Dm644 io.github.yeager.l10n-lint.desktop /app/share/applications/io.github.yeager.l10n-lint.desktop
@@ -29,4 +32,4 @@ modules:
     sources:
       - type: git
         url: https://github.com/yeager/l10n-lint.git
-        tag: v1.3.6
+        tag: v1.20.0

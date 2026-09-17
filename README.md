@@ -1,6 +1,6 @@
 # l10n-lint
 
-![Version](https://img.shields.io/badge/version-1.19.0-blue)
+![Version](https://img.shields.io/badge/version-1.20.0-blue)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -12,7 +12,7 @@ Built with Python as part of the professional L10n Tool Suite, l10n-lint provide
 
 ## Features
 
-- **23 built-in checks** covering placeholders, formatting, terminology, consistency, and more
+- **A shared registry of built-in checks** covering placeholders, formatting, terminology, consistency, and more
 - **Swedish terminology validation** — catches common translation mistakes (e.g., "redaktör" → "redigerare")
 - **Domain-specific rules** — music, web platform, and mail terminology
 - **False friends detection** — flags Swedish–English false cognates
@@ -134,7 +134,8 @@ Contributions welcome!
 
 ## Changelog
 
-- **1.19.0**: Latest stable release with enhanced check accuracy
+- **1.20.0**: Reliable parsing, shared rules, project configuration, baselines, catalog comparison, previewed fixes and SARIF
+- **1.19.0**: Enhanced check accuracy
 - **1.17.0**: Added terminology intelligence, domain-specific rules, false friends detection
 - **1.16.0**: 76% reduction in false positives (26,576 → 6,308 issues)
 - **1.15.x**: GTK4 GUI, GitHub integration, custom glossaries
@@ -147,3 +148,135 @@ GPL-3.0-or-later
 ## Author
 
 Daniel Nylander (daniel@danielnylander.se)
+## Project configuration and rule selection
+
+The CLI reads `[tool.l10n-lint]` from the nearest `pyproject.toml`, searching
+from the current working directory upwards. Use `--config FILE` to select one
+explicitly. Command-line values override configuration values. Paths in the
+configuration are relative to that TOML file; command-line paths are relative
+to the working directory.
+
+```toml
+[tool.l10n-lint]
+language = "sv"
+checks = ["placeholders", "whitespace", "terminology", "glossary"]
+exclude = ["vendor/**", "generated/**"]
+glossary = "translations/glossary.tsv"
+max-length = 500
+length-ratio = 3.0
+max-errors = 0
+max-warnings = 0
+strict = true
+
+[tool.l10n-lint.severity]
+terminology = "warning"
+glossary = "error"
+```
+
+`--list-rules` prints all diagnostic IDs, default severities and language scopes.
+`--checks` selects only the listed rules or groups. Groups include
+`placeholders`, `length`, `whitespace`, `plural-forms` and `accelerators`.
+`--disable` and `--skip-checks` accept the same names. Unknown names are errors.
+Operational errors (invalid syntax, unreadable/missing paths, incomplete
+network fetches and invalid references) cannot be disabled. An empty scan also
+fails, including when exclusions remove every input. Repeated local paths are
+deduplicated. Directory discovery accepts `.po` and `.ts` case-insensitively.
+
+A glossary contains two or three tab-separated fields per line:
+`wrong<TAB>correct[<TAB>context]`. Blank lines and lines beginning with `#` are
+ignored. Matching is case-insensitive at word boundaries; context is explanatory
+text in the diagnostic. Missing or malformed glossary files fail the command.
+Custom glossaries apply to every target language; built-in Swedish terminology
+and spelling checks run only for Swedish.
+
+Exit codes: **0** when findings are within the configured thresholds, **1** when
+warnings exceed `--max-warnings`, **2** when errors exceed `--max-errors` or an
+operational error occurs. `--strict` makes excess warnings return **2** as well.
+Informational findings do not fail a run. `--check` suppresses normal output.
+Invalid options/configuration still produce an error on stderr. `--skip-fuzzy`
+suppresses the fuzzy diagnostic; it does not skip validation of those entries.
+
+## Baselines: report only new findings
+
+```sh
+# Save existing findings. This command still returns the normal lint exit code.
+l10n-lint --write-baseline l10n-baseline.json translations/
+
+# Fail only for findings exceeding the recorded baseline.
+l10n-lint --baseline l10n-baseline.json translations/
+```
+
+Baselines include project-relative file identity, rule, severity, diagnostic
+message and context, with occurrence counts. They ignore physical line numbers,
+so moving an unchanged entry normally preserves its baseline. New duplicate
+occurrences remain visible. Changes to diagnostic text, severity, translation
+context or UI language may require baseline regeneration. Use the same project
+root and UI language in developer and CI runs. Syntax/read/network failures are
+never baselined. Commit the baseline for review; do not regenerate it on every
+CI run. `baseline = "l10n-baseline.json"` is also supported in configuration.
+
+## Compare translations with a source catalog
+
+```sh
+l10n-lint --reference messages.pot po/sv.po
+l10n-lint --reference source.ts translations/sv.ts
+```
+
+PO comparison keys include `msgctxt` and `msgid`; Qt keys use explicit IDs or
+context, disambiguation comment and source text. Missing entries, entries absent
+from the reference, and changed plural/source definitions are reported separately.
+Obsolete PO and vanished/obsolete Qt entries are excluded. One reference applies
+to every input in the command; use separate runs for different domains. Reference
+and target formats must match (`.pot`/`.po` or `.ts`).
+
+## Preview and apply conservative fixes
+
+```sh
+# Print a unified diff on stderr without changing files.
+l10n-lint --fix whitespace,ellipsis po/sv.po
+
+# Print the diff, write the changes, and lint the resulting files.
+l10n-lint --fix whitespace,ellipsis --apply po/sv.po
+```
+
+Fixes currently support **local UTF-8 PO files**. They touch translation fields
+only, skip headers and fuzzy/obsolete entries, and preserve unrelated comments,
+source strings, newline style and file permissions. Whitespace fixes remove
+extra boundary spaces/tabs only when the source has no boundary whitespace.
+Ellipsis fixes convert a trailing `...` to `…` only when the source also ends in
+an ellipsis. Interior spaces and meaningful source boundary whitespace are
+preserved. Multiline translation fields that change may be serialized onto one
+line. Each write is atomic; changed files and symlinks are rejected. Multi-file
+application is not a transaction, so review the preview before `--apply`.
+
+## SARIF and CI
+
+```sh
+l10n-lint -f sarif -o l10n-results.sarif translations/
+```
+
+SARIF 2.1.0 reports include diagnostic rule IDs, severity and source locations.
+Text, JSON, HTML, GNU and GitHub Actions output remain available. GitHub annotation
+properties and messages are escaped; informational findings use `notice`.
+
+GitHub repository scans discover the repository's actual default branch and
+fetch all files from the same tree revision. Download failures and truncated
+GitHub trees fail the scan instead of silently producing partial success.
+
+The GTK frontend uses the same input pipeline and rule IDs as the CLI, including
+URL/GitHub loading, plural checks and operational errors. CLI project baselines,
+reference comparison, SARIF export and fix commands are currently CLI workflows;
+GTK retains its own preferences.
+
+## Development and verification
+
+```sh
+python -m pip install '.[test]'
+python -m pytest -q
+python -m build
+```
+
+CI runs regression tests on Python 3.9, 3.11 and 3.14 and installs the built wheel
+into a fresh environment for a CLI smoke test outside the checkout. GTK worker logic is covered by regression tests, and a separate Xvfb job opens
+the window/preferences and displays a URL lint result. Manually check desktop
+integration when changing widgets.

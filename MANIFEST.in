@@ -1,0 +1,6 @@
+include CHANGELOG.md
+include l10n-lint.1
+recursive-include tests *.py *.po *.ts
+recursive-include man *.1
+recursive-include po *.po *.pot
+recursive-include locale *.pot *.mo

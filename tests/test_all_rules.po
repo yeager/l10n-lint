@@ -60,7 +60,7 @@ msgstr "Dubbla  mellanslag  här"
 
 # Rule: mixed-quotes ("smart" and "straight")
 msgid "Use quotes"
-msgstr "Använd "citattecken" och 'apostrofer'"
+msgstr "Använd \"citattecken\" och 'apostrofer'"
 
 # Rule: html-tag-mismatch (missing </b>)
 msgid "This is <b>bold</b> text"

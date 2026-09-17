@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.20.0] - 2026-09-17
+
+- Reject invalid PO/TS syntax and missing inputs; never silently pass incomplete scans.
+- Parse PO escapes strictly and validate each plural/Qt translation variant.
+- Compare typed printf arguments, Python fields and Qt placeholders; handle positional reordering.
+- Share rule IDs and input handling across CLI/GTK; fix URL and GitHub desktop scans.
+- Implement actual rule selection, validated TSV glossaries and TOML project configuration.
+- Add baseline filtering, source catalog comparison, SARIF reports and reviewable PO fixes.
+- Discover GitHub default branches and pin file downloads to the scanned revision.
+- Add end-to-end regression tests, clean wheel checks and pull-request CI.
+- Align runtime/package versions and ship the new project module in package builders.
+
+
 ## [1.19.0] - 2026-03-07
 
 ### Added

@@ -30,7 +30,11 @@ from pathlib import Path
 from typing import Generator, Optional
 from urllib.parse import urlparse
 
-__version__ = "1.19.0"
+# Keep shared data classes identical when invoked as a script.
+if __name__ == '__main__':
+    sys.modules.setdefault('l10n_lint', sys.modules[__name__])
+
+__version__ = "1.20.0"
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -102,6 +106,7 @@ class LintResult:
     files_checked: int = 0
     entries_checked: int = 0
     disabled_rules: set = field(default_factory=set)
+    severity_overrides: dict = field(default_factory=dict)
     
     @property
     def error_count(self):
@@ -123,9 +128,107 @@ class LintResult:
         return dict(sorted(by_rule.items(), key=lambda x: -x[1]))
     
     def add(self, issue: LintIssue):
-        if issue.rule in self.disabled_rules:
+        if issue.rule in self.disabled_rules and issue.rule not in OPERATIONAL_RULES:
             return
+        if issue.rule not in OPERATIONAL_RULES and issue.rule in self.severity_overrides:
+            issue.severity = Severity(self.severity_overrides[issue.rule])
         self.issues.append(issue)
+
+
+
+
+@dataclass(frozen=True)
+class RuleSpec:
+    method: str
+    severity: str
+    language: str = ""
+    description: str = ""
+    default: bool = True
+
+
+RULES = {
+    'placeholder-mismatch': RuleSpec('_check_placeholders', 'error', '', 'Placeholder mismatch'),
+    'too-long': RuleSpec('_check_length', 'warning', '', 'Too long'),
+    'length-ratio': RuleSpec('_check_length', 'info', '', 'Length ratio'),
+    'suspicious-length': RuleSpec('_check_length', 'warning', '', 'Suspicious length'),
+    'inconsistent-punctuation': RuleSpec('_check_punctuation', 'info', '', 'Inconsistent punctuation'),
+    'inconsistent-capitalization': RuleSpec('_check_capitalization', 'warning', '', 'Inconsistent capitalization'),
+    'trailing-whitespace': RuleSpec('_check_whitespace', 'warning', '', 'Trailing whitespace'),
+    'missing-trailing-space': RuleSpec('_check_whitespace', 'warning', '', 'Missing trailing space'),
+    'missing-leading-space': RuleSpec('_check_whitespace', 'warning', '', 'Missing leading space'),
+    'double-spaces': RuleSpec('_check_whitespace', 'info', '', 'Double spaces'),
+    'mixed-quotes': RuleSpec('_check_quotes', 'info', '', 'Mixed quotes'),
+    'html-tag-mismatch': RuleSpec('_check_html_tags', 'error', '', 'Html tag mismatch'),
+    'escaped-chars-mismatch': RuleSpec('_check_escapes', 'error', '', 'Escaped chars mismatch'),
+    'keyboard-shortcut-missing': RuleSpec('_check_accelerators', 'warning', '', 'Keyboard shortcut missing'),
+    'nordic-accelerator': RuleSpec('_check_accelerators', 'error', '', 'Nordic accelerator'),
+    'numeric-mismatch': RuleSpec('_check_numerics', 'info', '', 'Numeric mismatch'),
+    'untranslated-words': RuleSpec('_check_untranslated', 'warning', '', 'Untranslated words'),
+    'repeated-words': RuleSpec('_check_repeated_words', 'warning', '', 'Repeated words'),
+    'cross-newline-duplicate': RuleSpec('_check_cross_newline_duplicates', 'warning', '', 'Cross newline duplicate'),
+    'source-equals-translation': RuleSpec('_check_source_equals_translation', 'warning', '', 'Source equals translation'),
+    'option-value-missing': RuleSpec('_check_option_values', 'warning', '', 'Option value missing'),
+    'number-localization': RuleSpec('_check_number_localization', 'info', 'sv', 'Number localization'),
+    'decimal-separator': RuleSpec('_check_decimal_separator', 'warning', 'sv', 'Decimal separator'),
+    'currency-localization': RuleSpec('_check_currency_localization', 'info', 'sv', 'Currency localization'),
+    'date-format': RuleSpec('_check_date_format', 'warning', 'sv', 'Date format'),
+    'newline-mismatch': RuleSpec('_check_newline_mismatch', 'warning', '', 'Newline mismatch'),
+    'python-format': RuleSpec('_check_placeholders', 'error', '', 'Python format'),
+    'terminology': RuleSpec('_check_terminology', 'warning', 'sv', 'Terminology'),
+    'domain-terminology': RuleSpec('_check_domain_terminology', 'warning', 'sv', 'Domain terminology'),
+    'false-friends': RuleSpec('_check_false_friends', 'warning', 'sv', 'False friends'),
+    'consistency': RuleSpec('_check_consistency', 'info', '', 'Consistency'),
+    'typo': RuleSpec('_check_typos', 'warning', 'sv', 'Typo'),
+    'plural-header-missing': RuleSpec('_check_plural_forms', 'error', '', 'Plural header missing'),
+    'plural-header-wrong': RuleSpec('_check_plural_forms', 'error', '', 'Plural header wrong'),
+    'plural-forms-missing': RuleSpec('_check_plural_forms', 'error', '', 'Plural forms missing'),
+    'plural-form-empty': RuleSpec('_check_plural_forms', 'error', '', 'Plural form empty'),
+    'plural-formula-suspicious': RuleSpec('_check_plural_forms', 'warning', '', 'Plural formula suspicious'),
+    'plural-forms-extra': RuleSpec('_check_plural_forms', 'warning', '', 'Plural forms extra'),
+    'zero-width-space': RuleSpec('_check_zero_width_space', 'warning', '', 'Zero width space'),
+    'end-stop-mismatch': RuleSpec('_check_end_stop_mismatch', 'warning', '', 'End stop mismatch'),
+    'ellipsis': RuleSpec('_check_ellipsis', 'info', '', 'Ellipsis'),
+    'xml-tags-mismatch': RuleSpec('_check_xml_tags_mismatch', 'warning', '', 'Xml tags mismatch'),
+    'duplicate-words': RuleSpec('_check_duplicate_words', 'warning', '', 'Duplicate words'),
+    'same-plurals': RuleSpec('_check_same_plurals', 'warning', '', 'Same plurals'),
+    'punctuation-mismatch': RuleSpec('_check_punctuation_mismatch', 'warning', '', 'Punctuation mismatch'),
+    'url-preservation': RuleSpec('_check_url_preservation', 'warning', '', 'Url preservation'),
+    'escaped-newline-count': RuleSpec('_check_escaped_newline_count', 'warning', '', 'Escaped newline count'),
+    'max-length-ratio': RuleSpec('_check_max_length_ratio', 'warning', '', 'Max length ratio'),
+    'missing-translation': RuleSpec('', 'error', '', 'Missing translation'),
+    'fuzzy': RuleSpec('', 'warning', '', 'Fuzzy'),
+    'duplicate': RuleSpec('', 'warning', '', 'Duplicate'),
+    'vanished': RuleSpec('', 'info', '', 'Vanished'),
+    'glossary': RuleSpec('', 'warning', '', 'Glossary'),
+    'catalog-missing': RuleSpec('', 'error', '', 'Catalog missing'),
+    'catalog-obsolete': RuleSpec('', 'warning', '', 'Catalog obsolete'),
+    'catalog-plural-changed': RuleSpec('', 'error', '', 'Catalog plural changed'),
+}
+# Failures to inspect input cannot be hidden by rule selection or baselines.
+OPERATIONAL_RULES = {"syntax-error", "file-read-error", "path-error", "no-files",
+                     "url-fetch-error", "github-fetch-error", "reference-error", "unknown-format"}
+RULE_ALIASES = {}
+for _rule_id, _spec in RULES.items():
+    if _spec.method:
+        RULE_ALIASES.setdefault(_spec.method.removeprefix("_check_").replace("_", "-"), set()).add(_rule_id)
+RULE_ALIASES["placeholder"] = RULE_ALIASES["placeholders"]
+RULE_ALIASES["plural-placeholder-mismatch"] = {"placeholder-mismatch"}
+RULE_ALIASES["plural-forms"].add("same-plurals")
+
+
+def resolve_rules(names):
+    if isinstance(names, str):
+        names = names.split(",")
+    resolved = set()
+    for name in names:
+        name = name.strip()
+        if name in RULE_ALIASES:
+            resolved.update(RULE_ALIASES[name])
+        elif name in RULES:
+            resolved.add(name)
+        elif name:
+            raise ValueError(f"Unknown rule: {name}")
+    return resolved
 
 
 class POParser:
@@ -138,66 +241,67 @@ class POParser:
         self._parse()
     
     def _parse(self):
-        """Parse PO file into entries."""
-        lines = self.content.split('\n')
-        current_entry = {}
-        current_key = None
-        entry_start_line = 1
-        
-        for i, line in enumerate(lines, 1):
-            line_stripped = line.strip()
-            
-            # Empty line = end of entry
-            if not line_stripped:
-                if current_entry:
-                    current_entry['_line'] = entry_start_line
-                    self.entries.append(current_entry)
-                    current_entry = {}
-                    current_key = None
+        """Parse PO directives strictly, preserving physical spans for edits."""
+        current, key = {}, None
+        token = re.compile(r'(msgctxt|msgid_plural|msgid|msgstr(?:\[\d+\])?)\s+("(?:[^"\\]|\\.)*")\s*\Z')
+        quoted = re.compile(r'"(?:[^"\\]|\\.)*"\s*\Z')
+
+        def finish():
+            nonlocal current, key
+            if 'msgid' in current:
+                plural = 'msgid_plural' in current
+                translations = [k for k in current if k.startswith('msgstr')]
+                if not translations or (plural and 'msgstr' in current) or (not plural and 'msgstr' not in current):
+                    raise ValueError(f"Line {current['_line']}: invalid or missing msgstr directive")
+                self.entries.append(current)
+            elif any(not k.startswith('_') for k in current):
+                raise ValueError(f"Line {current['_line']}: missing msgid")
+            current, key = {}, None
+
+        for number, raw in enumerate(self.content.lstrip('\ufeff').splitlines(), 1):
+            line = raw.strip()
+            if not line:
+                finish()
                 continue
-            
-            # Comment lines
-            if line_stripped.startswith('#'):
-                if not current_entry:
-                    entry_start_line = i
-                if line_stripped.startswith('#,'):
-                    # Flags (fuzzy, etc.)
-                    flags = line_stripped[2:].strip().split(',')
-                    current_entry['_flags'] = [f.strip() for f in flags]
-                elif line_stripped.startswith('#:'):
-                    # Source reference
-                    current_entry['_source'] = line_stripped[2:].strip()
+            if line.startswith('#'):
+                if any(k.startswith('msgstr') for k in current):
+                    finish()
+                if line.startswith('#,'):
+                    current.setdefault('_flags', []).extend(f.strip() for f in line[2:].split(','))
                 continue
-            
-            # msgctxt, msgid, msgstr (check longer keys first to avoid prefix matching issues)
-            for key in ['msgctxt', 'msgid_plural', 'msgid', 'msgstr']:
-                if line_stripped.startswith(key):
-                    if not current_entry:
-                        entry_start_line = i
-                    # Handle msgstr[N] for plurals
-                    match = re.match(rf'{key}(\[\d+\])?\s+"(.*)"', line_stripped)
-                    if match:
-                        suffix = match.group(1) or ''
-                        value = match.group(2)
-                        full_key = key + suffix
-                        current_entry[full_key] = self._unescape(value)
-                        current_key = full_key
-                    break
+            match = token.fullmatch(line)
+            if match:
+                name, value = match.groups()
+                if name in ('msgctxt', 'msgid') and 'msgid' in current:
+                    finish()
+                if name in current:
+                    raise ValueError(f"Line {number}: duplicate {name}")
+                if name == 'msgid_plural' and ('msgid' not in current or any(k.startswith('msgstr') for k in current)):
+                    raise ValueError(f"Line {number}: misplaced msgid_plural")
+                if name.startswith('msgstr') and 'msgid' not in current:
+                    raise ValueError(f"Line {number}: msgstr before msgid")
+                current.setdefault('_line', number)
+                current[name] = self._unescape(value[1:-1])
+                current.setdefault('_spans', {})[name] = [number - 1, number]
+                key = name
+            elif quoted.fullmatch(line) and key:
+                current[key] += self._unescape(line[1:-1])
+                current['_spans'][key][1] = number
             else:
-                # Continuation line (starts with ")
-                if line_stripped.startswith('"') and current_key:
-                    match = re.match(r'"(.*)"', line_stripped)
-                    if match:
-                        current_entry[current_key] += self._unescape(match.group(1))
-        
-        # Don't forget last entry
-        if current_entry:
-            current_entry['_line'] = entry_start_line
-            self.entries.append(current_entry)
-    
+                raise ValueError(f"Line {number}: invalid PO syntax")
+        finish()
+        if not self.entries:
+            raise ValueError("No PO entries found")
+
     def _unescape(self, s: str) -> str:
-        """Unescape PO string."""
-        return s.replace('\\n', '\n').replace('\\t', '\t').replace('\\"', '"').replace('\\\\', '\\')
+        escapes = {'n': '\n', 't': '\t', 'r': '\r', 'b': '\b', 'f': '\f',
+                   'v': '\v', 'a': '\a', '"': '"', '\\': '\\'}
+        def decode(match):
+            code = match.group(1)
+            if code not in escapes:
+                raise ValueError(f"Invalid PO escape: \\{code}")
+            return escapes[code]
+        return re.sub(r'\\(.)', decode, s)
 
 
 class TSParser:
@@ -210,33 +314,43 @@ class TSParser:
         self._parse()
     
     def _parse(self):
-        """Parse TS file into entries."""
+        """Read Qt plural/length variants and actual XML line numbers."""
         import xml.etree.ElementTree as ET
-        
-        try:
-            root = ET.fromstring(self.content)
-        except ET.ParseError:
-            return
-        
-        for context in root.findall('.//context'):
-            context_name = context.findtext('name', '')
-            
+        from xml.parsers import expat
+        root = ET.fromstring(self.content)
+        if root.tag != 'TS':
+            raise ValueError("Expected a Qt TS document")
+        self.language = root.get('language', '')
+        lines = []
+        xml_parser = expat.ParserCreate()
+        def start(name, attrs):
+            if name == 'message':
+                lines.append(xml_parser.CurrentLineNumber)
+        xml_parser.StartElementHandler = start
+        xml_parser.Parse(self.content, True)
+        line_iter = iter(lines)
+        for context in root.findall('context'):
             for message in context.findall('message'):
-                entry = {
-                    '_context': context_name,
-                    '_line': 1,  # XML doesn't give us line numbers easily
-                }
-                
                 source = message.find('source')
-                if source is not None:
-                    entry['source'] = source.text or ''
-                
+                if source is None:
+                    raise ValueError("TS message is missing its source")
                 translation = message.find('translation')
+                forms = []
                 if translation is not None:
-                    entry['translation'] = translation.text or ''
-                    entry['_type'] = translation.get('type', '')  # unfinished, vanished, etc.
-                
-                self.entries.append(entry)
+                    nodes = translation.findall('numerusform') if message.get('numerus') == 'yes' else [translation]
+                    for node in nodes:
+                        variants = node.findall('lengthvariant')
+                        forms.extend(''.join(v.itertext()) for v in (variants or [node]))
+                self.entries.append({
+                    '_context': context.findtext('name', '') + '\x04' + message.findtext('comment', ''),
+                    '_id': message.get('id', ''),
+                    '_line': next(line_iter, 1),
+                    'source': ''.join(source.itertext()),
+                    'translation': forms[0] if forms else '',
+                    '_translations': forms or [''],
+                    '_numerus': message.get('numerus') == 'yes',
+                    '_type': translation.get('type', '') if translation is not None else 'unfinished',
+                })
 
 
 class L10nLinter:
@@ -311,13 +425,13 @@ class L10nLinter:
     
     def __init__(self, config: Optional[dict] = None, disabled_rules: Optional[set] = None):
         self.config = config or {}
-        self.disabled_rules = disabled_rules or set()
+        self.disabled_rules = resolve_rules(disabled_rules or set())
         self.max_length = self.config.get('max_length', 500)
         self.length_ratio = self.config.get('length_ratio', 3.0)  # Translation shouldn't be 3x longer
     
     def lint_file(self, filepath: str, content: Optional[str] = None) -> LintResult:
         """Lint a single file."""
-        result = LintResult(disabled_rules=self.disabled_rules)
+        result = LintResult(disabled_rules=self.disabled_rules, severity_overrides=self.config.get('severity', {}))
         result.files_checked = 1
         
         if content is None:
@@ -337,19 +451,31 @@ class L10nLinter:
         # Determine file type
         ext = Path(filepath).suffix.lower()
         
-        if ext == '.po':
-            self._lint_po(filepath, content, result)
-        elif ext == '.ts':
-            self._lint_ts(filepath, content, result)
+        if ext in ('.po', '.ts'):
+            try:
+                if ext == '.po':
+                    self._lint_po(filepath, content, result)
+                else:
+                    self._lint_ts(filepath, content, result)
+            except (ValueError, SyntaxError) as exc:
+                match = re.search(r'[Ll]ine (\d+)', str(exc))
+                result.add(LintIssue(filepath, int(match.group(1)) if match else 1,
+                                     Severity.ERROR, 'syntax-error', str(exc)))
         else:
             result.add(LintIssue(
                 file=filepath,
                 line=0,
-                severity=Severity.WARNING,
+                severity=Severity.ERROR,
                 rule="unknown-format",
                 message=_("Unknown file format: {ext}").format(ext=ext)
             ))
         
+        if self.config.get('reference') and not any(i.rule == 'syntax-error' for i in result.issues):
+            from l10n_project import compare_catalog
+            try:
+                compare_catalog(filepath, content, self.config['reference'], result)
+            except (OSError, ValueError, SyntaxError) as exc:
+                result.add(LintIssue(filepath, 1, Severity.ERROR, 'reference-error', str(exc)))
         return result
     
     def _lint_po(self, filepath: str, content: str, result: LintResult):
@@ -361,7 +487,7 @@ class L10nLinter:
         # Initialize consistency map for this file
         self.consistency_map = {}
         # Detect language for locale-specific checks
-        self._current_lang = self._detect_language_from_po(filepath, parser)
+        self._current_lang = self.config.get('language') or self._detect_language_from_po(filepath, parser)
         
         for entry in parser.entries:
             line = entry.get('_line', 0)
@@ -419,126 +545,14 @@ class L10nLinter:
                     context=msgid[:50]
                 ))
             
-            # Check: Placeholder mismatch
-            if msgstr:
-                self._check_placeholders(filepath, line, msgid, msgstr, result)
-            
-            # Check: Length
-            if msgstr:
-                self._check_length(filepath, line, msgid, msgstr, result)
-            
-            # Check: Punctuation
-            if msgstr:
-                self._check_punctuation(filepath, line, msgid, msgstr, result)
-            
-            # Check: Capitalization
-            if msgstr:
-                self._check_capitalization(filepath, line, msgid, msgstr, result)
-            
-            # Check: Whitespace issues
-            if msgstr:
-                self._check_whitespace(filepath, line, msgid, msgstr, result)
-            
-            # Check: Quote consistency
-            if msgstr:
-                self._check_quotes(filepath, line, msgid, msgstr, result)
-            
-            # Check: HTML tags
-            if msgstr:
-                self._check_html_tags(filepath, line, msgid, msgstr, result)
-            
-            # Check: Escaped characters
-            if msgstr:
-                self._check_escapes(filepath, line, msgid, msgstr, result)
-            
-            # Check: Keyboard accelerators
-            if msgstr:
-                self._check_accelerators(filepath, line, msgid, msgstr, result)
-            
-            # Check: Numeric values
-            if msgstr:
-                self._check_numerics(filepath, line, msgid, msgstr, result)
-            
-            # Check: Untranslated English words
-            if msgstr:
-                self._check_untranslated(filepath, line, msgid, msgstr, result)
-            
-            # Check: Repeated words
-            if msgstr:
-                self._check_repeated_words(filepath, line, msgid, msgstr, result)
-            
-            # Check: Cross-newline duplicate words
-            if msgstr:
-                self._check_cross_newline_duplicates(filepath, line, msgid, msgstr, result)
-            
-            # Check: Source equals translation
-            if msgstr:
-                self._check_source_equals_translation(filepath, line, msgid, msgstr, result)
-            
-            # Check: Option value consistency
-            if msgstr:
-                self._check_option_values(filepath, line, msgid, msgstr, result)
-            
-            # Check: Swedish terminology consistency
-            if msgstr:
-                self._check_terminology(filepath, line, msgid, msgstr, result)
-            
-            # Check: Domain-specific terminology
-            if msgstr:
-                self._check_domain_terminology(filepath, line, msgid, msgstr, result)
-            
-            # Check: False friends
-            if msgstr:
-                self._check_false_friends(filepath, line, msgid, msgstr, result)
-            
-            # Check: Internal consistency
-            if msgstr:
-                self._check_consistency(filepath, line, msgid, msgstr, result)
-            
-            # Check: Typos (via aspell)
-            if msgstr:
-                self._check_typos(filepath, line, msgid, msgstr, result)
-            
-            # Check: Decimal separator (. → , in Swedish)
-            if msgstr:
-                self._check_decimal_separator(filepath, line, msgid, msgstr, result)
-            
-            # Check: Zero-width characters
-            if msgstr:
-                self._check_zero_width_space(filepath, line, msgid, msgstr, result)
-            
-            # Check: End stop mismatch
-            if msgstr:
-                self._check_end_stop_mismatch(filepath, line, msgid, msgstr, result)
-            
-            # Check: Ellipsis style
-            if msgstr:
-                self._check_ellipsis(filepath, line, msgid, msgstr, result)
-            
-            # Check: XML tags mismatch
-            if msgstr:
-                self._check_xml_tags_mismatch(filepath, line, msgid, msgstr, result)
-            
-            # Check: Duplicate words (enhanced)
-            if msgstr:
-                self._check_duplicate_words(filepath, line, msgid, msgstr, result)
-            
-            # Check: Punctuation mismatch (enhanced)
-            if msgstr:
-                self._check_punctuation_mismatch(filepath, line, msgid, msgstr, result)
-            
-            # Check: URL preservation
-            if msgstr:
-                self._check_url_preservation(filepath, line, msgid, msgstr, result)
-            
-            # Check: Escaped newline count
-            if msgstr:
-                self._check_escaped_newline_count(filepath, line, msgid, msgstr, result)
-            
-            # Check: Max length ratio
-            if msgstr:
-                self._check_max_length_ratio(filepath, line, msgid, msgstr, result)
-            
+            self._format_flags = set(flags)
+            self._message_context = entry.get('msgctxt', '')
+            forms = [(key, value) for key, value in entry.items() if key.startswith('msgstr[')] if msgid_plural else [('msgstr', msgstr)]
+            for key, value in forms:
+                if value:
+                    source = msgid if key in ('msgstr', 'msgstr[0]') else msgid_plural
+                    self._check_translation(filepath, line, source, value, result)
+
             # Check: Duplicates (use msgctxt+msgid as key to avoid false positives)
             msgctxt = entry.get('msgctxt', '')
             dup_key = (msgctxt, msgid)
@@ -559,74 +573,75 @@ class L10nLinter:
         
         result.entries_checked += entries_count
     
+    def _check_translation(self, filepath, line, source, translation, result):
+        seen = set()
+        for rule, spec in RULES.items():
+            if not spec.method or spec.method in ('_check_plural_forms', '_check_same_plurals'):
+                continue
+            if rule in self.disabled_rules or spec.method in seen:
+                continue
+            if spec.language and getattr(self, '_current_lang', '').split('_')[0].split('-')[0] != spec.language:
+                continue
+            seen.add(spec.method)
+            getattr(self, spec.method)(filepath, line, source, translation, result)
+        for wrong, correct, context in self.config.get('glossary_terms', []):
+            if re.search(r'(?<!\w)' + re.escape(wrong) + r'(?!\w)', translation, re.IGNORECASE):
+                result.add(LintIssue(filepath, line, Severity.WARNING, 'glossary',
+                    f"Prefer '{correct}' over '{wrong}'" + (f" ({context})" if context else ''), source))
+
     def _lint_ts(self, filepath: str, content: str, result: LintResult):
-        """Lint a .ts file."""
         parser = TSParser(content, filepath)
-        entries_count = 0
-        
+        self._current_lang = self.config.get('language') or parser.language
+        self.po_parser = None
+        self.consistency_map = {}
+        self._format_flags = {'qt-format'}
         for entry in parser.entries:
-            entries_count += 1
-            line = entry.get('_line', 0)
-            source = entry.get('source', '')
-            translation = entry.get('translation', '')
-            trans_type = entry.get('_type', '')
-            
-            # Check: Unfinished
-            if trans_type == 'unfinished' or not translation:
-                result.add(LintIssue(
-                    file=filepath,
-                    line=line,
-                    severity=Severity.ERROR,
-                    rule="missing-translation",
-                    message=_("Unfinished/missing translation"),
-                    context=source[:50]
-                ))
-            
-            # Check: Vanished
-            if trans_type == 'vanished':
-                result.add(LintIssue(
-                    file=filepath,
-                    line=line,
-                    severity=Severity.INFO,
-                    rule="vanished",
-                    message=_("Vanished translation (source removed)"),
-                    context=source[:50]
-                ))
-            
-            # Check: Placeholders
-            if translation:
-                self._check_placeholders(filepath, line, source, translation, result)
-            
-            # Check: Length
-            if translation:
-                self._check_length(filepath, line, source, translation, result)
-        
-        result.entries_checked += entries_count
-    
-    def _check_placeholders(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
-        """Check for placeholder mismatches."""
-        # Find all placeholders in source and translation
-        for name, pattern in [
-            ('printf', self.PRINTF_PATTERN),
-            ('python-format', self.PYTHON_FORMAT),
-            ('python-named', self.PYTHON_NAMED),
-            ('qt-format', self.QT_PATTERN),
-        ]:
-            source_matches = sorted(pattern.findall(source))
-            trans_matches = sorted(pattern.findall(translation))
-            
-            if source_matches != trans_matches and source_matches:
-                result.add(LintIssue(
-                    file=filepath,
-                    line=line,
-                    severity=Severity.ERROR,
-                    rule="placeholder-mismatch",
-                    message=_("Placeholder mismatch ({name}): source has {source}, translation has {trans}").format(
-                        name=name, source=source_matches, trans=trans_matches
-                    ),
-                    context=source[:50]
-                ))
-    
+            line, source = entry['_line'], entry['source']
+            if entry['_type'] in ('vanished', 'obsolete'):
+                result.add(LintIssue(filepath, line, Severity.INFO, 'vanished',
+                                     'Translation source was removed', source))
+                continue
+            result.entries_checked += 1
+            self._message_context = entry['_context']
+            if entry['_type'] == 'unfinished' or any(not value.strip() for value in entry['_translations']):
+                result.add(LintIssue(filepath, line, Severity.ERROR, 'missing-translation',
+                                     'Unfinished/missing translation', source))
+            for value in entry['_translations']:
+                if value.strip():
+                    self._check_translation(filepath, line, source, value, result)
+
+    def _check_placeholders(self, filepath, line, source, translation, result):
+        from l10n_project import placeholder_signature
+        flags = getattr(self, '_format_flags', set())
+        if 'qt-format' in flags:
+            kinds = ['qt']
+        elif 'c-format' in flags or 'python-format' in flags:
+            kinds = ['printf']
+        elif 'python-brace-format' in flags:
+            kinds = ['python']
+        else:
+            kinds = ['printf']
+            if self.PYTHON_BRACE_FORMAT.search(source) or self.PYTHON_BRACE_FORMAT.search(translation):
+                kinds.append('python')
+            if re.search(r'%L?(?:[1-9]\d?|n)(?![\w.$])', source + ' ' + translation):
+                kinds.append('qt')
+        if ('no-c-format' in flags or 'no-python-format' in flags) and 'printf' in kinds:
+            kinds.remove('printf')
+        if 'no-python-brace-format' in flags and 'python' in kinds:
+            kinds.remove('python')
+        for kind in kinds:
+            rule = 'python-format' if kind == 'python' else 'placeholder-mismatch'
+            try:
+                before = placeholder_signature(source, kind)
+                after = placeholder_signature(translation, kind)
+            except ValueError as exc:
+                result.add(LintIssue(filepath, line, Severity.ERROR, rule,
+                                     f"Invalid {kind} format: {exc}", source))
+                continue
+            if before != after:
+                result.add(LintIssue(filepath, line, Severity.ERROR, rule,
+                    f"Placeholder mismatch ({kind}): source has {before}, translation has {after}", source))
+
     # Msgids where length checks are meaningless (translators put their own info)
     LENGTH_SKIP_MSGIDS = frozenset([
         'translator-credits', 'translator_credits',
@@ -1154,7 +1169,7 @@ class L10nLinter:
         Skip: version numbers (2.0.1), IP addresses, filenames, format strings,
               numbers identical in source and translation (likely intentional).
         """
-        target_lang = getattr(self, '_current_lang', 'sv')
+        target_lang = getattr(self, '_current_lang', 'sv').split('_')[0].split('-')[0]
         if not target_lang.startswith('sv'):
             return
         
@@ -1288,23 +1303,6 @@ class L10nLinter:
                 context=source[:50]
             ))
 
-    def _check_python_format(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
-        """Check Python {}-format strings specifically."""
-        source_braces = sorted(self.PYTHON_BRACE_FORMAT.findall(source))
-        trans_braces = sorted(self.PYTHON_BRACE_FORMAT.findall(translation))
-        
-        if source_braces and source_braces != trans_braces:
-            result.add(LintIssue(
-                file=filepath,
-                line=line,
-                severity=Severity.ERROR,
-                rule="python-format",
-                message=_("Python format string mismatch: source has {src}, translation has {trans}").format(
-                    src=source_braces, trans=trans_braces
-                ),
-                context=source[:50]
-            ))
-
     def _detect_language_from_po(self, filepath: str, po_parser: 'POParser') -> str:
         """Detect target language from PO file header or filename."""
         # Check for Language header in PO file
@@ -1319,7 +1317,7 @@ class L10nLinter:
         
         # Fall back to filename detection
         filename = Path(filepath).name.lower()
-        if '.sv.' in filename or filename.endswith('.sv.po'):
+        if filename == 'sv.po' or '.sv.' in filename or filename.endswith('.sv.po'):
             return 'sv'
         # Add more languages as needed
         return ''
@@ -1347,10 +1345,7 @@ class L10nLinter:
 
     def _check_terminology(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for common Swedish terminology mistakes."""
-        if not hasattr(self, 'po_parser'):
-            return
-        
-        lang = self._detect_language_from_po(filepath, self.po_parser)
+        lang = getattr(self, '_current_lang', '').split('_')[0].split('-')[0]
         if lang != 'sv':
             return
         
@@ -1455,10 +1450,7 @@ class L10nLinter:
 
     def _check_domain_terminology(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for domain-specific terminology mistakes."""
-        if not hasattr(self, 'po_parser'):
-            return
-        
-        lang = self._detect_language_from_po(filepath, self.po_parser)
+        lang = getattr(self, '_current_lang', '').split('_')[0].split('-')[0]
         if lang != 'sv':
             return
         
@@ -1511,10 +1503,7 @@ class L10nLinter:
 
     def _check_false_friends(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for Swedish-English false friends."""
-        if not hasattr(self, 'po_parser'):
-            return
-        
-        lang = self._detect_language_from_po(filepath, self.po_parser)
+        lang = getattr(self, '_current_lang', '').split('_')[0].split('-')[0]
         if lang != 'sv':
             return
         
@@ -1556,7 +1545,7 @@ class L10nLinter:
             return
         
         # Use source as key, excluding msgctxt for now (could be enhanced)
-        source_key = source.strip()
+        source_key = (getattr(self, '_message_context', ''), source.strip())
         
         if source_key in self.consistency_map:
             existing_translation = self.consistency_map[source_key]
@@ -1814,14 +1803,14 @@ class L10nLinter:
             if expected_nplurals:
                 max_idx = max(plural_forms.keys()) + 1
                 
-                if max_idx < expected_nplurals:
+                if set(range(expected_nplurals)) - plural_forms.keys():
                     result.add(LintIssue(
                         file=filepath,
                         line=line,
                         severity=Severity.ERROR,
                         rule="plural-forms-missing",
                         message=_("Missing plural forms: got {got}, expected {exp} (nplurals={n})").format(
-                            got=max_idx, exp=expected_nplurals, n=expected_nplurals
+                            got=len(plural_forms), exp=expected_nplurals, n=expected_nplurals
                         ),
                         context=msgid[:50]
                     ))
@@ -1832,7 +1821,7 @@ class L10nLinter:
                         severity=Severity.WARNING,
                         rule="plural-forms-extra",
                         message=_("Extra plural forms: got {got}, expected {exp} (nplurals={n})").format(
-                            got=max_idx, exp=expected_nplurals, n=expected_nplurals
+                            got=len(plural_forms), exp=expected_nplurals, n=expected_nplurals
                         ),
                         context=msgid[:50]
                     ))
@@ -1849,24 +1838,6 @@ class L10nLinter:
                         context=msgid[:50]
                     ))
             
-            # Check: placeholders consistent across all plural forms
-            if plural_forms:
-                source_placeholders = set(re.findall(r'%[sd%]|%\d*\$?[sd]|\{[^}]+\}|%\([^)]+\)[sdf]', msgid))
-                for idx, translation in plural_forms.items():
-                    if translation:
-                        trans_placeholders = set(re.findall(r'%[sd%]|%\d*\$?[sd]|\{[^}]+\}|%\([^)]+\)[sdf]', translation))
-                        if source_placeholders and trans_placeholders != source_placeholders:
-                            result.add(LintIssue(
-                                file=filepath,
-                                line=line,
-                                severity=Severity.ERROR,
-                                rule="plural-placeholder-mismatch",
-                                message=_("Placeholder mismatch in msgstr[{idx}]: source has {src}, translation has {trans}").format(
-                                    idx=idx, src=source_placeholders, trans=trans_placeholders
-                                ),
-                                context=msgid[:50]
-                            ))
-
     def _check_zero_width_space(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for zero-width Unicode characters in translations."""
         zero_width_chars = {
@@ -2127,93 +2098,115 @@ class L10nLinter:
         if len(source.strip()) < 10:
             return  # Skip short strings
         
-        if len(translation) > len(source) * 3:
+        if len(translation) > len(source) * self.length_ratio:
             ratio = len(translation) / len(source)
             result.add(LintIssue(
                 file=filepath,
                 line=line,
                 severity=Severity.WARNING,
                 rule="max-length-ratio",
-                message=_("Translation is {ratio:.1f}x longer than source (max 3x recommended)").format(ratio=ratio),
+                message=_("Translation is {ratio:.1f}x longer than source (max {maximum:g}x recommended)").format(ratio=ratio, maximum=self.length_ratio),
                 context=source[:50]
             ))
 
 
 def find_l10n_files(path: str, recursive: bool = True) -> Generator[str, None, None]:
-    """Find all .po and .ts files in path."""
     path = Path(path)
-    
+    if not path.exists():
+        raise FileNotFoundError(f"Path does not exist: {path}")
     if path.is_file():
-        if path.suffix.lower() in ('.po', '.ts'):
-            yield str(path)
+        if path.suffix.lower() not in ('.po', '.ts'):
+            raise ValueError(f"Unsupported translation file: {path}")
+        yield str(path)
         return
-    
-    pattern = '**/*' if recursive else '*'
-    for ext in ('.po', '.ts'):
-        for f in path.glob(f'{pattern}{ext}'):
-            yield str(f)
+    if not path.is_dir():
+        raise ValueError(f"Not a file or directory: {path}")
+    files = sorted(p for p in (path.rglob('*') if recursive else path.glob('*'))
+                   if p.is_file() and p.suffix.lower() in ('.po', '.ts'))
+    yield from (str(p) for p in files)
 
 
 def fetch_github_files(repo_url: str, path_filter: str = "") -> Generator[tuple[str, str], None, None]:
-    """
-    Fetch l10n files from a GitHub repository.
-    
-    Args:
-        repo_url: GitHub URL (https://github.com/owner/repo) or owner/repo
-        path_filter: Optional path filter within repo
-    
-    Yields:
-        (filepath, content) tuples
-    """
+    """Fetch one immutable tree from the repository's actual default branch."""
     import urllib.request
-    
-    # Parse repo URL
-    if repo_url.startswith('https://github.com/'):
-        parts = repo_url.replace('https://github.com/', '').strip('/').split('/')
-    elif '/' in repo_url and not repo_url.startswith('http'):
-        parts = repo_url.split('/')
-    else:
-        raise ValueError(f"Invalid GitHub URL: {repo_url}")
-    
-    if len(parts) < 2:
-        raise ValueError(f"Invalid GitHub URL: {repo_url}")
-    
-    owner, repo = parts[0], parts[1]
-    
-    # Use GitHub API to get repository tree
-    api_url = f"https://api.github.com/repos/{owner}/{repo}/git/trees/main?recursive=1"
-    
-    try:
-        # Try main branch
-        req = urllib.request.Request(api_url, headers={'User-Agent': 'l10n-lint'})
-        response = urllib.request.urlopen(req, timeout=30)
-        data = json.loads(response.read().decode())
-    except:
-        # Try master branch
-        api_url = api_url.replace('/main?', '/master?')
-        req = urllib.request.Request(api_url, headers={'User-Agent': 'l10n-lint'})
-        response = urllib.request.urlopen(req, timeout=30)
-        data = json.loads(response.read().decode())
-    
-    # Find .po and .ts files
+    from urllib.parse import quote
+    repo = repo_url.removeprefix('https://github.com/').strip('/').removesuffix('.git')
+    if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repo):
+        raise ValueError(f"Invalid GitHub repository: {repo_url}")
+    def fetch(url):
+        req = urllib.request.Request(url, headers={'User-Agent': 'l10n-lint'})
+        with urllib.request.urlopen(req, timeout=30) as response:
+            return response.read().decode('utf-8')
+    metadata = json.loads(fetch(f'https://api.github.com/repos/{repo}'))
+    branch = quote(metadata['default_branch'], safe='')
+    data = json.loads(fetch(f'https://api.github.com/repos/{repo}/git/trees/{branch}?recursive=1'))
+    if data.get('truncated'):
+        raise ValueError('GitHub returned a truncated tree; lint a local checkout instead')
+    revision = data['sha']
     for item in data.get('tree', []):
         filepath = item['path']
-        
-        if path_filter and not filepath.startswith(path_filter):
+        if item.get('type') != 'blob' or Path(filepath).suffix.lower() not in ('.po', '.ts'):
             continue
-        
-        if not (filepath.endswith('.po') or filepath.endswith('.ts')):
+        if path_filter and not (filepath == path_filter.rstrip('/') or filepath.startswith(path_filter.rstrip('/') + '/')):
             continue
-        
-        # Fetch file content
-        raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/main/{filepath}"
+        content = fetch(f'https://raw.githubusercontent.com/{repo}/{revision}/{quote(filepath, safe="/")}')
+        yield filepath, content
+
+
+def lint_inputs(paths=(), github=None, path_filter='', config=None, disabled_rules=None,
+                recursive=True, exclude=(), root=None, progress=None):
+    """Shared desktop/CLI input pipeline; failures always become diagnostics."""
+    from l10n_project import excluded
+    config = config or {}
+    linter = L10nLinter(config, disabled_rules)
+    result = LintResult(disabled_rules=linter.disabled_rules, severity_overrides=config.get('severity', {}))
+    seen = set()
+    def add_file(path, content=None, identity=None):
+        if excluded(path, exclude, root or Path.cwd()):
+            return
+        key = identity or (path if content is not None else str(Path(path).resolve()))
+        if key in seen:
+            return
+        seen.add(key)
+        file_result = linter.lint_file(path, content)
+        result.files_checked += file_result.files_checked
+        result.entries_checked += file_result.entries_checked
+        result.issues.extend(file_result.issues)
+        if progress:
+            progress(path)
+    if github:
         try:
-            req = urllib.request.Request(raw_url, headers={'User-Agent': 'l10n-lint'})
-            content_response = urllib.request.urlopen(req, timeout=30)
-            content = content_response.read().decode('utf-8')
-            yield (filepath, content)
-        except Exception as e:
-            print(_("Warning: Could not fetch {path}: {error}").format(path=filepath, error=e), file=sys.stderr)
+            for filepath, content in fetch_github_files(github, path_filter):
+                add_file(filepath, content)
+        except Exception as exc:
+            result.add(LintIssue(github, 0, Severity.ERROR, 'github-fetch-error', str(exc)))
+    for path in paths:
+        if is_url(path):
+            try:
+                filename, content = fetch_url_file(path)
+                # Use URL identity for diagnostics but its decoded path for format detection.
+                before = len(result.issues)
+                add_file(filename, content, identity=path)
+                for issue in result.issues[before:]:
+                    issue.file = path
+            except Exception as exc:
+                result.add(LintIssue(path, 0, Severity.ERROR, 'url-fetch-error', str(exc)))
+        else:
+            try:
+                found = list(find_l10n_files(path, recursive))
+                if not found:
+                    result.add(LintIssue(path, 0, Severity.ERROR, 'no-files', 'No translation files found'))
+                for filepath in found:
+                    add_file(filepath)
+            except (OSError, ValueError) as exc:
+                result.add(LintIssue(path, 0, Severity.ERROR, 'path-error', str(exc)))
+    if not result.files_checked and not result.issues:
+        result.add(LintIssue(str(root or '.'), 0, Severity.ERROR, 'no-files', 'No translation files checked'))
+    return result
+
+
+def lint_github_repo(repo, path_filter="", **kwargs):
+    return lint_inputs(github=repo, path_filter=path_filter, **kwargs)
 
 
 def fetch_url_file(url: str) -> tuple[str, str]:
@@ -2247,8 +2240,8 @@ def fetch_url_file(url: str) -> tuple[str, str]:
         'Accept': 'text/plain, application/octet-stream, */*',
     })
     
-    response = urllib.request.urlopen(req, timeout=30)
-    content = response.read().decode('utf-8')
+    with urllib.request.urlopen(req, timeout=30) as response:
+        content = response.read().decode('utf-8')
     
     return (filename, content)
 
@@ -2438,9 +2431,13 @@ def generate_html_report(result: LintResult, title: str = "l10n-lint Report") ->
 
 def format_output(result: LintResult, format_type: str = "text") -> str:
     """Format lint results."""
+    if format_type == 'sarif':
+        from l10n_project import sarif_report
+        return sarif_report(result)
     if format_type == "json":
         return json.dumps({
             "files_checked": result.files_checked,
+            "entries_checked": result.entries_checked,
             "errors": result.error_count,
             "warnings": result.warning_count,
             "issues": [i.to_dict() for i in result.issues]
@@ -2453,8 +2450,11 @@ def format_output(result: LintResult, format_type: str = "text") -> str:
         # GitHub Actions annotation format
         lines = []
         for issue in result.issues:
-            level = "error" if issue.severity == Severity.ERROR else "warning"
-            lines.append(f"::{level} file={issue.file},line={issue.line}::[{issue.rule}] {issue.message}")
+            level = {Severity.ERROR: 'error', Severity.WARNING: 'warning', Severity.INFO: 'notice'}[issue.severity]
+            def escape(value, prop=False):
+                value = value.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                return value.replace(':', '%3A').replace(',', '%2C') if prop else value
+            lines.append(f"::{level} file={escape(issue.file, True)},line={max(1, issue.line)}::[{issue.rule}] {escape(issue.message)}")
         return '\n'.join(lines)
     
     elif format_type == "gnu":
@@ -2511,302 +2511,127 @@ class TranslatedHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description=_('l10n-lint - Linter for localization files (.po, .ts)'),
-        formatter_class=TranslatedHelpFormatter,
-        add_help=False,
-        epilog=_("Examples:") + """
-  l10n-lint ./translations/           # Lint local directory
-  l10n-lint file.po                   # Lint single file
-  l10n-lint https://example.com/sv.po # Lint file from URL
-  l10n-lint --github owner/repo       # Lint GitHub repository
-  l10n-lint -f html -o report.html .  # Generate HTML report
-  l10n-lint -f json -o results.json . # Generate JSON report
-        """
-    )
-    
-    parser.add_argument('paths', nargs='*', help=_('Files or directories to lint'))
-    parser.add_argument('--github', '-g', metavar='REPO', help=_('GitHub repository (owner/repo or URL)'))
-    parser.add_argument('--path', '-p', metavar='PATH', default='', help=_('Path filter for GitHub repos'))
-    parser.add_argument('--format', '-f', choices=['text', 'json', 'html', 'github', 'gnu'], default='text', help=_('Output format (gnu = Emacs-compatible file:line:col format)'))
-    parser.add_argument('--output', '-o', metavar='FILE', help=_('Save report to file'))
-    parser.add_argument('--max-length', type=int, default=500, help=_('Max translation length (default: 500)'))
-    parser.add_argument('--no-recursive', action='store_true', help=_("Don't search subdirectories"))
-    parser.add_argument('--strict', action='store_true', help=_('Treat warnings as errors'))
-    parser.add_argument('--quiet', '-q', action='store_true', help=_('Show only summary'))
-    parser.add_argument('--check', action='store_true', help=_('Exit code only, no output (for CI)'))
-    parser.add_argument('--skip-fuzzy', action='store_true', help=_('Ignore fuzzy warnings'))
-    parser.add_argument('--disable', metavar='RULES', help=_('Comma-separated list of rule names to disable (e.g. trailing-whitespace,keyboard-shortcut-missing)'))
-    parser.add_argument('--checks', metavar='RULES', help=_('Comma-separated list of specific checks to run (e.g. terminology,false-friends,consistency)'))
-    parser.add_argument('--skip-checks', metavar='RULES', help=_('Comma-separated list of specific checks to skip (e.g. terminology,domain-terminology)'))
-    parser.add_argument('--terminology', action='store_true', default=True, help=_('Enable terminology checks (default: enabled)'))
-    parser.add_argument('--no-terminology', action='store_false', dest='terminology', help=_('Disable terminology checks'))
-    parser.add_argument('--glossary', metavar='FILE', help=_('Load custom glossary file (TSV format: wrong\tcorrect\tcontext)'))
-    parser.add_argument('--verbose', '-V', action='store_true', help=_('Show detailed progress'))
-    parser.add_argument('--gtk', '-G', action='store_true', help=_('Launch GTK graphical interface'))
-    parser.add_argument('-h', '--help', action='help', help=_('Show this help message and exit'))
-    parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}',
-                        help=_('Show version number and exit'))
-    
-    args = parser.parse_args()
-    
-    # Launch GTK interface if requested
-    if args.gtk:
-        try:
-            # Try to import and run GTK interface
-            gtk_script = Path(__file__).parent / "l10n_lint_gtk.py"
-            if gtk_script.exists():
-                import subprocess
-                cmd = [sys.executable, str(gtk_script)]
-                if args.paths:
-                    cmd.extend(args.paths)
-                sys.exit(subprocess.call(cmd))
-            else:
-                # Try system-installed version
-                import shutil
-                gtk_cmd = shutil.which("l10n-lint-gtk")
-                if gtk_cmd:
-                    import subprocess
-                    cmd = [gtk_cmd]
-                    if args.paths:
-                        cmd.extend(args.paths)
-                    sys.exit(subprocess.call(cmd))
-                else:
-                    print(_("Error: GTK interface not found. Install l10n-lint-gtk or run from source directory."), file=sys.stderr)
-                    sys.exit(1)
-        except Exception as e:
-            print(_("Error launching GTK interface: {error}").format(error=e), file=sys.stderr)
-            sys.exit(1)
-    
-    if not args.paths and not args.github:
-        parser.print_help()
-        sys.exit(1)
-    
-    verbose = args.verbose
-    start_time = time.time()
-    
-    def vprint(msg):
-        """Print if verbose mode is enabled."""
-        if verbose:
-            print(msg, file=sys.stderr)
-    
-    def vprint_elapsed():
-        """Print elapsed time."""
-        elapsed = time.time() - start_time
-        vprint(_("⏱️  Elapsed time: {elapsed:.2f}s").format(elapsed=elapsed))
-    
-    vprint(_("🔧 l10n-lint {version} starting...").format(version=__version__))
-    vprint(_("   Max length: {max}").format(max=args.max_length))
-    vprint(_("   Length ratio: {ratio}x").format(ratio=3.0))
-    vprint(_("   Strict mode: {strict}").format(strict=args.strict))
-    vprint(_("   Output format: {fmt}").format(fmt=args.format))
-    vprint(_("   Recursive: {rec}").format(rec=not args.no_recursive))
-    if LOCALE_DIR:
-        vprint(_("   Locale dir: {dir}").format(dir=LOCALE_DIR))
-        vprint(_("   Language: {lang}").format(lang=_lang_code))
-    else:
-        vprint(_("   Locale: not found (using English)"))
-    vprint("")
-    
-    disabled = set()
-    if hasattr(args, 'disable') and args.disable:
-        disabled = {r.strip() for r in args.disable.split(',')}
-    
-    # Handle new CLI arguments for terminology checks
-    terminology_disabled = set()
-    
-    # If --no-terminology, disable all terminology checks
-    if hasattr(args, 'terminology') and not args.terminology:
-        terminology_disabled.update(['terminology', 'domain-terminology', 'false-friends', 'consistency'])
-    
-    # Handle --skip-checks
-    if hasattr(args, 'skip_checks') and args.skip_checks:
-        terminology_disabled.update(r.strip() for r in args.skip_checks.split(','))
-    
-    # Handle --checks (only run specific checks)
-    if hasattr(args, 'checks') and args.checks:
-        all_terminology_checks = {'terminology', 'domain-terminology', 'false-friends', 'consistency'}
-        specified_checks = {r.strip() for r in args.checks.split(',')}
-        # Disable checks that were not specified
-        terminology_disabled.update(all_terminology_checks - specified_checks)
-    
-    # Merge with existing disabled rules
-    disabled.update(terminology_disabled)
-    
-    # TODO: Handle --glossary if needed in future versions
-    
-    linter = L10nLinter(config={
-        'max_length': args.max_length,
-    }, disabled_rules=disabled)
-    
-    result = LintResult(disabled_rules=disabled)
-    
-    # Lint GitHub repo
-    if args.github:
-        vprint(_("🌐 GitHub mode"))
-        print(_("🔍 Fetching from GitHub: {repo}").format(repo=args.github), file=sys.stderr)
-        if args.path:
-            vprint(_("   Path filter: {path}").format(path=args.path))
-        try:
-            fetch_start = time.time()
-            vprint(_("   Connecting to GitHub API..."))
-            files_found = 0
-            for filepath, content in fetch_github_files(args.github, args.path):
-                files_found += 1
-                file_start = time.time()
-                vprint(_("  [{n}] {path}").format(n=files_found, path=filepath))
-                vprint(_("       Size: {size} bytes").format(size=len(content)))
-                file_result = linter.lint_file(filepath, content)
-                file_elapsed = time.time() - file_start
-                result.files_checked += file_result.files_checked
-                result.entries_checked += file_result.entries_checked
-                result.issues.extend(file_result.issues)
-                vprint(_("       Entries: {count}").format(count=file_result.entries_checked))
-                vprint(_("       Parsed in {elapsed:.3f}s").format(elapsed=file_elapsed))
-                if file_result.issues:
-                    vprint(_("       ⚠️  Found {count} issue(s)").format(count=len(file_result.issues)))
-                else:
-                    vprint(_("       ✓ No issues"))
-            fetch_elapsed = time.time() - fetch_start
-            vprint(_("   Fetched {count} file(s) in {elapsed:.2f}s").format(
-                count=files_found, elapsed=fetch_elapsed))
-        except Exception as e:
-            print(_("❌ GitHub error: {error}").format(error=e), file=sys.stderr)
-            sys.exit(1)
-    
-    # Lint local files and URLs
-    if args.paths:
-        # Separate URLs from local paths
-        url_paths = [p for p in args.paths if is_url(p)]
-        local_paths = [p for p in args.paths if not is_url(p)]
-        
-        # Process URLs
-        if url_paths:
-            vprint(_("🌐 URL mode"))
-            url_files = 0
-            for url in url_paths:
-                url_files += 1
-                file_start = time.time()
-                vprint(_("  [{n}] {url}").format(n=url_files, url=url))
-                try:
-                    filename, content = fetch_url_file(url)
-                    fetch_elapsed = time.time() - file_start
-                    vprint(_("       Fetched: {name} ({size} bytes) in {elapsed:.3f}s").format(
-                        name=filename, size=len(content), elapsed=fetch_elapsed))
-                    
-                    lint_start = time.time()
-                    file_result = linter.lint_file(filename, content)
-                    lint_elapsed = time.time() - lint_start
-                    result.files_checked += file_result.files_checked
-                    result.entries_checked += file_result.entries_checked
-                    result.issues.extend(file_result.issues)
-                    vprint(_("       Entries: {count}").format(count=file_result.entries_checked))
-                    vprint(_("       Parsed in {elapsed:.3f}s").format(elapsed=lint_elapsed))
-                    if file_result.issues:
-                        vprint(_("       ⚠️  Found {count} issue(s)").format(count=len(file_result.issues)))
-                    else:
-                        vprint(_("       ✓ No issues"))
-                except Exception as e:
-                    print(_("❌ URL error for {url}: {error}").format(url=url, error=e), file=sys.stderr)
-                    result.add(LintIssue(
-                        file=url,
-                        line=0,
-                        severity=Severity.ERROR,
-                        rule="url-fetch-error",
-                        message=_("Could not fetch URL: {error}").format(error=e)
-                    ))
-                    result.files_checked += 1
-            
-            vprint(_("   Total URL files: {count}").format(count=url_files))
-        
-        # Process local paths
-        if local_paths:
-            vprint(_("📁 Local mode"))
-            local_files = 0
-            for path in local_paths:
-                vprint(_("📂 Scanning: {path}").format(path=path))
-                scan_start = time.time()
-                path_files = list(find_l10n_files(path, recursive=not args.no_recursive))
-                scan_elapsed = time.time() - scan_start
-                vprint(_("   Found {count} file(s) in {elapsed:.3f}s").format(
-                    count=len(path_files), elapsed=scan_elapsed))
-                
-                for filepath in path_files:
-                    local_files += 1
-                    file_start = time.time()
-                    file_size = Path(filepath).stat().st_size
-                    vprint(_("  [{n}] {path}").format(n=local_files, path=filepath))
-                    vprint(_("       Size: {size} bytes").format(size=file_size))
-                    file_result = linter.lint_file(filepath)
-                    file_elapsed = time.time() - file_start
-                    result.files_checked += file_result.files_checked
-                    result.entries_checked += file_result.entries_checked
-                    result.issues.extend(file_result.issues)
-                    vprint(_("       Entries: {count}").format(count=file_result.entries_checked))
-                    vprint(_("       Parsed in {elapsed:.3f}s").format(elapsed=file_elapsed))
-                    if file_result.issues:
-                        vprint(_("       ⚠️  Found {count} issue(s)").format(count=len(file_result.issues)))
-                    else:
-                        vprint(_("       ✓ No issues"))
-            
-            vprint(_("   Total local files: {count}").format(count=local_files))
-    
-    # Filter out fuzzy if requested
-    if args.skip_fuzzy:
-        result.issues = [i for i in result.issues if i.rule != 'fuzzy']
-    
-    # Verbose summary
-    elapsed = time.time() - start_time
-    vprint("")
-    vprint(_("📊 Summary:"))
-    vprint(_("   Files checked: {count}").format(count=result.files_checked))
-    vprint(_("   Entries checked: {count}").format(count=result.entries_checked))
-    vprint(_("   Errors: {count}").format(count=result.error_count))
-    vprint(_("   Warnings: {count}").format(count=result.warning_count))
-    vprint(_("   Info: {count}").format(count=result.info_count))
-    
-    # Issue breakdown by rule
-    issues_by_rule = result.issues_by_rule()
-    if issues_by_rule:
-        vprint(_("   Issues by rule:"))
-        for rule, count in list(issues_by_rule.items())[:10]:
-            vprint(_("     - {rule}: {count}").format(rule=rule, count=count))
-        if len(issues_by_rule) > 10:
-            vprint(_("     ... and {more} more rules").format(more=len(issues_by_rule) - 10))
-    
-    # Processing speed
-    if elapsed > 0:
-        files_per_sec = result.files_checked / elapsed
-        entries_per_sec = result.entries_checked / elapsed if result.entries_checked > 0 else 0
-        vprint(_("   Processing speed:"))
-        vprint(_("     - {speed:.1f} files/sec").format(speed=files_per_sec))
-        if entries_per_sec > 0:
-            vprint(_("     - {speed:.1f} entries/sec").format(speed=entries_per_sec))
-    
-    vprint_elapsed()
-    vprint("")
-    
-    # Output (unless --check mode)
-    if not args.check:
-        if args.quiet:
-            # Just summary line
-            print(_("📊 {files} file(s), {errors} error(s), {warnings} warning(s)").format(
-                files=result.files_checked, errors=result.error_count, warnings=result.warning_count))
-        else:
-            output = format_output(result, args.format)
+    from l10n_project import (load_config, read_glossary, filter_baseline, write_baseline,
+                              preview_fixes, apply_fixes, excluded)
+    preliminary = argparse.ArgumentParser(add_help=False)
+    preliminary.add_argument('--config')
+    known, _unused = preliminary.parse_known_args()
+    parser = argparse.ArgumentParser(description=_('Linter for PO and Qt TS localization files'))
+    parser.add_argument('paths', nargs='*')
+    parser.add_argument('--config', help='Project TOML file (default: nearest pyproject.toml)')
+    parser.add_argument('--github', '-g', metavar='REPO')
+    parser.add_argument('--path', '-p', default='', help='GitHub path filter')
+    parser.add_argument('--format', '-f', choices=['text', 'json', 'html', 'github', 'gnu', 'sarif'], default='text')
+    parser.add_argument('--output', '-o')
+    parser.add_argument('--max-length', type=int, default=500)
+    parser.add_argument('--length-ratio', type=float, default=3.0)
+    parser.add_argument('--language', help='Override target language, e.g. sv or pt_BR')
+    parser.add_argument('--no-recursive', action='store_true')
+    parser.add_argument('--strict', action='store_true', help='Return error status for warnings over the threshold')
+    parser.add_argument('--max-errors', type=int, default=0)
+    parser.add_argument('--max-warnings', type=int, default=0)
+    parser.add_argument('--quiet', '-q', action='store_true')
+    parser.add_argument('--check', action='store_true', help='Exit status only')
+    parser.add_argument('--skip-fuzzy', action='store_true', help='Suppress fuzzy warnings')
+    parser.add_argument('--disable', default='')
+    parser.add_argument('--checks', help='Run only these rules/groups (comma-separated)')
+    parser.add_argument('--skip-checks', default='')
+    parser.add_argument('--list-rules', action='store_true')
+    parser.add_argument('--terminology', action='store_true', default=True)
+    parser.add_argument('--no-terminology', action='store_false', dest='terminology')
+    parser.add_argument('--glossary', help='TSV: wrong<TAB>correct[<TAB>context]')
+    parser.add_argument('--exclude', action='append', default=[], help='Project-relative glob, repeatable')
+    parser.add_argument('--baseline', help='Report only findings absent from this baseline')
+    parser.add_argument('--write-baseline', metavar='FILE', help='Save current findings before baseline filtering')
+    parser.add_argument('--reference', help='Compare with a .pot, .po or source .ts catalog')
+    parser.add_argument('--fix', metavar='RULES', help='Preview local PO fixes: whitespace,ellipsis (diff on stderr)')
+    parser.add_argument('--apply', action='store_true', help='Apply the fixes requested by --fix, then lint again')
+    parser.add_argument('--verbose', '-V', action='store_true')
+    parser.add_argument('--gtk', '-G', action='store_true')
+    parser.add_argument('--version', '-v', action='version', version=f'%(prog)s {__version__}')
+    try:
+        defaults, root = load_config(known.config)
+        severity = defaults.pop('severity', {})
+        overrides = {}
+        for rule, value in severity.items():
+            if value not in ('error', 'warning', 'info'):
+                raise ValueError(f'Invalid severity for {rule}: {value}')
+            for rule_id in resolve_rules([rule]):
+                overrides[rule_id] = value
+        parser.set_defaults(**defaults)
+        args = parser.parse_args()
+        if args.format not in ('text', 'json', 'html', 'github', 'gnu', 'sarif'):
+            raise ValueError('Unknown output format')
+        if args.max_length <= 0 or args.length_ratio <= 0 or args.max_errors < 0 or args.max_warnings < 0:
+            raise ValueError('Invalid length or diagnostic threshold')
+        disabled = resolve_rules(args.disable) | resolve_rules(args.skip_checks)
+        if args.checks is not None:
+            disabled |= set(RULES) - resolve_rules(args.checks)
+        if not args.terminology:
+            disabled |= resolve_rules(['terminology', 'domain-terminology', 'false-friends', 'consistency'])
+        if args.skip_fuzzy:
+            disabled.add('fuzzy')
+        config = {'max_length': args.max_length, 'length_ratio': args.length_ratio,
+                  'language': args.language, 'severity': overrides, 'reference': args.reference,
+                  'glossary_terms': read_glossary(args.glossary) if args.glossary else []}
+        if args.list_rules:
+            for rule, spec in RULES.items():
+                print(f'{rule:30} {spec.severity:8} {spec.language or "all":4} {spec.description}')
+            return 0
+        if args.gtk:
+            try:
+                from l10n_lint_gtk import main as gtk_main
+            except (ImportError, ValueError) as exc:
+                raise ValueError(f'GTK interface unavailable: {exc}') from exc
+            return gtk_main([sys.argv[0], *args.paths])
+        if not args.paths and not args.github:
+            parser.error('Specify translation files, directories or --github')
+        if args.apply and not args.fix:
+            raise ValueError('--apply requires --fix')
+        if args.fix:
+            fix_rules = set(args.fix.split(','))
+            if not fix_rules or fix_rules - {'whitespace', 'ellipsis'}:
+                raise ValueError('--fix accepts whitespace,ellipsis')
+            if args.github or any(is_url(p) for p in args.paths):
+                raise ValueError('--fix requires local PO files')
+            previews = {}
+            # Validate every input before applying any changes.
+            for path in args.paths:
+                for filename in find_l10n_files(path, not args.no_recursive):
+                    if not excluded(filename, args.exclude, root):
+                        previews[str(Path(filename).resolve())] = preview_fixes(filename, fix_rules)
+            for filename, (original, updated, diff) in previews.items():
+                if diff and not args.check:
+                    print(diff, end='', file=sys.stderr)
+            if args.apply:
+                for filename, (original, updated, diff) in previews.items():
+                    apply_fixes(filename, original, updated)
+        start = time.monotonic()
+        result = lint_inputs(args.paths, args.github, args.path, config, disabled,
+                             not args.no_recursive, args.exclude, root,
+                             (lambda path: print(f'Checked {path}', file=sys.stderr)) if args.verbose and not args.check else None)
+        if args.write_baseline:
+            write_baseline(result, args.write_baseline, root)
+        if args.baseline:
+            filter_baseline(result, args.baseline, root)
+        if not args.check:
+            output = (f'{result.files_checked} file(s), {result.error_count} error(s), {result.warning_count} warning(s)'
+                      if args.quiet else format_output(result, args.format))
             if args.output:
-                with open(args.output, 'w', encoding='utf-8') as f:
-                    f.write(output)
-                print(_("📄 Report saved to: {file}").format(file=args.output))
+                Path(args.output).write_text(output + '\n', encoding='utf-8')
             else:
                 print(output)
-    
-    # Exit code: 0=success, 1=warnings, 2=errors
-    if args.strict:
-        sys.exit(2 if result.error_count > 0 else (1 if result.warning_count > 0 else (1 if result.issues else 0)))
-    else:
-        sys.exit(2 if result.error_count > 0 else (1 if result.warning_count > 0 else 0))
+            if args.verbose:
+                print(f'{result.entries_checked} entries in {time.monotonic() - start:.2f}s', file=sys.stderr)
+        if any(i.rule in OPERATIONAL_RULES for i in result.issues) or result.error_count > args.max_errors:
+            return 2
+        if result.warning_count > args.max_warnings:
+            return 2 if args.strict else 1
+        return 0
+    except (OSError, ValueError, SyntaxError) as exc:
+        print(f'l10n-lint: {exc}', file=sys.stderr)
+        return 2
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

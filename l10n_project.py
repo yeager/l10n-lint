@@ -14,10 +14,13 @@ import tempfile
 from urllib.parse import quote
 
 
+# Gettext represents portable <inttypes.h> conversions as %<PRIu64>,
+# including widths/precision/argument positions before the macro.
 PRINTF = re.compile(
     r'%(?:(?P<position>\d+)\$|\((?P<name>[^)]+)\))?[-+ #0\']*'
     r'(?P<width>\*(?:\d+\$)?|\d+)?(?:\.(?P<precision>\*(?:\d+\$)?|\d*))?'
-    r'(?P<length>hh|ll|[hlLjzt])?(?P<type>[diouxXfFeEgGaAcspn%])')
+    r'(?P<length>hh|ll|[hlLjzt])?'
+    r'(?P<type>[diouxXfFeEgGaAcspn%]|<PRI[diouxX](?:(?:LEAST|FAST)?(?:8|16|32|64)|MAX|PTR)>)')
 
 
 # reST math roles are literal mathematics, not str.format expressions. Both
@@ -86,6 +89,8 @@ def placeholder_signature(text, kind, *, explicit=True):
             if not (match['name'] or match['position']):
                 sequential += 1
             type_ = ('int' if match['type'] in 'di' else match['type'])
+            if type_.startswith('<PRIi'):
+                type_ = '<PRId' + type_[5:]  # PRIdN and PRIiN consume the same type.
             args.append((index, (match['length'] or '') + type_))
         return sorted(Counter(args).items())
     args, automatic = [], [0]

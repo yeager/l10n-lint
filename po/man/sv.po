@@ -1,17 +1,12 @@
-# SOME DESCRIPTIVE TITLE
-# Copyright (C) YEAR Free Software Foundation, Inc.
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-# Translators:
+# Swedish translation for l10n-lint manual pages.
+# Copyright (C) 2026 Daniel Nylander
+# This file is distributed under the same license as the l10n-lint package.
 # Daniel Nylander <po@danielnylander.se>, 2026
-#
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: l10n-lint\n"
 "POT-Creation-Date: 2026-02-23 04:52+0000\n"
-"PO-Revision-Date: 2026-02-15 14:39+0000\n"
+"PO-Revision-Date: 2026-09-19 12:00+0200\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>, 2026\n"
 "Language-Team: Swedish (https://app.transifex.com/danielnylander/"
 "teams/304710/sv/)\n"

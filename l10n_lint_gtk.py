@@ -37,7 +37,7 @@ _possible_module_paths = [
 # Add paths to sys.path if module not already importable
 try:
     from l10n_lint import (
-        L10nLinter, LintResult, LintIssue, Severity,
+        JSONParser, L10nLinter, LintResult, LintIssue, Severity, XLIFFParser,
         find_l10n_files, fetch_url_file, is_url, RULES, resolve_rules, lint_inputs,
         __version__ as LINT_VERSION
     )
@@ -46,7 +46,7 @@ except ImportError:
         if path.exists() and str(path) not in sys.path:
             sys.path.insert(0, str(path))
     from l10n_lint import (
-        L10nLinter, LintResult, LintIssue, Severity,
+        JSONParser, L10nLinter, LintResult, LintIssue, Severity, XLIFFParser,
         find_l10n_files, fetch_url_file, is_url, RULES, resolve_rules, lint_inputs,
         __version__ as LINT_VERSION
     )
@@ -127,7 +127,7 @@ def save_settings(settings):
 
 
 class FileMetadata:
-    """Extract and hold metadata from .po or .ts files."""
+    """Extract and hold metadata from supported localization files."""
     
     def __init__(self, filepath: str):
         self.filepath = filepath
@@ -167,6 +167,23 @@ class FileMetadata:
         elif ext == '.ts':
             self.file_type = "Qt Linguist (.ts)"
             self._extract_ts(content)
+        elif ext in ('.xlf', '.xliff'):
+            self.file_type = "XLIFF (1.2 or 2.x)"
+            self._extract_external_catalog(XLIFFParser, content)
+        elif ext == '.json':
+            self.file_type = "JSON localization catalog"
+            self._extract_external_catalog(JSONParser, content)
+
+    def _extract_external_catalog(self, parser_type, content):
+        """Show language and translation counts for XLIFF and JSON catalogs."""
+        try:
+            parser = parser_type(content, self.filepath)
+        except ValueError:
+            return
+        self.language = parser.language or None
+        self.total_entries = len(parser.entries)
+        self.translated = sum(bool(entry['translation'].strip()) for entry in parser.entries)
+        self.untranslated = self.total_entries - self.translated
     
     def _extract_po(self, content: str):
         """Extract metadata from PO file header."""
@@ -807,7 +824,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
             path = value.get_path()
             if path:
                 # Check if it's a supported file type
-                if path.endswith(('.po', '.ts')) or os.path.isdir(path):
+                if path.lower().endswith(('.po', '.ts', '.xlf', '.xliff', '.json')) or os.path.isdir(path):
                     self.path_entry.set_text(path)
                     self.remove_css_class("drop-target")
                     # Show metadata immediately
@@ -819,7 +836,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
                     GLib.idle_add(self._on_lint_clicked, None)
                     return True
                 else:
-                    self.status_label.set_text(_("Unsupported file type. Use .po or .ts files."))
+                    self.status_label.set_text(_("Unsupported file type. Use PO, TS, XLIFF, or JSON files."))
                     self.remove_css_class("drop-target")
         return False
     
@@ -911,9 +928,12 @@ class L10nLintWindow(Adw.ApplicationWindow):
         filter_store = Gio.ListStore.new(Gtk.FileFilter)
         
         l10n_filter = Gtk.FileFilter()
-        l10n_filter.set_name(_("Localization files (*.po, *.ts)"))
+        l10n_filter.set_name(_("Localization files (*.po, *.ts, *.xlf, *.xliff, *.json)"))
         l10n_filter.add_pattern("*.po")
         l10n_filter.add_pattern("*.ts")
+        l10n_filter.add_pattern("*.xlf")
+        l10n_filter.add_pattern("*.xliff")
+        l10n_filter.add_pattern("*.json")
         filter_store.append(l10n_filter)
         
         all_filter = Gtk.FileFilter()
@@ -1481,7 +1501,7 @@ class L10nLintApp(Adw.Application):
             license_type=Gtk.License.GPL_3_0,
             copyright="© 2026 Daniel Nylander",
             developers=["Daniel Nylander <daniel@danielnylander.se>"],
-            comments=_("Graphical linter for localization files (.po, .ts)"),
+            comments=_("Graphical linter for PO, TS, XLIFF, and JSON localization files"),
             translator_credits=_("translator-credits"),
         )
         about.present(self.props.active_window)

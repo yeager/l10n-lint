@@ -1,25 +1,25 @@
 # l10n-lint
 
-[![Version](https://img.shields.io/badge/version-1.20.3-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.20.3)
+[![Version](https://img.shields.io/badge/version-1.21.0-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.21.0)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
-l10n-lint checks gettext PO and Qt TS translation files for missing translations,
+l10n-lint checks gettext PO, Qt TS, XLIFF 1.2/2.x and JSON translation catalogs for missing translations,
 invalid syntax, placeholder mismatches, plural errors and inconsistent formatting.
 Use the command line in CI or the GTK4 desktop interface for interactive review.
 Swedish-specific checks cover spelling patterns, terminology and localization conventions.
 
-[Download 1.20.3](https://github.com/yeager/l10n-lint/releases/tag/v1.20.3)
+[Download 1.21.0](https://github.com/yeager/l10n-lint/releases/tag/v1.21.0)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
-Version **1.20.3** ignores intentionally empty Qt TS keys and requires menu context
-before recommending `File` → `Arkiv` ([#8](https://github.com/yeager/l10n-lint/issues/8)).
+Version **1.21.0** adds XLIFF and JSON catalog support, ICU MessageFormat handling,
+gettext portable-integer placeholders, JSON plurals and JSON format policies.
 
 ## Features
 
-- Validate PO/TS syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
+- Validate PO/TS/XLIFF/JSON syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
 - Share diagnostic IDs and input handling between the CLI and GTK4 interface.
-- Scan local files, directories, remote PO/TS URLs and GitHub repositories.
+- Scan local files, directories, remote PO/TS/XLIFF/JSON URLs and GitHub repositories.
 - Select individual rules or groups, configure severities and load custom TSV glossaries.
 - Store project settings in `pyproject.toml` and baseline existing findings.
 - Compare translations with a source catalog to find missing or obsolete entries.
@@ -30,21 +30,21 @@ before recommending `File` → `Arkiv` ([#8](https://github.com/yeager/l10n-lint
 
 ### Install the current release
 
-Download the package for your system from [release 1.20.3](https://github.com/yeager/l10n-lint/releases/tag/v1.20.3).
+Download the package for your system from [release 1.21.0](https://github.com/yeager/l10n-lint/releases/tag/v1.21.0).
 The release includes `.deb`, `.rpm`, a Python wheel, a source archive and `SHA256SUMS`.
 
 | System | Download | Install command |
 |--------|----------|-----------------|
-| Debian / Ubuntu | [Debian package](https://github.com/yeager/l10n-lint/releases/download/v1.20.3/l10n-lint_1.20.3-1_all.deb) | `sudo apt install ./l10n-lint_1.20.3-1_all.deb` |
-| Fedora | [RPM package](https://github.com/yeager/l10n-lint/releases/download/v1.20.3/l10n-lint-1.20.3-1.noarch.rpm) | `sudo dnf install ./l10n-lint-1.20.3-1.noarch.rpm` |
+| Debian / Ubuntu | [Debian package](https://github.com/yeager/l10n-lint/releases/download/v1.21.0/l10n-lint_1.21.0-1_all.deb) | `sudo apt install ./l10n-lint_1.21.0-1_all.deb` |
+| Fedora | [RPM package](https://github.com/yeager/l10n-lint/releases/download/v1.21.0/l10n-lint-1.21.0-1.noarch.rpm) | `sudo dnf install ./l10n-lint-1.21.0-1.noarch.rpm` |
 
-For the Python CLI, download the [wheel](https://github.com/yeager/l10n-lint/releases/download/v1.20.3/l10n_lint-1.20.3-py3-none-any.whl)
+For the Python CLI, download the [wheel](https://github.com/yeager/l10n-lint/releases/download/v1.21.0/l10n_lint-1.21.0-py3-none-any.whl)
 and use Python 3.9 or newer in a virtual environment:
 
 ```sh
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install ./l10n_lint-1.20.3-py3-none-any.whl
+python -m pip install ./l10n_lint-1.21.0-py3-none-any.whl
 l10n-lint --version
 ```
 
@@ -213,6 +213,7 @@ length-ratio = 3.0
 max-errors = 0
 max-warnings = 0
 strict = true
+json-format = "auto"
 
 [tool.l10n-lint.severity]
 terminology = "warning"
@@ -226,7 +227,31 @@ glossary = "error"
 Operational errors (invalid syntax, unreadable/missing paths, incomplete
 network fetches and invalid references) cannot be disabled. An empty scan also
 fails, including when exclusions remove every input. Repeated local paths are
-deduplicated. Directory discovery accepts `.po` and `.ts` case-insensitively.
+deduplicated. Directory discovery accepts `.po`, `.ts`, `.xlf`, `.xliff` and `.json`
+case-insensitively.
+
+## XLIFF and JSON catalogs
+
+XLIFF support covers XLIFF 1.2 `trans-unit` elements and XLIFF 2.x `unit`/`segment`
+elements. The linter reads the target language, skips units marked `translate="no"`,
+and preserves inline placeholders expressed through `equiv-text` or `equiv`.
+
+JSON support accepts nested key/value catalogs, where the leaf key is the source text,
+and explicit entries with `source` plus `target`, `translation`, or `value`. Use
+`@locale`, `locale`, `targetLanguage`, or `target_language` for language metadata.
+Entries marked `translate: false` or `translatable: false` are skipped.
+Plural objects with CLDR forms such as `one` and `other` are validated form by form.
+
+Set `json-format = "nested"` to allow only nested key/value catalogs, or
+`json-format = "entries"` to allow only explicit `source`/`target` entries.
+This policy is useful when a repository also contains non-localization JSON files.
+
+```json
+{
+  "@locale": "sv",
+  "menu": {"Save %s": "Spara %s"}
+}
+```
 
 A glossary contains two or three tab-separated fields per line:
 `wrong<TAB>correct[<TAB>context]`. Blank lines and lines beginning with `#` are
@@ -266,6 +291,7 @@ CI run. `baseline = "l10n-baseline.json"` is also supported in configuration.
 ```sh
 l10n-lint --reference messages.pot po/sv.po
 l10n-lint --reference source.ts translations/sv.ts
+l10n-lint --reference source.xlf translations/sv.xlf
 ```
 
 PO comparison keys include `msgctxt` and `msgid`; Qt keys use explicit IDs or
@@ -273,7 +299,7 @@ context, disambiguation comment and source text. Missing entries, entries absent
 from the reference, and changed plural/source definitions are reported separately.
 Obsolete PO and vanished/obsolete Qt entries are excluded. One reference applies
 to every input in the command; use separate runs for different domains. Reference
-and target formats must match (`.pot`/`.po` or `.ts`).
+and target formats must match (`.pot`/`.po`, `.ts`, `.xlf`/`.xliff`, or `.json`).
 
 ## Preview and apply conservative fixes
 
@@ -345,7 +371,7 @@ Contributions welcome!
 
 ## Changelog
 
-- **1.20.3**: Ignore intentionally empty Qt TS keys; require menu context for `File` → `Arkiv`
+- **1.21.0**: Add XLIFF/JSON catalogs, ICU MessageFormat and portable integer placeholders
 - **1.20.2**: Recognize year tokens in typo checks; require context for ambiguous Swedish terminology
 - **1.20.1**: Fix false format errors in percentage prose and reST documentation; repair APT setup
 - **1.20.0**: Reliable parsing, shared rules, project configuration, baselines, catalog comparison, previewed fixes and SARIF

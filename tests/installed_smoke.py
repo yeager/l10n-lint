@@ -48,4 +48,15 @@ with tempfile.TemporaryDirectory() as directory:
         run = subprocess.run([str(command), '--checks', 'terminology', '--strict', '--check', str(ts)],
                              cwd=root, capture_output=True, text=True)
         assert run.returncode == expected, (content, run.stdout, run.stderr)
+    xlf = root / 'sv.xlf'
+    xlf.write_text(
+        '<xliff version="1.2"><file target-language="sv"><body><trans-unit id="save">'
+        '<source>Save %s</source><target>Spara %s</target></trans-unit></body></file></xliff>',
+        encoding='utf-8')
+    run = subprocess.run([str(command), '--strict', '--check', str(xlf)], cwd=root, capture_output=True, text=True)
+    assert run.returncode == 0, (run.stdout, run.stderr)
+    json_catalog = root / 'sv.json'
+    json_catalog.write_text(json.dumps({'@locale': 'sv', 'Save %s': 'Spara %d'}), encoding='utf-8')
+    run = subprocess.run([str(command), '--strict', '--check', str(json_catalog)], cwd=root, capture_output=True, text=True)
+    assert run.returncode == 2, (run.stdout, run.stderr)
 print('Installed wheel smoke tests passed')

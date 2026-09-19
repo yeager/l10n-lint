@@ -1,3 +1,11 @@
+l10n-lint (1.21.0-1) unstable; urgency=medium
+
+  * Add XLIFF and JSON localization catalog support.
+  * Recognize ICU MessageFormat and portable integer placeholders.
+  * Validate JSON plural forms and format policies.
+
+ -- Daniel Nylander <daniel@danielnylander.se>  Sat, 19 Sep 2026 12:00:00 +0200
+
 l10n-lint (1.20.3-1) unstable; urgency=medium
 
   * Ignore intentionally empty Qt TS keys and contextualize File menu checks.

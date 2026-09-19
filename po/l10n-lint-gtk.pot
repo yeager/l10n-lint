@@ -288,7 +288,7 @@ msgid "Drop file to lint..."
 msgstr ""
 
 #: l10n_lint_gtk.py:829
-msgid "Unsupported file type. Use .po or .ts files."
+msgid "Unsupported file type. Use PO, TS, XLIFF, or JSON files."
 msgstr ""
 
 #: l10n_lint_gtk.py:915
@@ -296,7 +296,7 @@ msgid "Select file"
 msgstr ""
 
 #: l10n_lint_gtk.py:921
-msgid "Localization files (*.po, *.ts)"
+msgid "Localization files (*.po, *.ts, *.xlf, *.xliff, *.json)"
 msgstr ""
 
 #: l10n_lint_gtk.py:927
@@ -412,7 +412,7 @@ msgid "Reset to Defaults"
 msgstr ""
 
 #: l10n_lint_gtk.py:1526
-msgid "Graphical linter for localization files (.po, .ts)"
+msgid "Graphical linter for PO, TS, XLIFF, and JSON localization files"
 msgstr ""
 
 #: l10n_lint_gtk.py:1527

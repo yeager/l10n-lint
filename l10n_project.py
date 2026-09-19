@@ -14,10 +14,13 @@ import tempfile
 from urllib.parse import quote
 
 
+# Gettext represents portable <inttypes.h> conversions as %<PRIu64>, including
+# widths, precision and positional arguments before the macro.
 PRINTF = re.compile(
     r'%(?:(?P<position>\d+)\$|\((?P<name>[^)]+)\))?[-+ #0\']*'
     r'(?P<width>\*(?:\d+\$)?|\d+)?(?:\.(?P<precision>\*(?:\d+\$)?|\d*))?'
-    r'(?P<length>hh|ll|[hlLjzt])?(?P<type>[diouxXfFeEgGaAcspn%])')
+    r'(?P<length>hh|ll|[hlLjzt])?'
+    r'(?P<type>[diouxXfFeEgGaAcspn%]|<PRI[diouxX](?:(?:LEAST|FAST)?(?:8|16|32|64)|MAX|PTR)>)')
 
 
 # reST math roles are literal mathematics, not str.format expressions. Both
@@ -26,6 +29,26 @@ REST_MATH = re.compile(
     r'(?<![\w\\]):math:`(?:\\.|[^`])+`'
     r'|(?<![`\\])`(?:\\.|[^`])+`:math:(?!\w)')
 REST_LITERAL = re.compile(r'(?<![`\\])``([^`]+)``(?!`)')
+ICU_START = re.compile(r'\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*,\s*(plural|select|selectordinal)\s*,')
+
+
+def _icu_ranges(text):
+    """Return balanced ICU plural/select expressions and their variables."""
+    for match in ICU_START.finditer(text):
+        depth = 0
+        for index in range(match.start(), len(text)):
+            if text[index] == '{':
+                depth += 1
+            elif text[index] == '}':
+                depth -= 1
+                if depth == 0:
+                    yield match.start(), index + 1, match.group(1)
+                    break
+
+
+def icu_signature(text):
+    """Return the variables consumed by valid ICU plural/select expressions."""
+    return sorted(Counter(variable for _, _, variable in _icu_ranges(text)).items())
 
 
 def python_format_text(text):
@@ -41,7 +64,11 @@ def python_format_text(text):
         if body.strip() and not body.strip(' {}\t\r\n') and '{}' not in body:
             return ' ' * len(match.group())
         return match.group()
-    return REST_LITERAL.sub(literal, text)
+    text = REST_LITERAL.sub(literal, text)
+    chars = list(text)
+    for start, end, _ in _icu_ranges(text):
+        chars[start:end] = ' ' * (end - start)
+    return ''.join(chars)
 
 
 def _unambiguous_printf(match, text):
@@ -86,6 +113,8 @@ def placeholder_signature(text, kind, *, explicit=True):
             if not (match['name'] or match['position']):
                 sequential += 1
             type_ = ('int' if match['type'] in 'di' else match['type'])
+            if type_.startswith('<PRIi'):
+                type_ = '<PRId' + type_[5:]
             args.append((index, (match['length'] or '') + type_))
         return sorted(Counter(args).items())
     args, automatic = [], [0]
@@ -127,7 +156,7 @@ def load_config(filename=None, start=None):
         raise ValueError('[tool.l10n-lint] must be a table')
     fields = {
         'language': str, 'checks': list, 'disable': list, 'exclude': list,
-        'glossary': str, 'baseline': str, 'reference': str, 'format': str,
+        'glossary': str, 'baseline': str, 'reference': str, 'format': str, 'json-format': str,
         'max-length': int, 'length-ratio': (int, float),
         'max-errors': int, 'max-warnings': int, 'strict': bool,
         'severity': dict,
@@ -143,6 +172,8 @@ def load_config(filename=None, start=None):
             raise ValueError(f'{key} must be positive')
         if key in ('max-errors', 'max-warnings') and value < 0:
             raise ValueError(f'{key} cannot be negative')
+        if key == 'json-format' and value not in ('auto', 'nested', 'entries'):
+            raise ValueError('json-format must be auto, nested, or entries')
     config = {k.replace('-', '_'): v for k, v in raw.items()}
     for key in ('glossary', 'baseline', 'reference'):
         if key in config:
@@ -209,7 +240,7 @@ def filter_baseline(result, path, root):
 
 
 def compare_catalog(filepath, content, reference_path, result):
-    from l10n_lint import POParser, TSParser, LintIssue, Severity
+    from l10n_lint import JSONParser, POParser, TSParser, XLIFFParser, LintIssue, Severity
     def entries(path, text):
         if Path(path).suffix.lower() in ('.po', '.pot'):
             return {('po', e.get('msgctxt', ''), e['msgid']): (e.get('msgid_plural', ''), e['_line'])
@@ -218,8 +249,17 @@ def compare_catalog(filepath, content, reference_path, result):
             return {('ts', e['_id'] or e['_context'], '' if e['_id'] else e['source']):
                     ((e['source'], e['_numerus']), e['_line'])
                     for e in TSParser(text, path).entries if e['_type'] not in ('vanished', 'obsolete')}
-        raise ValueError('Reference must be .pot, .po or .ts')
-    if (Path(filepath).suffix.lower() == '.ts') != (Path(reference_path).suffix.lower() == '.ts'):
+        if Path(path).suffix.lower() in ('.xlf', '.xliff'):
+            return {('xliff', e['_id'] or e['_context'], e['source']): ((e['source'], False), e['_line'])
+                    for e in XLIFFParser(text, path).entries}
+        if Path(path).suffix.lower() == '.json':
+            return {('json', e['_id'] or e['_context'], e['source']): ((e['source'], False), e['_line'])
+                    for e in JSONParser(text, path).entries}
+        raise ValueError('Reference must be .pot, .po, .ts, .xlf/.xliff, or .json')
+    formats = {'.po': 'po', '.pot': 'po', '.xlf': 'xliff', '.xliff': 'xliff'}
+    target_format = formats.get(Path(filepath).suffix.lower(), Path(filepath).suffix.lower())
+    reference_format = formats.get(Path(reference_path).suffix.lower(), Path(reference_path).suffix.lower())
+    if target_format != reference_format:
         raise ValueError('Reference and translation must use the same catalog format')
     source = entries(reference_path, Path(reference_path).read_text(encoding='utf-8-sig'))
     target = entries(filepath, content)

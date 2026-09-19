@@ -295,16 +295,16 @@ msgid "Drop file to lint..."
 msgstr "Släpp filen att linta..."
 
 #: l10n_lint_gtk.py:829
-msgid "Unsupported file type. Use .po or .ts files."
-msgstr "Filformat som inte stöds. Använd .po- eller .ts-filer."
+msgid "Unsupported file type. Use PO, TS, XLIFF, or JSON files."
+msgstr "Filformat som inte stöds. Använd PO-, TS-, XLIFF- eller JSON-filer."
 
 #: l10n_lint_gtk.py:915
 msgid "Select file"
 msgstr "Välj fil"
 
 #: l10n_lint_gtk.py:921
-msgid "Localization files (*.po, *.ts)"
-msgstr "Lokaliseringfiler (*.po, *.ts)"
+msgid "Localization files (*.po, *.ts, *.xlf, *.xliff, *.json)"
+msgstr "Lokaliseringsfiler (*.po, *.ts, *.xlf, *.xliff, *.json)"
 
 #: l10n_lint_gtk.py:927
 msgid "All files"
@@ -419,8 +419,8 @@ msgid "Reset to Defaults"
 msgstr "Återställ till standard"
 
 #: l10n_lint_gtk.py:1526
-msgid "Graphical linter for localization files (.po, .ts)"
-msgstr "Grafisk linter för lokaliseringsfiler (.po, .ts)"
+msgid "Graphical linter for PO, TS, XLIFF, and JSON localization files"
+msgstr "Grafiskt granskningsverktyg för PO-, TS-, XLIFF- och JSON-lokaliseringsfiler"
 
 #: l10n_lint_gtk.py:1527
 msgid "translator-credits"

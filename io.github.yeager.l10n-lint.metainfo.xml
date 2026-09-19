@@ -12,7 +12,7 @@
 
   <description>
     <p>
-      l10n-lint checks .po and .ts localization files for common errors such as
+      l10n-lint checks .po, .ts, .xlf/.xliff and .json localization files for common errors such as
       missing translations, format string mismatches, inconsistent punctuation,
       and more. It provides both a command-line interface and a GTK graphical
       interface for convenient use.
@@ -38,6 +38,8 @@
     <keyword>gettext</keyword>
     <keyword>PO</keyword>
     <keyword>TS</keyword>
+    <keyword>XLIFF</keyword>
+    <keyword>JSON</keyword>
     <keyword>linter</keyword>
   </keywords>
 
@@ -46,6 +48,12 @@
   <url type="vcs-browser">https://github.com/yeager/l10n-lint</url>
 
   <releases>
+    <release version="1.21.0" date="2026-09-19">
+      <description>
+        <p>Add XLIFF 1.2/2.x and JSON localization catalog support.</p>
+        <p>Recognize ICU MessageFormat, gettext portable integer placeholders, and JSON plural forms.</p>
+      </description>
+    </release>
     <release version="1.20.3" date="2026-09-17">
       <description>
         <p>Ignore intentionally empty Qt translation keys and contextualize the Swedish File menu recommendation.</p>

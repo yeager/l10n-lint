@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.0] - 2026-09-19
+
+- Add XLIFF 1.2/2.x and JSON catalog parsing to the CLI, GTK interface, catalog comparison, URL and GitHub inputs.
+- Validate JSON plural forms, report JSON source lines, and support `json-format` project policies.
+- Recognize ICU MessageFormat plural/select variables without misparsing them as Python braces (#9).
+- Recognize gettext portable integer placeholders such as `%<PRIu64>`.
+
 ## [1.20.3] - 2026-09-17
 
 - Ignore intentionally empty Qt TS source/translation keys instead of reporting missing translations (#8).

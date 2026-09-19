@@ -1,5 +1,5 @@
 Name:           l10n-lint
-Version:        1.20.3
+Version:        1.21.0
 Release:        1%{?dist}
 Summary:        Linter for localization files
 License:        GPL-3.0-or-later
@@ -14,7 +14,7 @@ Recommends:     gtk4
 Recommends:     libadwaita
 
 %description
-A linter for PO and Qt TS localization files with project configuration,
+A linter for PO, Qt TS, XLIFF and JSON localization files with project configuration,
 baselines, source catalog comparison, previewed fixes and SARIF reports.
 Includes command-line and GTK interfaces.
 
@@ -73,6 +73,9 @@ update-desktop-database /usr/share/applications 2>/dev/null || true
 %license LICENSE
 
 %changelog
+* Sat Sep 19 2026 Daniel Nylander <daniel@danielnylander.se> - 1.21.0-1
+- Add XLIFF/JSON catalogs, ICU MessageFormat and portable integer placeholders.
+
 * Thu Sep 17 2026 Daniel Nylander <daniel@danielnylander.se> - 1.20.3-1
 - Ignore intentionally empty Qt TS keys and contextualize File menu checks.
 

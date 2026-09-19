@@ -334,7 +334,7 @@ msgstr ""
 
 #: l10n_lint.py:2174
 #, python-brace-format
-msgid "URL must point to a .po or .ts file, got: {ext}"
+msgid "URL must point to a .po, .ts, .xlf/.xliff, or .json file, got: {ext}"
 msgstr ""
 
 #: l10n_lint.py:2408
@@ -368,7 +368,7 @@ msgid "options"
 msgstr ""
 
 #: l10n_lint.py:2447
-msgid "l10n-lint - Linter for localization files (.po, .ts)"
+msgid "l10n-lint - Linter for localization files (.po, .ts, .xlf/.xliff, .json)"
 msgstr ""
 
 #: l10n_lint.py:2450
@@ -968,7 +968,7 @@ msgid "Drop file to lint..."
 msgstr ""
 
 #: l10n_lint_gtk.py:830
-msgid "Unsupported file type. Use .po or .ts files."
+msgid "Unsupported file type. Use PO, TS, XLIFF, or JSON files."
 msgstr ""
 
 #: l10n_lint_gtk.py:916
@@ -976,7 +976,7 @@ msgid "Select file"
 msgstr ""
 
 #: l10n_lint_gtk.py:922
-msgid "Localization files (*.po, *.ts)"
+msgid "Localization files (*.po, *.ts, *.xlf, *.xliff, *.json)"
 msgstr ""
 
 #: l10n_lint_gtk.py:928
@@ -1088,7 +1088,7 @@ msgid "Reset to Defaults"
 msgstr ""
 
 #: l10n_lint_gtk.py:1526
-msgid "Graphical linter for localization files (.po, .ts)"
+msgid "Graphical linter for PO, TS, XLIFF, and JSON localization files"
 msgstr ""
 
 #: l10n_lint_gtk.py:1527

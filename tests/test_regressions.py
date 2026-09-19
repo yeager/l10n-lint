@@ -66,6 +66,18 @@ def test_po_no_blank_lines_escapes_context_and_obsolete():
     ('%*.*f', '%f', 'c-format', True),
     ('%*.*f', '%3$*1$.*2$f', 'c-format', False),
     ('%%s', '%%d', 'c-format', False),
+    ('%<PRIu64>', '%<PRIu32>', 'c-format', True),
+    ('%<PRIu64>', '%<PRId64>', 'c-format', True),
+    ('%<PRId64>', '%<PRIi64>', 'c-format', False),
+    ('%<PRIu64>', '%u', 'c-format', True),
+    ('%<PRIu64>', 'antal', 'c-format', True),
+    ('%<PRIu64> %s', '%s %<PRIu64>', 'c-format', True),
+    ('%<PRIu64> %s', '%2$s %1$<PRIu64>', 'c-format', False),
+    ('%4<PRIu64> %s', '%4<PRIu64> %s', 'c-format', False),
+    ('%*.*<PRIxMAX>', '%3$*1$.*2$<PRIxMAX>', 'c-format', False),
+    ('%<PRIdFAST16>', '%<PRIdLEAST16>', 'c-format', True),
+    ('%<PRIuPTR>', 'värde', 'c-format', True),
+    ('%%<PRIu64>', '%%<PRIu32>', 'c-format', False),
     ('{name}', '{other}', 'python-brace-format', True),
     ('{value:.2f}', '{value:.2d}', 'python-brace-format', True),
     ('{value:{width}}', '{value:{height}}', 'python-brace-format', True),
@@ -88,6 +100,15 @@ def test_plural_all_forms_receive_shared_rules():
 def test_plural_hole_is_reported():
     text = HEADER + 'msgid "File"\nmsgid_plural "Files"\nmsgstr[1] "Filer"\n'
     assert any(i.rule == 'plural-forms-missing' for i in lint(text).issues)
+
+
+def test_icu_messageformat_is_not_parsed_as_python_and_variables_must_match():
+    source = '{rating, plural, =0 {Star Rating} other {# Star Ratings}}. {label}'
+    target = '{rating, plural, =0 {Stjärnbetyg} other {# Stjärnbetyg}}. {label}'
+    assert not lint(po(source, target), checks=['placeholders']).issues
+    changed = target.replace('{rating, plural', '{count, plural')
+    issues = lint(po(source, changed), checks=['placeholders']).issues
+    assert any(issue.rule == 'placeholder-mismatch' and '(icu)' in issue.message for issue in issues)
 
 
 def ts(translations, type_='', numerus=True):

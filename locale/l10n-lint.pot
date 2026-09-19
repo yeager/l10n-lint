@@ -174,7 +174,7 @@ msgstr ""
 
 #: l10n_lint.py:1061
 #, python-brace-format
-msgid "URL must point to a .po or .ts file, got: {ext}"
+msgid "URL must point to a .po, .ts, .xlf/.xliff, or .json file, got: {ext}"
 msgstr ""
 
 #: l10n_lint.py:1295
@@ -208,7 +208,7 @@ msgid "options"
 msgstr ""
 
 #: l10n_lint.py:1334
-msgid "l10n-lint - Linter for localization files (.po, .ts)"
+msgid "l10n-lint - Linter for localization files (.po, .ts, .xlf/.xliff, .json)"
 msgstr ""
 
 #: l10n_lint.py:1337

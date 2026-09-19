@@ -1,4 +1,4 @@
-.TH L10N-LINT 1 "September 2026" "l10n-lint 1.20.3" "User Commands"
+.TH L10N-LINT 1 "September 2026" "l10n-lint 1.21.0" "User Commands"
 .SH NAME
 l10n-lint \- linter for localization files
 .SH SYNOPSIS
@@ -6,7 +6,7 @@ l10n-lint \- linter for localization files
 [\fIOPTIONS\fR] [\fIPATH\fR...]
 .SH DESCRIPTION
 .B l10n-lint
-checks gettext .po and Qt .ts localization files for common issues:
+checks gettext .po, Qt .ts, XLIFF .xlf/.xliff and JSON .json localization files for common issues:
 missing translations, fuzzy entries, placeholder mismatches, length problems, 
 and other translation quality issues. It supports direct GitHub repository
 analysis and various output formats for integration with different workflows.
@@ -170,6 +170,12 @@ GNU gettext portable object files
 .TP
 .B *.ts
 Qt Linguist translation source files
+.TP
+.B *.xlf, *.xliff
+XLIFF 1.2 and 2.x translation catalogs
+.TP
+.B *.json
+JSON localization catalogs
 .SH AUTHOR
 Daniel Nylander <daniel@danielnylander.se>
 .SH SEE ALSO
@@ -207,7 +213,7 @@ cannot be suppressed.
 Save current findings before filtering. Retains the ordinary lint exit status.
 .TP
 .BI --reference " FILE"
-Compare entries with a .pot/.po or source .ts catalog of the same format.
+Compare entries with a .pot/.po, .ts, .xlf/.xliff or .json catalog of the same format.
 .TP
 .BI --fix " whitespace,ellipsis"
 Preview conservative local UTF-8 PO translation fixes as a unified diff on stderr.

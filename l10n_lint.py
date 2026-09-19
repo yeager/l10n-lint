@@ -4,7 +4,7 @@
 # l10n-lint - Linter for localization files
 # Copyright (C) 2026 Daniel Nylander <daniel@danielnylander.se>
 """
-l10n-lint - Linter for localization files (.po, .ts)
+l10n-lint - Linter for localization files (.po, .ts, .xlf/.xliff, .json)
 
 Checks for:
 - Missing translations (empty msgstr)
@@ -34,7 +34,8 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.20.3"
+__version__ = "1.21.0"
+L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json'})
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -353,6 +354,277 @@ class TSParser:
                 })
 
 
+class XLIFFParser:
+    """Parse translatable units from XLIFF 1.2 and 2.x documents."""
+
+    _INLINE_CODES = frozenset({'ph', 'x', 'bx', 'ex', 'bpt', 'ept', 'it', 'sc', 'ec', 'cp'})
+
+    def __init__(self, content: str, filename: str = '<unknown>'):
+        self.content = content
+        self.filename = filename
+        self.entries = []
+        self.language = ''
+        self._parse()
+
+    @staticmethod
+    def _name(tag):
+        return tag.rsplit('}', 1)[-1].rsplit(':', 1)[-1]
+
+    @classmethod
+    def _child(cls, element, name):
+        return next((child for child in element if cls._name(child.tag) == name), None)
+
+    @classmethod
+    def _text(cls, element):
+        """Keep visible text and an inline code's explicit equivalent text."""
+        if element is None:
+            return ''
+        parts = []
+
+        def visit(node):
+            if node.text:
+                parts.append(node.text)
+            for child in node:
+                name = cls._name(child.tag)
+                equivalent = child.get('equiv-text') or child.get('equiv')
+                if name in cls._INLINE_CODES and equivalent:
+                    parts.append(equivalent)
+                else:
+                    visit(child)
+                if child.tail:
+                    parts.append(child.tail)
+
+        visit(element)
+        return ''.join(parts)
+
+    def _parse(self):
+        import xml.etree.ElementTree as ET
+        from xml.parsers import expat
+        try:
+            root = ET.fromstring(self.content)
+        except ET.ParseError as exc:
+            raise ValueError(f'Line {exc.position[0]}: invalid XLIFF XML: {exc}') from exc
+        if self._name(root.tag) != 'xliff':
+            raise ValueError('Expected an XLIFF document')
+        version = root.get('version', '')
+        if version.startswith('1.'):
+            self._parse_12(root)
+        elif version.startswith('2.'):
+            self._parse_2(root)
+        else:
+            raise ValueError(f'Unsupported XLIFF version: {version or "missing"}')
+
+    def _element_lines(self, names):
+        from xml.parsers import expat
+        lines = []
+        parser = expat.ParserCreate(namespace_separator=' ')
+
+        def start(name, attrs):
+            if name.rsplit(' ', 1)[-1].rsplit(':', 1)[-1] in names:
+                lines.append(parser.CurrentLineNumber)
+
+        parser.StartElementHandler = start
+        parser.Parse(self.content, True)
+        return iter(lines)
+
+    def _parse_12(self, root):
+        lines = self._element_lines({'trans-unit'})
+        units = [element for element in root.iter() if self._name(element.tag) == 'trans-unit']
+        unit_lines = {id(unit): next(lines, 1) for unit in units}
+        for file_element in (element for element in root.iter() if self._name(element.tag) == 'file'):
+            if file_element.get('translate', '').lower() == 'no':
+                continue
+            language = file_element.get('target-language', '') or root.get('target-language', '')
+            self.language = self.language or language
+            for unit in (element for element in file_element.iter() if self._name(element.tag) == 'trans-unit'):
+                line = unit_lines[id(unit)]
+                if unit.get('translate', '').lower() == 'no':
+                    continue
+                source = self._child(unit, 'source')
+                if source is None:
+                    raise ValueError(f'Line {line}: XLIFF trans-unit is missing source')
+                target = self._child(unit, 'target')
+                context = unit.get('resname', '') or unit.get('id', '')
+                self.entries.append({
+                    '_id': unit.get('id', ''), '_context': context, '_line': line,
+                    '_language': language, 'source': self._text(source),
+                    'translation': self._text(target),
+                    '_translations': [self._text(target)], '_type': unit.get('state', ''),
+                })
+
+    def _parse_2(self, root):
+        lines = self._element_lines({'segment'})
+        segment_lines = {}
+        for segment in (element for element in root.iter() if self._name(element.tag) == 'segment'):
+            segment_lines[id(segment)] = next(lines, 1)
+        language = root.get('trgLang', '')
+        self.language = language
+        for unit in (element for element in root.iter() if self._name(element.tag) == 'unit'):
+            if unit.get('translate', '').lower() == 'no':
+                continue
+            context = unit.get('name', '') or unit.get('id', '')
+            for segment in (element for element in unit if self._name(element.tag) == 'segment'):
+                line = segment_lines[id(segment)]
+                source = self._child(segment, 'source')
+                if source is None:
+                    raise ValueError(f'Line {line}: XLIFF segment is missing source')
+                target = self._child(segment, 'target')
+                segment_id = segment.get('id', '')
+                unit_id = unit.get('id', '')
+                self.entries.append({
+                    '_id': f'{unit_id}:{segment_id}' if segment_id else unit_id,
+                    '_context': context, '_line': line, '_language': language,
+                    'source': self._text(source), 'translation': self._text(target),
+                    '_translations': [self._text(target)], '_type': segment.get('state', ''),
+                })
+
+
+class JSONParser:
+    """Parse common JSON localization catalogs without third-party dependencies."""
+
+    _METADATA = frozenset({'locale', 'language', 'targetlanguage', 'target_language', '$schema'})
+    _PLURAL_FORMS = frozenset({'zero', 'one', 'two', 'few', 'many', 'other'})
+
+    def __init__(self, content: str, filename: str = '<unknown>', format_: str = 'auto'):
+        self.content = content
+        self.filename = filename
+        if format_ not in ('auto', 'nested', 'entries'):
+            raise ValueError('JSON format must be auto, nested, or entries')
+        self.format = format_
+        self.entries = []
+        self.language = ''
+        self._parse()
+
+    def _parse(self):
+        try:
+            document = json.loads(self.content)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f'Line {exc.lineno}: invalid JSON: {exc.msg}') from exc
+        if not isinstance(document, (dict, list)) or not document:
+            raise ValueError('JSON catalog must contain an object or non-empty entry list')
+        if isinstance(document, dict):
+            self.language = str(document.get('@locale') or document.get('locale') or
+                                document.get('targetLanguage') or document.get('target_language') or '')
+        self._line_map = self._locations()
+        self._walk(document, ())
+        if not self.entries:
+            raise ValueError('JSON catalog contains no translation entries')
+
+    def _locations(self):
+        """Map JSON member paths to source lines without another dependency."""
+        positions, length = {}, len(self.content)
+
+        def skip(index):
+            while index < length and self.content[index].isspace():
+                index += 1
+            return index
+
+        def string(index):
+            start = index
+            index += 1
+            while index < length:
+                if self.content[index] == '\\':
+                    index += 2
+                elif self.content[index] == '"':
+                    return json.loads(self.content[start:index + 1]), index + 1
+                else:
+                    index += 1
+            raise ValueError('invalid JSON string')
+
+        def value(index, path):
+            index = skip(index)
+            if self.content[index] == '{':
+                index = skip(index + 1)
+                while self.content[index] != '}':
+                    key_line = self.content.count('\n', 0, index) + 1
+                    key, index = string(index)
+                    child = path + (key,)
+                    positions[child] = key_line
+                    index = skip(index)
+                    index = value(skip(index + 1), child)
+                    index = skip(index)
+                    if self.content[index] == ',':
+                        index = skip(index + 1)
+                    else:
+                        break
+                return index + 1
+            if self.content[index] == '[':
+                index = skip(index + 1)
+                item = 0
+                while self.content[index] != ']':
+                    child = path + (str(item),)
+                    positions[child] = self.content.count('\n', 0, index) + 1
+                    index = value(index, child)
+                    item += 1
+                    index = skip(index)
+                    if self.content[index] == ',':
+                        index = skip(index + 1)
+                    else:
+                        break
+                return index + 1
+            if self.content[index] == '"':
+                return string(index)[1]
+            match = re.match(r'(?:true|false|null|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)', self.content[index:])
+            return index + len(match.group())
+
+        value(skip(0), ())
+        return positions
+
+    def _append(self, source, translation, path, item=None, translations=None):
+        item = item or {}
+        translations = list(translations) if translations is not None else [translation]
+        if not isinstance(source, str) or not all(isinstance(value, str) for value in translations):
+            raise ValueError(f'JSON translation at {".".join(path) or "root"} must use string source and target values')
+        if item.get('translate') is False or item.get('translatable') is False:
+            return
+        entry_id = str(item.get('id') or '.'.join(path))
+        context = str(item.get('context') or '.'.join(path[:-1]))
+        self.entries.append({
+            '_id': entry_id, '_context': context,
+            '_line': self._line_map.get(path + ('source',), self._line_map.get(path, 1)),
+            '_language': str(item.get('targetLanguage') or item.get('target_language') or self.language),
+            'source': source, 'translation': translations[0],
+            '_translations': translations, '_type': str(item.get('state', '')),
+        })
+
+    def _walk(self, value, path):
+        if isinstance(value, list):
+            for index, item in enumerate(value):
+                if not isinstance(item, dict):
+                    raise ValueError(f'JSON catalog entry {index} must be an object')
+                self._walk(item, path + (str(index),))
+            return
+        if not isinstance(value, dict):
+            raise ValueError('JSON catalog root must be an object or entry list')
+        if 'source' in value:
+            if self.format == 'nested':
+                raise ValueError('JSON format policy only allows nested catalogs')
+            target_key = next((key for key in ('target', 'translation', 'value') if key in value), None)
+            target = value.get(target_key, '')
+            if isinstance(target, dict) and target and set(target) <= self._PLURAL_FORMS:
+                self._append(value['source'], '', path, value,
+                             ['' if form is None else form for form in target.values()])
+            else:
+                self._append(value['source'], '' if target is None else target, path, value)
+            return
+        for key, child in value.items():
+            if key.startswith('@') or key.lower() in self._METADATA:
+                continue
+            child_path = path + (key,)
+            if isinstance(child, str) or child is None:
+                if self.format == 'entries':
+                    raise ValueError('JSON format policy only allows explicit entries')
+                self._append(key, child or '', child_path)
+            elif isinstance(child, dict) and child and set(child) <= self._PLURAL_FORMS:
+                if self.format == 'entries':
+                    raise ValueError('JSON format policy only allows explicit entries')
+                self._append(key, '', child_path, translations=['' if form is None else form for form in child.values()])
+            elif isinstance(child, (dict, list)):
+                self._walk(child, child_path)
+            else:
+                raise ValueError(f'JSON translation at {".".join(child_path)} must be a string, object, or entry list')
+
+
 class L10nLinter:
     """Main linter class."""
     
@@ -451,12 +723,16 @@ class L10nLinter:
         # Determine file type
         ext = Path(filepath).suffix.lower()
         
-        if ext in ('.po', '.ts'):
+        if ext in L10N_EXTENSIONS:
             try:
                 if ext == '.po':
                     self._lint_po(filepath, content, result)
-                else:
+                elif ext == '.ts':
                     self._lint_ts(filepath, content, result)
+                elif ext in ('.xlf', '.xliff'):
+                    self._lint_xliff(filepath, content, result)
+                else:
+                    self._lint_json(filepath, content, result)
             except (ValueError, SyntaxError) as exc:
                 match = re.search(r'[Ll]ine (\d+)', str(exc))
                 result.add(LintIssue(filepath, int(match.group(1)) if match else 1,
@@ -615,11 +891,45 @@ class L10nLinter:
                 if value.strip():
                     self._check_translation(filepath, line, source, value, result)
 
+    def _lint_xliff(self, filepath: str, content: str, result: LintResult):
+        self._lint_external_entries(filepath, XLIFFParser(content, filepath), result)
+
+    def _lint_json(self, filepath: str, content: str, result: LintResult):
+        self._lint_external_entries(filepath, JSONParser(content, filepath, self.config.get('json_format', 'auto')), result)
+
+    def _lint_external_entries(self, filepath, parser, result):
+        """Run the shared checks for XLIFF and JSON source/target entries."""
+        self.po_parser = None
+        self.consistency_map = {}
+        self._format_flags = set()
+        default_language = self.config.get('language') or parser.language
+        for entry in parser.entries:
+            source = entry['source']
+            translations = entry['_translations']
+            if not source.strip() and all(not value.strip() for value in translations):
+                continue
+            result.entries_checked += 1
+            self._current_lang = self.config.get('language') or entry.get('_language') or default_language
+            self._message_context = entry.get('_context', '')
+            line = entry['_line']
+            if any(not value.strip() for value in translations):
+                result.add(LintIssue(filepath, line, Severity.ERROR, 'missing-translation',
+                                     'Unfinished/missing translation', source))
+            for value in translations:
+                if value.strip():
+                    self._check_translation(filepath, line, source, value, result)
+
     def _check_placeholders(self, filepath, line, source, translation, result):
-        from l10n_project import placeholder_signature, python_format_text
+        from l10n_project import icu_signature, placeholder_signature, python_format_text
         python_source = python_format_text(source)
         python_translation = python_format_text(translation)
         flags = getattr(self, '_format_flags', set())
+        icu_before = icu_signature(source)
+        icu_after = icu_signature(translation)
+        if icu_before or icu_after:
+            if icu_before != icu_after:
+                result.add(LintIssue(filepath, line, Severity.ERROR, 'placeholder-mismatch',
+                    f"Placeholder mismatch (icu): source has {icu_before}, translation has {icu_after}", source))
         if 'qt-format' in flags:
             kinds = ['qt']
         elif 'c-format' in flags or 'python-format' in flags:
@@ -2137,14 +2447,14 @@ def find_l10n_files(path: str, recursive: bool = True) -> Generator[str, None, N
     if not path.exists():
         raise FileNotFoundError(f"Path does not exist: {path}")
     if path.is_file():
-        if path.suffix.lower() not in ('.po', '.ts'):
+        if path.suffix.lower() not in L10N_EXTENSIONS:
             raise ValueError(f"Unsupported translation file: {path}")
         yield str(path)
         return
     if not path.is_dir():
         raise ValueError(f"Not a file or directory: {path}")
     files = sorted(p for p in (path.rglob('*') if recursive else path.glob('*'))
-                   if p.is_file() and p.suffix.lower() in ('.po', '.ts'))
+                   if p.is_file() and p.suffix.lower() in L10N_EXTENSIONS)
     yield from (str(p) for p in files)
 
 
@@ -2167,7 +2477,7 @@ def fetch_github_files(repo_url: str, path_filter: str = "") -> Generator[tuple[
     revision = data['sha']
     for item in data.get('tree', []):
         filepath = item['path']
-        if item.get('type') != 'blob' or Path(filepath).suffix.lower() not in ('.po', '.ts'):
+        if item.get('type') != 'blob' or Path(filepath).suffix.lower() not in L10N_EXTENSIONS:
             continue
         if path_filter and not (filepath == path_filter.rstrip('/') or filepath.startswith(path_filter.rstrip('/') + '/')):
             continue
@@ -2236,7 +2546,7 @@ def fetch_url_file(url: str) -> tuple[str, str]:
     Fetch a single l10n file from a URL.
     
     Args:
-        url: HTTP(S) URL to a .po or .ts file
+        url: HTTP(S) URL to a .po, .ts, .xlf/.xliff, or .json file
     
     Returns:
         (filename, content) tuple
@@ -2253,8 +2563,8 @@ def fetch_url_file(url: str) -> tuple[str, str]:
     
     # Validate file extension
     ext = Path(filename).suffix.lower()
-    if ext not in ('.po', '.ts'):
-        raise ValueError(_("URL must point to a .po or .ts file, got: {ext}").format(ext=ext))
+    if ext not in L10N_EXTENSIONS:
+        raise ValueError(_("URL must point to a .po, .ts, .xlf/.xliff, or .json file, got: {ext}").format(ext=ext))
     
     # Fetch content
     req = urllib.request.Request(url, headers={
@@ -2538,7 +2848,7 @@ def main():
     preliminary = argparse.ArgumentParser(add_help=False)
     preliminary.add_argument('--config')
     known, _unused = preliminary.parse_known_args()
-    parser = argparse.ArgumentParser(description=_('Linter for PO and Qt TS localization files'))
+    parser = argparse.ArgumentParser(description=_('Linter for PO, Qt TS, XLIFF, and JSON localization files'))
     parser.add_argument('paths', nargs='*')
     parser.add_argument('--config', help='Project TOML file (default: nearest pyproject.toml)')
     parser.add_argument('--github', '-g', metavar='REPO')
@@ -2548,6 +2858,8 @@ def main():
     parser.add_argument('--max-length', type=int, default=500)
     parser.add_argument('--length-ratio', type=float, default=3.0)
     parser.add_argument('--language', help='Override target language, e.g. sv or pt_BR')
+    parser.add_argument('--json-format', choices=['auto', 'nested', 'entries'],
+                        help='Allow automatic, nested-only, or explicit-entry JSON catalogs')
     parser.add_argument('--no-recursive', action='store_true')
     parser.add_argument('--strict', action='store_true', help='Return error status for warnings over the threshold')
     parser.add_argument('--max-errors', type=int, default=0)
@@ -2565,7 +2877,7 @@ def main():
     parser.add_argument('--exclude', action='append', default=[], help='Project-relative glob, repeatable')
     parser.add_argument('--baseline', help='Report only findings absent from this baseline')
     parser.add_argument('--write-baseline', metavar='FILE', help='Save current findings before baseline filtering')
-    parser.add_argument('--reference', help='Compare with a .pot, .po or source .ts catalog')
+    parser.add_argument('--reference', help='Compare with a .pot/.po, .ts, .xlf/.xliff, or .json source catalog')
     parser.add_argument('--fix', metavar='RULES', help='Preview local PO fixes: whitespace,ellipsis (diff on stderr)')
     parser.add_argument('--apply', action='store_true', help='Apply the fixes requested by --fix, then lint again')
     parser.add_argument('--verbose', '-V', action='store_true')
@@ -2595,6 +2907,7 @@ def main():
             disabled.add('fuzzy')
         config = {'max_length': args.max_length, 'length_ratio': args.length_ratio,
                   'language': args.language, 'severity': overrides, 'reference': args.reference,
+                  'json_format': args.json_format or 'auto',
                   'glossary_terms': read_glossary(args.glossary) if args.glossary else []}
         if args.list_rules:
             for rule, spec in RULES.items():

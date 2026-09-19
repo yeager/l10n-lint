@@ -1339,8 +1339,11 @@ class L10nLinter:
     def _check_numerics(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check that numbers in source appear in translation."""
         # Find all numbers in source
-        source_nums = set(re.findall(r'\b\d+(?:\.\d+)?\b', source))
-        trans_nums = set(re.findall(r'\b\d+(?:\.\d+)?\b', translation))
+        # Swedish decimal separators normally use a comma, while source text
+        # commonly uses a decimal point.  Compare a normalized representation
+        # so that 0.5 → 0,5 does not become a false positive.
+        source_nums = {number.replace(',', '.') for number in re.findall(r'\b\d+(?:[.,]\d+)?\b', source)}
+        trans_nums = {number.replace(',', '.') for number in re.findall(r'\b\d+(?:[.,]\d+)?\b', translation)}
         
         # Numbers in source but not in translation
         missing = source_nums - trans_nums
@@ -2023,7 +2026,6 @@ class L10nLinter:
         'fölljande': 'följande', 'tilllåta': 'tillåta', 'tilllåt': 'tillåt',
         'annvändare': 'användare', 'annvänds': 'används', 'annvända': 'använda',
         'innstallera': 'installera', 'elller': 'eller',
-        'upppil': 'uppil', 'upppilen': 'uppilen',
         # Transpositions / missing chars
         'defintions': 'definitions', 'definiton': 'definition',
         'destintation': 'destination', 'altenativ': 'alternativ',
@@ -2077,7 +2079,7 @@ class L10nLinter:
                 continue
             # yyyy is a year token too; keep the exemption at word boundaries
             # so repeated letters inside actual words still receive diagnostics.
-            if word.lower() == 'yyyy' or re.fullmatch(r'[åmdhs]+', word, re.IGNORECASE):
+            if word.lower() in {'yyyy', 'processstatus', 'upppil'} or re.fullmatch(r'[åmdhs]+', word, re.IGNORECASE):
                 continue
             # Skip intentional exclamations in game/dialog text (neeeej, jooooo)
             if re.match(r'^[a-zåäö]{1,3}([a-zåäö])\1{3,}[a-zåäö]?$', word, re.IGNORECASE):
@@ -2384,7 +2386,10 @@ class L10nLinter:
     def _check_xml_tags_mismatch(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check that XML/HTML tags match between source and translation."""
         # Extract all tags from both strings
-        tag_pattern = r'<(/?)([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>'
+        # Require a real tag delimiter after the tag name.  Without this,
+        # placeholders such as <your-organization> are incorrectly parsed as
+        # an HTML <your> tag.
+        tag_pattern = r'<(/?)([a-zA-Z][a-zA-Z0-9]*)(?=[\s/>])[^>]*>'
         source_tags = re.findall(tag_pattern, source)
         trans_tags = re.findall(tag_pattern, translation)
         

@@ -415,6 +415,8 @@ class XLIFFParser:
         if version.startswith('1.'):
             self._parse_12(root)
         elif version.startswith('2.'):
+            if not root.tag.startswith('{urn:oasis:names:tc:xliff:document:2.0}'):
+                raise ValueError('XLIFF 2.x documents must use the official 2.0 namespace')
             self._parse_2(root)
         else:
             raise ValueError(f'Unsupported XLIFF version: {version or "missing"}')
@@ -3000,6 +3002,8 @@ def main():
             except subprocess.CalledProcessError as exc:
                 raise ValueError(f'Cannot determine changed files from {args.changed}: {exc}') from exc
             args.paths.extend(str(root / path) for path in changed if Path(path).suffix.lower() in L10N_EXTENSIONS)
+            if not args.paths and not args.github:
+                return 0
         if not args.paths and not args.github:
             parser.error('Specify translation files, directories or --github')
         if args.apply and not args.fix:

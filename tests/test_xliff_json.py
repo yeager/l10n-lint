@@ -69,6 +69,7 @@ def test_xliff_20_parses_segments_and_uses_target_language():
 @pytest.mark.parametrize('content', [
     '<xliff version="1.2"><file><body><trans-unit id="x"><target>x</target></trans-unit></body></file></xliff>',
     '<xliff version="3.0"/>',
+    '<xliff version="2.0"><file id="f"/></xliff>',
     '<not-xliff/>',
 ])
 def test_invalid_xliff_is_a_syntax_error(content):

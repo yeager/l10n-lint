@@ -56,7 +56,7 @@ with tempfile.TemporaryDirectory() as directory:
     run = subprocess.run([str(command), '--strict', '--check', str(xlf)], cwd=root, capture_output=True, text=True)
     assert run.returncode == 0, (run.stdout, run.stderr)
     json_catalog = root / 'sv.json'
-    json_catalog.write_text(json.dumps({'@locale': 'sv', 'Save %s': 'Spara %d'}), encoding='utf-8')
+    json_catalog.write_text(json.dumps({'@locale': 'sv', 'source': 'Save %s', 'target': 'Spara %d'}), encoding='utf-8')
     run = subprocess.run([str(command), '--strict', '--check', str(json_catalog)], cwd=root, capture_output=True, text=True)
     assert run.returncode == 2, (run.stdout, run.stderr)
 print('Installed wheel smoke tests passed')

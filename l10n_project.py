@@ -71,7 +71,7 @@ def python_format_text(text):
     return ''.join(chars)
 
 
-def _unambiguous_printf(match, text):
+def _unambiguous_printf(match, text, *, allow_suffix=False):
     """Unflagged messages need stronger evidence than '% coverage' or '10%s'."""
     token = match.group()
     if any(char.isspace() for char in token):
@@ -85,7 +85,7 @@ def _unambiguous_printf(match, text):
     # placeholder; ordinary prose such as ``%download`` remains ambiguous.
     if match['type'] in 'di' and re.match(r'[smhd](?:\b|[^A-Za-z0-9_])', text[match.end():]):
         return True
-    if match.end() < len(text) and (text[match.end()].isalnum() or text[match.end()] == '_'):
+    if not allow_suffix and match.end() < len(text) and (text[match.end()].isalnum() or text[match.end()] == '_'):
         return False
     # A percent sign following a number is normally a prose percentage. An
     # explicit PO format flag opts into ambiguous conversions in these strings.
@@ -97,7 +97,7 @@ def _unambiguous_printf(match, text):
     return True
 
 
-def placeholder_signature(text, kind, *, explicit=True):
+def placeholder_signature(text, kind, *, explicit=True, allow_suffix=False):
     """Compare argument identities/types/counts, allowing explicit reordering."""
     if kind == 'qt':
         return sorted(Counter(re.findall(r'%(?:L?(?:[1-9]\d?|n))', text)).items())
@@ -117,7 +117,7 @@ def placeholder_signature(text, kind, *, explicit=True):
                 and len(match.group()) == 3
                 and match['type'].isalpha()
             )
-            if match['type'] == '%' or prose_percentage or (not explicit and not _unambiguous_printf(match, text)):
+            if match['type'] == '%' or prose_percentage or (not explicit and not _unambiguous_printf(match, text, allow_suffix=allow_suffix)):
                 continue
             for field in ('width', 'precision'):
                 value = match[field] or ''

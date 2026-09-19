@@ -692,7 +692,7 @@ class L10nLinter:
     NORDIC_CHARS = set('åäöÅÄÖæøÆØ')
     
     # Option value pattern (--option=VALUE or --option VALUE)
-    OPTION_VALUE_PATTERN = re.compile(r'--?\w+[=\s]([A-Z][A-Z0-9_]+)')
+    OPTION_VALUE_PATTERN = re.compile(r'(?<![\w-])--?[A-Za-z][\w-]*(?:=|\s+)([A-Z][A-Z0-9_]+)')
     
     # Number patterns for localization checks
     NUMBER_WITH_COMMAS = re.compile(r'\b\d{1,3}(,\d{3})+\b')  # e.g. 1,000 or 1,000,000
@@ -1036,6 +1036,17 @@ class L10nLinter:
                 explicit = bool(flags & {'c-format', 'python-format'})
                 before = placeholder_signature(python_source if kind == 'python' else source, kind, explicit=explicit)
                 after = placeholder_signature(python_translation if kind == 'python' else translation, kind, explicit=explicit)
+                if kind == 'printf' and not explicit and before != after:
+                    # msgunfmt usually loses format flags. Literal suffixes
+                    # such as %iHz, %uth and Swedish %ss (genitive) can then
+                    # hide one side of an otherwise identical contract. Only
+                    # suppress the mismatch when BOTH complete signatures
+                    # agree; retain the safeguards for prose percentages and
+                    # whitespace after %. Explicit format checks stay strict.
+                    suffixed_before = placeholder_signature(source, kind, explicit=False, allow_suffix=True)
+                    suffixed_after = placeholder_signature(translation, kind, explicit=False, allow_suffix=True)
+                    if suffixed_before and suffixed_before == suffixed_after:
+                        before, after = suffixed_before, suffixed_after
             except ValueError as exc:
                 result.add(LintIssue(filepath, line, Severity.ERROR, rule,
                                      f"Invalid {kind} format: {exc}", source))
@@ -2055,8 +2066,14 @@ class L10nLinter:
         # Swedish compounds normally reduce three equal consecutive letters to
         # two.  Flag triples, while retaining the narrowly scoped exemptions
         # required for intentional dialogue and format tokens.
+        source_words = set(re.findall(r'\b\w+\b', source))
         for word in re.findall(r'\b[a-zåäö]+\b', clean, re.IGNORECASE):
             if not re.search(r'([a-zåäö])\1{2,}', word, re.IGNORECASE):
+                continue
+            # Unchanged source tokens (IEEE, PPP, pppd, III, www) are
+            # technical names, not Swedish compounds. Curated typo checks
+            # above still apply, including when the source repeats a typo.
+            if word in source_words:
                 continue
             # yyyy is a year token too; keep the exemption at word boundaries
             # so repeated letters inside actual words still receive diagnostics.
@@ -2124,10 +2141,12 @@ class L10nLinter:
         header_nplurals = None
         header_plural_formula = None
         header_lang = None
+        has_plural_header = False
         
         for entry in parser.entries[:5]:
             if 'msgid' in entry and entry['msgid'] == '':
                 msgstr = entry.get('msgstr', '')
+                has_plural_header = bool(re.search(r'^Plural-Forms:', msgstr, re.MULTILINE))
                 # Extract Plural-Forms header
                 plural_match = re.search(
                     r'Plural-Forms:\s*nplurals\s*=\s*(\d+)\s*;\s*plural\s*=\s*([^;\\]+)',
@@ -2154,7 +2173,7 @@ class L10nLinter:
         if header_lang and header_lang in KNOWN_PLURALS:
             expected = KNOWN_PLURALS[header_lang]
             
-            if header_nplurals is None:
+            if header_nplurals is None and (has_plural_header or any('msgid_plural' in e for e in parser.entries)):
                 result.add(LintIssue(
                     file=filepath,
                     line=1,
@@ -2165,7 +2184,7 @@ class L10nLinter:
                     ),
                     context="Plural-Forms header"
                 ))
-            elif header_nplurals != expected['nplurals']:
+            elif header_nplurals is not None and header_nplurals != expected['nplurals']:
                 result.add(LintIssue(
                     file=filepath,
                     line=1,

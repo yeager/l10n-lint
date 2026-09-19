@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Require a plural header only when a catalog has plural entries; continue checking malformed headers that are present.
+- Recognize matching printf argument contracts with attached literal suffixes in catalogs decompiled by `msgunfmt`, while preserving type, count and prose-percentage checks.
+- Avoid treating hyphenated prose and numeric ranges as command-line options.
+- Exclude unchanged source tokens such as IEEE, PPP, pppd and III from the Swedish triple-letter heuristic; keep explicit spelling corrections active.
+
 ## [1.21.2] - 2026-09-19
 
 - Flag three identical consecutive letters in Swedish text as a likely spelling error; Swedish compound spelling normally reduces the sequence to two, for example `process + status` → `processtatus`.

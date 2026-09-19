@@ -71,6 +71,10 @@ def test_unflagged_clear_conversions_are_still_checked(source, target):
     assert any(i.rule == 'placeholder-mismatch' for i in issues(source, target))
 
 
+def test_unflagged_printf_time_unit_can_be_spaced_in_swedish():
+    assert not issues('Retry within %ds', 'Försök igen inom %d s')
+
+
 def test_prose_does_not_shift_real_printf_argument_numbers():
     assert not issues('Progress %s: 100% complete', 'Förlopp %s: 100 % klart')
     assert not issues('At 10% coverage, %s needs %d files', 'Vid 10 % täckning behöver %1$s %2$d filer')

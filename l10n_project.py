@@ -80,6 +80,11 @@ def _unambiguous_printf(match, text):
     # even when followed by a literal unit (e.g. %1$dpx or %.2fms).
     if match['position'] or match['name'] or match['width'] or match['precision'] is not None:
         return True
+    # Gettext UI messages commonly attach a time unit directly to an integer
+    # conversion (``%ds``).  Treat that established printf idiom as a
+    # placeholder; ordinary prose such as ``%download`` remains ambiguous.
+    if match['type'] in 'di' and re.match(r'[smhd](?:\b|[^A-Za-z0-9_])', text[match.end():]):
+        return True
     if match.end() < len(text) and (text[match.end()].isalnum() or text[match.end()] == '_'):
         return False
     # A percent sign following a number is normally a prose percentage. An

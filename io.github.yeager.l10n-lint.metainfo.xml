@@ -48,6 +48,9 @@
   <url type="vcs-browser">https://github.com/yeager/l10n-lint</url>
 
   <releases>
+    <release version="1.21.4" date="2026-09-19">
+      <description><p>Fix CI coverage for JSON placeholder checks and distinguish lowercase Swedish compound typos from title-case UI labels.</p></description>
+    </release>
     <release version="1.21.3" date="2026-09-19">
       <description><p>Reduce false positives for printf suffixes, JSON keys, plural headers, command-line options and preserved Swedish source tokens.</p></description>
     </release>

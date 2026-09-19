@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.21.4] - 2026-09-19
+
+- Fix CI coverage for JSON placeholder checks and Swedish compound spelling.
+- Preserve title-case Processstatus while flagging the lowercase typo.
+
 ## [1.21.3] - 2026-09-19
 
 - Recognize attached integer time units and ignore prose percentages even when marked as `c-format`.

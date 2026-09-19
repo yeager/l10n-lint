@@ -577,7 +577,7 @@ class JSONParser:
         value(skip(0), ())
         return positions
 
-    def _append(self, source, translation, path, item=None, translations=None, plural_categories=()):
+    def _append(self, source, translation, path, item=None, translations=None, plural_categories=(), source_is_key=False):
         item = item or {}
         translations = list(translations) if translations is not None else [translation]
         if not isinstance(source, str) or not all(isinstance(value, str) for value in translations):
@@ -591,7 +591,7 @@ class JSONParser:
             '_line': self._line_map.get(path + ('source',), self._line_map.get(path, 1)),
             '_language': str(item.get('targetLanguage') or item.get('target_language') or self.language),
             'source': source, 'translation': translations[0],
-            '_translations': translations, '_plural_categories': tuple(plural_categories),
+            '_source_is_key': source_is_key, '_translations': translations, '_plural_categories': tuple(plural_categories),
             '_type': str(item.get('state', '')),
         })
 
@@ -633,12 +633,12 @@ class JSONParser:
             if isinstance(child, str) or child is None:
                 if self.format == 'entries':
                     raise ValueError('JSON format policy only allows explicit entries')
-                self._append(key, child or '', child_path)
+                self._append(key, child or '', child_path, source_is_key=True)
             elif isinstance(child, dict) and child and set(child) <= self._PLURAL_FORMS:
                 if self.format == 'entries':
                     raise ValueError('JSON format policy only allows explicit entries')
                 self._append(key, '', child_path, translations=['' if form is None else form for form in child.values()],
-                             plural_categories=child.keys())
+                             plural_categories=child.keys(), source_is_key=True)
             elif isinstance(child, (dict, list)):
                 self._walk(child, child_path)
             else:
@@ -963,6 +963,8 @@ class L10nLinter:
             self._current_lang = self.config.get('language') or entry.get('_language') or default_language
             self._message_context = entry.get('_context', '')
             line = entry['_line']
+            previous_source_is_key = getattr(self, '_source_is_key', False)
+            self._source_is_key = entry.get('_source_is_key', False)
             self._check_cldr_plural_categories(filepath, line, entry, result)
             if any(not value.strip() for value in translations):
                 result.add(LintIssue(filepath, line, Severity.ERROR, 'missing-translation',
@@ -977,6 +979,7 @@ class L10nLinter:
                         self._check_translation(filepath, line, source, value, result)
             finally:
                 self._skip_consistency = previous_skip
+                self._source_is_key = previous_source_is_key
 
     def _check_cldr_plural_categories(self, filepath, line, entry, result):
         """Require the core CLDR categories for JSON plural objects when known."""
@@ -997,6 +1000,10 @@ class L10nLinter:
                 'Missing CLDR plural form(s): ' + ', '.join(sorted(missing)), entry['source']))
 
     def _check_placeholders(self, filepath, line, source, translation, result):
+        # Nested JSON exports contain only target strings. Their dotted key is
+        # useful context, but is not source text and cannot define placeholders.
+        if getattr(self, '_source_is_key', False):
+            return
         from l10n_project import icu_signature, placeholder_signature, python_format_text
         python_source = python_format_text(source)
         python_translation = python_format_text(translation)

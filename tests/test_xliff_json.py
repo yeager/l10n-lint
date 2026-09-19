@@ -174,3 +174,10 @@ def test_json_weblate_api_plural_arrays_are_supported():
     assert parser.entries[0]['source'] == '{{count}} bottle'
     assert parser.entries[0]['_translations'] == ['{{count}} flaska', '{{count}} flaskor']
     assert not L10nLinter().lint_file('sv.json', content).issues
+
+
+def test_nested_json_does_not_compare_placeholders_against_key_names(tmp_path):
+    path = tmp_path / 'sv.json'
+    path.write_text('{"relativeTime": {"future": "i %s", "mm": "%d minuter"}}', encoding='utf-8')
+    result = L10nLinter().lint_file(str(path), path.read_text(encoding='utf-8'))
+    assert not [issue for issue in result.issues if issue.rule == 'placeholder-mismatch']

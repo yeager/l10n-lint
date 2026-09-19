@@ -95,6 +95,13 @@ def test_json_parser_supports_nested_key_value_and_explicit_entries():
     assert rules(result) == ['missing-translation']
 
 
+def test_json_nested_catalog_allows_source_as_a_regular_key():
+    content = json.dumps({'common': {'source': 'Källa', 'target': 'Mål', 'other': 'Övrigt'}})
+    result = L10nLinter().lint_file('sv.json', content)
+    assert result.entries_checked == 3
+    assert rules(result) == []
+
+
 def test_json_placeholder_mismatch_and_nontranslatable_entry_are_handled():
     content = json.dumps([
         {'id': 'bad', 'source': 'Save %s', 'target': 'Spara %d'},

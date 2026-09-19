@@ -1363,8 +1363,12 @@ class L10nLinter:
         to avoid false positives where <option> in source is descriptive
         text translated to <flagga> in Swedish (not actual HTML).
         """
-        source_tags = sorted(self._REAL_HTML_TAG.findall(source))
-        trans_tags = sorted(self._REAL_HTML_TAG.findall(translation))
+        # Attributes may be serialized with different quote styles by Qt/PO
+        # tooling (for example href='…' becomes href="…").  Structural tag
+        # comparison must not report that benign normalization as an error.
+        canonical = lambda value: re.sub(r'\s+[^>]*', '', value).lower()
+        source_tags = sorted(canonical(tag) for tag in self._REAL_HTML_TAG.findall(source))
+        trans_tags = sorted(canonical(tag) for tag in self._REAL_HTML_TAG.findall(translation))
         
         # Skip if translation has no HTML tags at all — source tags are likely
         # descriptive terms (e.g., <option> → <flagga>) not actual markup

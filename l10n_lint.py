@@ -1274,9 +1274,12 @@ class L10nLinter:
         if re.search(r'<[^>]+="[^"]*"', translation):
             return
         
-        # Detect mixed quote styles
-        straight_quotes = translation.count('"') + translation.count("'")
-        curly_quotes = translation.count('\u201c') + translation.count('\u201d') + translation.count('\u2018') + translation.count('\u2019')
+        # Programming examples such as Texture("name", index) must retain
+        # straight quotes even when surrounding Swedish prose uses ”…”.
+        prose = re.sub(r'\b[A-Za-z_]\w*\([^\n]*?"[^\n]*?"[^\n]*?\)', '', translation)
+        # Detect mixed quote styles in prose.
+        straight_quotes = prose.count('"') + prose.count("'")
+        curly_quotes = prose.count('\u201c') + prose.count('\u201d') + prose.count('\u2018') + prose.count('\u2019')
         german_quotes = translation.count('\u201e')  # Only „ (U+201E), don't re-count chars in curly_quotes
         
         quote_styles = sum(1 for c in [straight_quotes, curly_quotes, german_quotes] if c > 0)
@@ -2435,6 +2438,10 @@ class L10nLinter:
 
     def _check_xml_tags_mismatch(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check that XML/HTML tags match between source and translation."""
+        # Combo-box sentinel values like <None> are visible text, not markup.
+        sentinel = r'\s*<[A-Za-z][A-Za-z0-9 _-]*>\s*'
+        if re.fullmatch(sentinel, source) and re.fullmatch(sentinel, translation):
+            return
         # Extract all tags from both strings
         # Require a real tag delimiter after the tag name.  Without this,
         # placeholders such as <your-organization> are incorrectly parsed as

@@ -609,11 +609,22 @@ class JSONParser:
                 raise ValueError('JSON format policy only allows nested catalogs')
             target_key = next((key for key in ('target', 'translation', 'value') if key in value), None)
             target = value.get(target_key, '')
-            if isinstance(target, dict) and target and set(target) <= self._PLURAL_FORMS:
-                self._append(value['source'], '', path, value,
+            source = value['source']
+            # Weblate's API export represents plural source and target strings as
+            # parallel arrays.  Treat these as an explicit plural catalog rather
+            # than rejecting a valid API response as malformed JSON.
+            if isinstance(source, list) or isinstance(target, list):
+                if not isinstance(source, list) or not isinstance(target, list):
+                    raise ValueError(f'JSON translation at {".".join(path) or "root"} must use matching source and target arrays')
+                if not source or len(source) != len(target):
+                    raise ValueError(f'JSON translation at {".".join(path) or "root"} must use non-empty source and target arrays of equal length')
+                self._append(source[0], '', path, value,
+                             ['' if form is None else form for form in target])
+            elif isinstance(target, dict) and target and set(target) <= self._PLURAL_FORMS:
+                self._append(source, '', path, value,
                              ['' if form is None else form for form in target.values()], target.keys())
             else:
-                self._append(value['source'], '' if target is None else target, path, value)
+                self._append(source, '' if target is None else target, path, value)
             return
         for key, child in value.items():
             if key.startswith('@') or key.lower() in self._METADATA:
@@ -956,9 +967,16 @@ class L10nLinter:
             if any(not value.strip() for value in translations):
                 result.add(LintIssue(filepath, line, Severity.ERROR, 'missing-translation',
                                      'Unfinished/missing translation', source))
-            for value in translations:
-                if value.strip():
-                    self._check_translation(filepath, line, source, value, result)
+            # Plural variants are alternative forms of one entry, so they must
+            # not be compared with each other by the cross-entry consistency rule.
+            previous_skip = getattr(self, '_skip_consistency', False)
+            self._skip_consistency = len(translations) > 1
+            try:
+                for value in translations:
+                    if value.strip():
+                        self._check_translation(filepath, line, source, value, result)
+            finally:
+                self._skip_consistency = previous_skip
 
     def _check_cldr_plural_categories(self, filepath, line, entry, result):
         """Require the core CLDR categories for JSON plural objects when known."""
@@ -1927,6 +1945,8 @@ class L10nLinter:
 
     def _check_consistency(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check consistency within a file and against optional project memory."""
+        if getattr(self, '_skip_consistency', False):
+            return
         if not hasattr(self, 'consistency_map'):
             self.consistency_map = {}
         

@@ -162,3 +162,15 @@ def test_xliff_and_json_catalog_comparison_uses_matching_formats(tmp_path):
     target.write_text(XLIFF_12, encoding='utf-8')
     result = L10nLinter({'reference': str(source)}).lint_file(str(target))
     assert not any(issue.rule.startswith('reference-error') for issue in result.issues)
+
+def test_json_weblate_api_plural_arrays_are_supported():
+    content = json.dumps([{
+        'id': 1, 'context': 'bottles',
+        'source': ['{{count}} bottle', '{{count}} bottles'],
+        'target': ['{{count}} flaska', '{{count}} flaskor'],
+        'state': 20,
+    }])
+    parser = JSONParser(content, 'sv.json')
+    assert parser.entries[0]['source'] == '{{count}} bottle'
+    assert parser.entries[0]['_translations'] == ['{{count}} flaska', '{{count}} flaskor']
+    assert not L10nLinter().lint_file('sv.json', content).issues

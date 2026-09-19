@@ -35,7 +35,7 @@ if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
 __version__ = "1.21.3"
-L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json'})
+L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.rc'})
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -308,6 +308,51 @@ class POParser:
                 raise ValueError(f"Invalid PO escape: \\{code}")
             return escapes[code]
         return re.sub(r'\\(.)', decode, s)
+
+
+class RCParser:
+    """Extract user-visible strings from Windows resource scripts.
+
+    A localized ``.rc`` file carries target text only, so source-dependent
+    checks intentionally receive an empty source.  This still lets the linter
+    catch malformed quoting, Swedish spelling, ellipses, invisible controls,
+    and duplicated words without pretending that the target is its source.
+    """
+
+    _STRING_CONTROLS = frozenset({
+        'CAPTION', 'LTEXT', 'RTEXT', 'CTEXT', 'PUSHBUTTON', 'DEFPUSHBUTTON',
+        'CHECKBOX', 'AUTOCHECKBOX', 'RADIOBUTTON', 'AUTORADIOBUTTON',
+        'GROUPBOX', 'MENUITEM', 'POPUP', 'CONTROL',
+    })
+    _QUOTED = re.compile(r'^(?P<control>[A-Z]+)\s+"(?P<text>(?:[^"\\\\]|\\\\.)*)"')
+
+    def __init__(self, content: str, filename: str = '<unknown>'):
+        self.content = content
+        self.filename = filename
+        self.language = 'sv' if re.search(r'[-_.]s(?:v|e)(?:[-_.]|$)', filename, re.IGNORECASE) else ''
+        self.entries = []
+        self._parse()
+
+    def _parse(self):
+        for line_number, raw in enumerate(self.content.splitlines(), 1):
+            match = self._QUOTED.match(raw.lstrip())
+            if not match or match.group('control') not in self._STRING_CONTROLS:
+                continue
+            text = match.group('text')
+            # RC uses C-style escaping in quoted resource values.
+            text = re.sub(r'\\\\([\\\\"nrt])', lambda item: {
+                '\\\\': '\\\\', '"': '"', 'n': '\\n', 'r': '\\r', 't': '\\t',
+            }[item.group(1)], text)
+            self.entries.append({
+                '_line': line_number,
+                '_context': match.group('control'),
+                'source': '',
+                'translation': text,
+                '_translations': [text],
+                '_type': '',
+            })
+        if not self.entries:
+            raise ValueError('No Windows RC UI strings found')
 
 
 class TSParser:
@@ -753,6 +798,8 @@ class L10nLinter:
                     self._lint_ts(filepath, content, result)
                 elif ext in ('.xlf', '.xliff'):
                     self._lint_xliff(filepath, content, result)
+                elif ext == '.rc':
+                    self._lint_rc(filepath, content, result)
                 else:
                     self._lint_json(filepath, content, result)
             except (ValueError, SyntaxError) as exc:
@@ -947,6 +994,9 @@ class L10nLinter:
 
     def _lint_json(self, filepath: str, content: str, result: LintResult):
         self._lint_external_entries(filepath, JSONParser(content, filepath, self.config.get('json_format', 'auto')), result)
+
+    def _lint_rc(self, filepath: str, content: str, result: LintResult):
+        self._lint_external_entries(filepath, RCParser(content, filepath), result)
 
     def _lint_external_entries(self, filepath, parser, result):
         """Run the shared checks for XLIFF and JSON source/target entries."""

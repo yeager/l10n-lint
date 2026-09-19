@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.21.0"
+__version__ = "1.21.1"
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json'})
 
 # Translation setup

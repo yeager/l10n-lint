@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.21.1] - 2026-09-19
+
+- Add incremental pull-request linting, translation memory and project terminology policies.
+- Report bidi controls and Unicode normalization issues, validate CLDR JSON plural categories, and require the XLIFF 2.x namespace.
+- Complete Swedish PO metadata headers.
+
 ## [1.21.0] - 2026-09-19
 
 - Add XLIFF 1.2/2.x and JSON catalog parsing to the CLI, GTK interface, catalog comparison, URL and GitHub inputs.

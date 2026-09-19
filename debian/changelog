@@ -1,3 +1,9 @@
+l10n-lint (1.21.1-1) unstable; urgency=medium
+
+  * Add incremental review, project policy and Unicode/CLDR checks.
+
+ -- Daniel Nylander <daniel@danielnylander.se>  Sat, 19 Sep 2026 12:30:00 +0200
+
 l10n-lint (1.21.0-1) unstable; urgency=medium
 
   * Add XLIFF and JSON localization catalog support.

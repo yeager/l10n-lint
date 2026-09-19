@@ -360,3 +360,11 @@ def test_gtk_cli_receives_only_paths(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     assert core.main() == 0
     assert received == [['l10n-lint', 'sv.po']]
+
+
+def test_false_friend_patron_allows_preserved_capitalized_tier_name():
+    result = L10nLinter({'language': 'sv'}).lint_file('sv.json', json.dumps([{
+        'source': 'Supporter, Patron and Benefactor',
+        'target': 'Supporter, Patron och Benefactor',
+    }]))
+    assert not any(issue.rule == 'false-friends' for issue in result.issues)

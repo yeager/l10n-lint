@@ -1928,10 +1928,14 @@ class L10nLinter:
         
         for english_word, (wrong_swedish, correct_swedish) in false_friends.items():
             if english_word in source_lower and wrong_swedish in translation_lower:
-                # Special handling for chef - only flag in cooking context
+                # Special handling for chef - only flag in cooking context.
                 if english_word == 'chef' and not any(cook_word in source_lower for cook_word in ['cook', 'kitchen', 'recipe', 'food']):
                     continue
-                
+                # Capitalized subscription tiers and other product labels can be
+                # intentionally preserved verbatim, e.g. "Patron".
+                if english_word == 'patron' and re.search(r'\bPatron\b', source) and re.search(r'\bPatron\b', translation):
+                    continue
+
                 result.add(LintIssue(
                     file=filepath,
                     line=line,

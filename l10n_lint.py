@@ -35,7 +35,7 @@ if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
 __version__ = "1.21.4"
-L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.rc'})
+L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.rc', '.properties'})
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -531,6 +531,41 @@ class XLIFFParser:
                 })
 
 
+class PropertiesParser:
+    """Parse Java ``.properties`` localization exports.
+
+    Hosted Weblate can export a translated Java-properties catalog without the
+    English source catalog.  In that form the key is useful as context, but
+    must never be treated as source text for placeholder or terminology
+    comparisons.  This parser deliberately validates the portable, one-line
+    key/value subset used by Weblate exports and preserves line numbers for
+    useful diagnostics.
+    """
+
+    def __init__(self, content: str, filename: str = '<unknown>'):
+        self.entries = []
+        self.language = ''
+        for line_number, line in enumerate(content.splitlines(), 1):
+            stripped = line.lstrip()
+            if not stripped or stripped.startswith(('#', '!')):
+                continue
+            separator = next((index for index, char in enumerate(line)
+                              if char in '=:'), None)
+            if separator is None:
+                raise ValueError(f'Line {line_number}: expected key/value separator')
+            key, value = line[:separator].strip(), line[separator + 1:]
+            if not key:
+                raise ValueError(f'Line {line_number}: empty properties key')
+            self.entries.append({
+                '_id': key, '_context': key, '_line': line_number,
+                '_language': '', '_source_is_key': True,
+                'source': key, 'translation': value, '_translations': [value],
+                '_plural_categories': (), '_type': '',
+            })
+        if not self.entries:
+            raise ValueError('Properties catalog contains no translation entries')
+
+
 class JSONParser:
     """Parse common JSON localization catalogs without third-party dependencies."""
 
@@ -806,6 +841,8 @@ class L10nLinter:
                     self._lint_xliff(filepath, content, result)
                 elif ext == '.rc':
                     self._lint_rc(filepath, content, result)
+                elif ext == '.properties':
+                    self._lint_properties(filepath, content, result)
                 else:
                     self._lint_json(filepath, content, result)
             except (ValueError, SyntaxError) as exc:
@@ -926,8 +963,17 @@ class L10nLinter:
     
     def _check_translation(self, filepath, line, source, translation, result):
         seen = set()
+        # Target-only formats (nested JSON and Java properties exports) do not
+        # carry English source text.  Their identifiers are context only, so
+        # source/target comparisons would be fabricated diagnostics.
+        target_only_methods = {
+            '_check_typos', '_check_repeated_words', '_check_zero_width_space',
+            '_check_unicode_integrity',
+        }
         for rule, spec in RULES.items():
             if not spec.method or spec.method in ('_check_plural_forms', '_check_same_plurals'):
+                continue
+            if getattr(self, '_source_is_key', False) and spec.method not in target_only_methods:
                 continue
             if rule in self.disabled_rules or spec.method in seen:
                 continue
@@ -1003,6 +1049,9 @@ class L10nLinter:
 
     def _lint_rc(self, filepath: str, content: str, result: LintResult):
         self._lint_external_entries(filepath, RCParser(content, filepath), result)
+
+    def _lint_properties(self, filepath: str, content: str, result: LintResult):
+        self._lint_external_entries(filepath, PropertiesParser(content, filepath), result)
 
     def _lint_external_entries(self, filepath, parser, result):
         """Run the shared checks for XLIFF and JSON source/target entries."""

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from l10n_lint import JSONParser, L10nLinter, XLIFFParser, find_l10n_files, lint_inputs
+from l10n_lint import JSONParser, L10nLinter, PropertiesParser, XLIFFParser, find_l10n_files, lint_inputs
 
 
 XLIFF_12 = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -188,3 +188,17 @@ def test_nested_json_does_not_compare_placeholders_against_key_names(tmp_path):
     path.write_text('{"relativeTime": {"future": "i %s", "mm": "%d minuter"}}', encoding='utf-8')
     result = L10nLinter().lint_file(str(path), path.read_text(encoding='utf-8'))
     assert not [issue for issue in result.issues if issue.rule == 'placeholder-mismatch']
+
+
+def test_properties_catalog_lints_values_without_treating_keys_as_source():
+    content = 'menu.open=Öppna\nmenu.empty=\n'
+    parser = PropertiesParser(content, 'sv.properties')
+    assert [entry['_id'] for entry in parser.entries] == ['menu.open', 'menu.empty']
+    result = L10nLinter().lint_file('sv.properties', content)
+    assert result.entries_checked == 2
+    assert rules(result) == ['missing-translation']
+
+
+def test_properties_catalog_requires_key_value_separator():
+    result = L10nLinter().lint_file('broken.properties', 'missing separator\n')
+    assert rules(result) == ['syntax-error']

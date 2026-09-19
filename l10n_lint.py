@@ -196,6 +196,11 @@ RULES = {
     'url-preservation': RuleSpec('_check_url_preservation', 'warning', '', 'Url preservation'),
     'escaped-newline-count': RuleSpec('_check_escaped_newline_count', 'warning', '', 'Escaped newline count'),
     'max-length-ratio': RuleSpec('_check_max_length_ratio', 'warning', '', 'Max length ratio'),
+    'bidi-control': RuleSpec('_check_unicode_integrity', 'warning', '', 'Bidirectional control character'),
+    'unicode-normalization': RuleSpec('_check_unicode_integrity', 'warning', '', 'Unicode normalization'),
+    'required-term-missing': RuleSpec('_check_project_terms', 'error', '', 'Required term missing'),
+    'forbidden-term': RuleSpec('_check_project_terms', 'warning', '', 'Forbidden term'),
+    'cldr-plural-missing': RuleSpec('', 'error', '', 'CLDR plural form missing'),
     'missing-translation': RuleSpec('', 'error', '', 'Missing translation'),
     'fuzzy': RuleSpec('', 'warning', '', 'Fuzzy'),
     'duplicate': RuleSpec('', 'warning', '', 'Duplicate'),
@@ -570,7 +575,7 @@ class JSONParser:
         value(skip(0), ())
         return positions
 
-    def _append(self, source, translation, path, item=None, translations=None):
+    def _append(self, source, translation, path, item=None, translations=None, plural_categories=()):
         item = item or {}
         translations = list(translations) if translations is not None else [translation]
         if not isinstance(source, str) or not all(isinstance(value, str) for value in translations):
@@ -584,7 +589,8 @@ class JSONParser:
             '_line': self._line_map.get(path + ('source',), self._line_map.get(path, 1)),
             '_language': str(item.get('targetLanguage') or item.get('target_language') or self.language),
             'source': source, 'translation': translations[0],
-            '_translations': translations, '_type': str(item.get('state', '')),
+            '_translations': translations, '_plural_categories': tuple(plural_categories),
+            '_type': str(item.get('state', '')),
         })
 
     def _walk(self, value, path):
@@ -603,7 +609,7 @@ class JSONParser:
             target = value.get(target_key, '')
             if isinstance(target, dict) and target and set(target) <= self._PLURAL_FORMS:
                 self._append(value['source'], '', path, value,
-                             ['' if form is None else form for form in target.values()])
+                             ['' if form is None else form for form in target.values()], target.keys())
             else:
                 self._append(value['source'], '' if target is None else target, path, value)
             return
@@ -618,7 +624,8 @@ class JSONParser:
             elif isinstance(child, dict) and child and set(child) <= self._PLURAL_FORMS:
                 if self.format == 'entries':
                     raise ValueError('JSON format policy only allows explicit entries')
-                self._append(key, '', child_path, translations=['' if form is None else form for form in child.values()])
+                self._append(key, '', child_path, translations=['' if form is None else form for form in child.values()],
+                             plural_categories=child.keys())
             elif isinstance(child, (dict, list)):
                 self._walk(child, child_path)
             else:
@@ -700,6 +707,8 @@ class L10nLinter:
         self.disabled_rules = resolve_rules(disabled_rules or set())
         self.max_length = self.config.get('max_length', 500)
         self.length_ratio = self.config.get('length_ratio', 3.0)  # Translation shouldn't be 3x longer
+        self.translation_memory = self.config.get('translation_memory', {})
+        self._use_translation_memory = 'translation_memory' in self.config
     
     def lint_file(self, filepath: str, content: Optional[str] = None) -> LintResult:
         """Lint a single file."""
@@ -865,6 +874,35 @@ class L10nLinter:
                 result.add(LintIssue(filepath, line, Severity.WARNING, 'glossary',
                     f"Prefer '{correct}' over '{wrong}'" + (f" ({context})" if context else ''), source))
 
+    def _check_project_terms(self, filepath, line, source, translation, result):
+        """Apply project-specific required and forbidden terminology."""
+        context = getattr(self, '_message_context', '')
+        for item in self.config.get('required_terms', []):
+            if not isinstance(item, dict) or not item.get('source') or not item.get('target'):
+                continue
+            if item['source'].casefold() in source.casefold() and item['target'].casefold() not in translation.casefold():
+                scope = item.get('context', '')
+                if not scope or scope == context:
+                    result.add(LintIssue(filepath, line, Severity.ERROR, 'required-term-missing',
+                        f"Required term '{item['target']}' is missing", source))
+        for term in self.config.get('forbidden_terms', []):
+            if isinstance(term, str) and re.search(r'(?<!\w)' + re.escape(term) + r'(?!\w)', translation, re.IGNORECASE):
+                result.add(LintIssue(filepath, line, Severity.WARNING, 'forbidden-term',
+                    f"Forbidden term '{term}'", source))
+
+    def _check_unicode_integrity(self, filepath, line, source, translation, result):
+        """Expose invisible direction controls and non-normalized text to reviewers."""
+        import unicodedata
+        controls = set('\u061c\u200e\u200f\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069')
+        introduced = sorted(set(translation) - set(source))
+        found = [f'U+{ord(char):04X}' for char in introduced if char in controls]
+        if found:
+            result.add(LintIssue(filepath, line, Severity.WARNING, 'bidi-control',
+                'Translation introduces bidirectional control character(s): ' + ', '.join(found), source))
+        if translation != unicodedata.normalize('NFC', translation):
+            result.add(LintIssue(filepath, line, Severity.WARNING, 'unicode-normalization',
+                'Translation is not normalized as Unicode NFC', source))
+
     def _lint_ts(self, filepath: str, content: str, result: LintResult):
         parser = TSParser(content, filepath)
         self._current_lang = self.config.get('language') or parser.language
@@ -912,12 +950,31 @@ class L10nLinter:
             self._current_lang = self.config.get('language') or entry.get('_language') or default_language
             self._message_context = entry.get('_context', '')
             line = entry['_line']
+            self._check_cldr_plural_categories(filepath, line, entry, result)
             if any(not value.strip() for value in translations):
                 result.add(LintIssue(filepath, line, Severity.ERROR, 'missing-translation',
                                      'Unfinished/missing translation', source))
             for value in translations:
                 if value.strip():
                     self._check_translation(filepath, line, source, value, result)
+
+    def _check_cldr_plural_categories(self, filepath, line, entry, result):
+        """Require the core CLDR categories for JSON plural objects when known."""
+        categories = set(entry.get('_plural_categories', ()))
+        if not categories:
+            return
+        language = (self._current_lang or '').replace('_', '-').split('-')[0]
+        expected = {
+            'ar': {'zero', 'one', 'two', 'few', 'many', 'other'},
+            'ru': {'one', 'few', 'many', 'other'},
+            'pl': {'one', 'few', 'many', 'other'},
+            'cs': {'one', 'few', 'many', 'other'},
+            'ja': {'other'}, 'ko': {'other'}, 'zh': {'other'},
+        }.get(language, {'one', 'other'})
+        missing = expected - categories
+        if missing:
+            result.add(LintIssue(filepath, line, Severity.ERROR, 'cldr-plural-missing',
+                'Missing CLDR plural form(s): ' + ', '.join(sorted(missing)), entry['source']))
 
     def _check_placeholders(self, filepath, line, source, translation, result):
         from l10n_project import icu_signature, placeholder_signature, python_format_text
@@ -1867,7 +1924,7 @@ class L10nLinter:
                 ))
 
     def _check_consistency(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
-        """Check internal consistency within the file."""
+        """Check consistency within a file and against optional project memory."""
         if not hasattr(self, 'consistency_map'):
             self.consistency_map = {}
         
@@ -1892,6 +1949,16 @@ class L10nLinter:
         else:
             if translation:  # Only store non-empty translations
                 self.consistency_map[source_key] = translation
+        if self._use_translation_memory:
+            memory_key = source.strip()
+            remembered = self.translation_memory.get(memory_key)
+            if remembered and remembered != translation:
+                result.add(LintIssue(
+                    file=filepath, line=line, severity=Severity.INFO, rule="consistency",
+                    message=_('Translation differs from project translation memory'),
+                    context=f"'{source[:40]}' → '{remembered[:30]}' vs '{translation[:30]}'"))
+            elif translation:
+                self.translation_memory[memory_key] = translation
 
 
     # Pattern-based typo detection (no external dictionary needed)
@@ -2843,7 +2910,7 @@ class TranslatedHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
 
 def main():
-    from l10n_project import (load_config, read_glossary, filter_baseline, write_baseline,
+    from l10n_project import (load_config, read_glossary, read_translation_memory, filter_baseline, write_baseline,
                               preview_fixes, apply_fixes, excluded)
     preliminary = argparse.ArgumentParser(add_help=False)
     preliminary.add_argument('--config')
@@ -2852,6 +2919,7 @@ def main():
     parser.add_argument('paths', nargs='*')
     parser.add_argument('--config', help='Project TOML file (default: nearest pyproject.toml)')
     parser.add_argument('--github', '-g', metavar='REPO')
+    parser.add_argument('--changed', metavar='BASE', help='Lint localization files changed since this Git revision')
     parser.add_argument('--path', '-p', default='', help='GitHub path filter')
     parser.add_argument('--format', '-f', choices=['text', 'json', 'html', 'github', 'gnu', 'sarif'], default='text')
     parser.add_argument('--output', '-o')
@@ -2860,6 +2928,7 @@ def main():
     parser.add_argument('--language', help='Override target language, e.g. sv or pt_BR')
     parser.add_argument('--json-format', choices=['auto', 'nested', 'entries'],
                         help='Allow automatic, nested-only, or explicit-entry JSON catalogs')
+    parser.add_argument('--translation-memory', help='JSON source-to-translation memory for consistency checks')
     parser.add_argument('--no-recursive', action='store_true')
     parser.add_argument('--strict', action='store_true', help='Return error status for warnings over the threshold')
     parser.add_argument('--max-errors', type=int, default=0)
@@ -2908,7 +2977,11 @@ def main():
         config = {'max_length': args.max_length, 'length_ratio': args.length_ratio,
                   'language': args.language, 'severity': overrides, 'reference': args.reference,
                   'json_format': args.json_format or 'auto',
+                  'required_terms': args.required_terms if hasattr(args, 'required_terms') else [],
+                  'forbidden_terms': args.forbidden_terms if hasattr(args, 'forbidden_terms') else [],
                   'glossary_terms': read_glossary(args.glossary) if args.glossary else []}
+        if args.translation_memory:
+            config['translation_memory'] = read_translation_memory(args.translation_memory)
         if args.list_rules:
             for rule, spec in RULES.items():
                 print(f'{rule:30} {spec.severity:8} {spec.language or "all":4} {spec.description}')
@@ -2919,6 +2992,14 @@ def main():
             except (ImportError, ValueError) as exc:
                 raise ValueError(f'GTK interface unavailable: {exc}') from exc
             return gtk_main([sys.argv[0], *args.paths])
+        if args.changed:
+            import subprocess
+            try:
+                changed = subprocess.check_output(
+                    ['git', 'diff', '--name-only', f'{args.changed}...HEAD'], text=True, cwd=root).splitlines()
+            except subprocess.CalledProcessError as exc:
+                raise ValueError(f'Cannot determine changed files from {args.changed}: {exc}') from exc
+            args.paths.extend(str(root / path) for path in changed if Path(path).suffix.lower() in L10N_EXTENSIONS)
         if not args.paths and not args.github:
             parser.error('Specify translation files, directories or --github')
         if args.apply and not args.fix:

@@ -208,6 +208,9 @@ language = "sv"
 checks = ["placeholders", "whitespace", "terminology", "glossary"]
 exclude = ["vendor/**", "generated/**"]
 glossary = "translations/glossary.tsv"
+translation-memory = "translations/memory.json"
+forbidden-terms = ["Dokumentera"]
+required-terms = [{ source = "Save", target = "Spara", context = "menu" }]
 max-length = 500
 length-ratio = 3.0
 max-errors = 0
@@ -266,6 +269,15 @@ operational error occurs. `--strict` makes excess warnings return **2** as well.
 Informational findings do not fail a run. `--check` suppresses normal output.
 Invalid options/configuration still produce an error on stderr. `--skip-fuzzy`
 suppresses the fuzzy diagnostic; it does not skip validation of those entries.
+
+## Efficient review workflows
+
+Use `--changed BASE` in a pull-request job to lint only localization files changed
+since a Git revision, for example `l10n-lint --changed origin/main --format github`.
+Use `translation-memory` for cross-catalog consistency, `required-terms` and
+`forbidden-terms` for domain policy, and a JSON object of source-to-translation
+string pairs for the memory file. The linter also reports introduced bidi controls,
+non-NFC text, and missing CLDR plural categories in JSON plural objects.
 
 ## Baselines: report only new findings
 

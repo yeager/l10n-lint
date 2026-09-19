@@ -111,6 +111,16 @@ def test_icu_messageformat_is_not_parsed_as_python_and_variables_must_match():
     assert any(issue.rule == 'placeholder-mismatch' and '(icu)' in issue.message for issue in issues)
 
 
+def test_project_memory_terms_and_unicode_integrity():
+    config = {
+        'translation_memory': {'Save document': 'Spara dokument'},
+        'required_terms': [{'source': 'Save', 'target': 'Spara'}],
+        'forbidden_terms': ['Dokumentera'],
+    }
+    result = lint(po('Save document', 'Dokumentera\u202e'), config=config)
+    assert {'consistency', 'required-term-missing', 'forbidden-term', 'bidi-control'} <= {issue.rule for issue in result.issues}
+
+
 def ts(translations, type_='', numerus=True):
     return '<TS language="sv"><context><name>App</name>\n<message' + (' numerus="yes"' if numerus else '') + '><source>%n file(s)</source>\n<translation type="' + type_ + '">' + translations + '</translation></message></context></TS>'
 

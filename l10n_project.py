@@ -157,6 +157,7 @@ def load_config(filename=None, start=None):
     fields = {
         'language': str, 'checks': list, 'disable': list, 'exclude': list,
         'glossary': str, 'baseline': str, 'reference': str, 'format': str, 'json-format': str,
+        'translation-memory': str, 'required-terms': list, 'forbidden-terms': list,
         'max-length': int, 'length-ratio': (int, float),
         'max-errors': int, 'max-warnings': int, 'strict': bool,
         'severity': dict,
@@ -166,8 +167,11 @@ def load_config(filename=None, start=None):
             raise ValueError(f'Unknown configuration option: {key}')
         if not isinstance(value, fields[key]) or (isinstance(value, bool) and fields[key] != bool):
             raise ValueError(f'Invalid value for {key}')
-        if isinstance(value, list) and not all(isinstance(v, str) for v in value):
+        if isinstance(value, list) and key != 'required-terms' and not all(isinstance(v, str) for v in value):
             raise ValueError(f'{key} must contain strings')
+        if key == 'required-terms' and not all(isinstance(v, dict) and isinstance(v.get('source'), str)
+                                               and isinstance(v.get('target'), str) for v in value):
+            raise ValueError('required-terms must contain source/target tables')
         if key in ('max-length', 'length-ratio') and value <= 0:
             raise ValueError(f'{key} must be positive')
         if key in ('max-errors', 'max-warnings') and value < 0:
@@ -175,13 +179,22 @@ def load_config(filename=None, start=None):
         if key == 'json-format' and value not in ('auto', 'nested', 'entries'):
             raise ValueError('json-format must be auto, nested, or entries')
     config = {k.replace('-', '_'): v for k, v in raw.items()}
-    for key in ('glossary', 'baseline', 'reference'):
+    for key in ('glossary', 'baseline', 'reference', 'translation_memory'):
         if key in config:
             config[key] = str(path.parent / config[key])
     for key in ('checks', 'disable'):
         if key in config:
             config[key] = ','.join(config[key])
     return config, path.parent
+
+
+def read_translation_memory(path):
+    """Read a reviewable source-to-translation memory JSON file."""
+    data = json.loads(Path(path).read_text(encoding='utf-8'))
+    if not isinstance(data, dict) or not all(isinstance(source, str) and isinstance(target, str)
+                                             for source, target in data.items()):
+        raise ValueError('translation-memory must be a JSON object of string pairs')
+    return data
 
 
 def read_glossary(path):

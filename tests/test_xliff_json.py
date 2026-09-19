@@ -130,6 +130,12 @@ def test_json_format_policy_rejects_other_catalog_shapes():
     assert rules(L10nLinter({'json_format': 'nested'}).lint_file('sv.json', explicit)) == ['syntax-error']
 
 
+def test_json_plural_forms_follow_known_cldr_categories():
+    content = json.dumps({'@locale': 'ar', 'Files': {'one': 'ملف', 'other': 'ملفات'}})
+    result = L10nLinter().lint_file('ar.json', content)
+    assert 'cldr-plural-missing' in rules(result)
+
+
 @pytest.mark.parametrize('content', ['{', '[]', '{"message": 5}', '{"source": 7, "target": "Hej"}'])
 def test_invalid_json_catalog_is_a_syntax_error(content):
     result = L10nLinter().lint_file('broken.json', content)

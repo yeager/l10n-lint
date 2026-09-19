@@ -1964,9 +1964,12 @@ class L10nLinter:
 
 
     # Pattern-based typo detection (no external dictionary needed)
-    # Doubled consonants that are likely typos (Swedish allows some doubles like ll, nn, ss, tt, etc.)
+    # Swedish spelling normally reduces a compound boundary with three equal
+    # consecutive letters to two (process + status → processtatus).  Treat all
+    # triple-letter runs as suspicious; _check_typos exempts intentional
+    # exclamations and format tokens before reporting them.
     _TYPO_DOUBLED_RE = re.compile(
-        r'([bcdfghjkmpqvwxz])\1{2,}'  # Triple+ consonants are always wrong
+        r'([a-zåäö])\1{2,}'
         r'|([^lnrstdgk])(\2)'  # Doubled consonants that are rare in Swedish (except l,n,r,s,t,d,g,k)
         , re.IGNORECASE
     )
@@ -2018,19 +2021,21 @@ class L10nLinter:
             if wl in self._COMMON_TYPOS:
                 typos_found.append(f"{w} → {self._COMMON_TYPOS[wl]}")
         
-        # Check for highly suspicious patterns only (minimize false positives)
-        # Quadruple+ letters are always wrong (but skip date patterns and exclamations)
-        for m in re.finditer(r'\b([a-zåäö]*([a-zåäö])\2\2\2[a-zåäö]*)\b', clean):
-            word = m.group(1)
+        # Swedish compounds normally reduce three equal consecutive letters to
+        # two.  Flag triples, while retaining the narrowly scoped exemptions
+        # required for intentional dialogue and format tokens.
+        for word in re.findall(r'\b[a-zåäö]+\b', clean, re.IGNORECASE):
+            if not re.search(r'([a-zåäö])\1{2,}', word, re.IGNORECASE):
+                continue
             # yyyy is a year token too; keep the exemption at word boundaries
             # so repeated letters inside actual words still receive diagnostics.
-            if word == 'yyyy' or re.fullmatch(r'[åmdhs]+', word, re.IGNORECASE):
+            if word.lower() == 'yyyy' or re.fullmatch(r'[åmdhs]+', word, re.IGNORECASE):
                 continue
             # Skip intentional exclamations in game/dialog text (neeeej, jooooo)
-            if re.match(r'^[a-zåäö]{1,3}([a-zåäö])\1{3,}[a-zåäö]?$', word):
+            if re.match(r'^[a-zåäö]{1,3}([a-zåäö])\1{3,}[a-zåäö]?$', word, re.IGNORECASE):
                 continue
             # Skip format placeholders (uxxxx, etc.)
-            if re.match(r'^[ux]+$', word):
+            if re.match(r'^[ux]+$', word, re.IGNORECASE):
                 continue
             typos_found.append(word)
         

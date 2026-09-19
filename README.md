@@ -169,6 +169,21 @@ remain checked, even in a message that also contains mathematics. These
 exclusions affect format parsing only; the original text is retained for
 other checks and reports.
 
+### Swedish terminology sources
+
+The built-in Swedish rules are deliberately conservative. Their curated terms and
+recommendations are reviewed against [SAOL, SO and SAOB](https://svenska.se/),
+[TEPA](https://termipankki.fi/tepa/sv/), [IATE](https://iate.europa.eu/home),
+[Rikstermbanken](https://www.rikstermbanken.se/) and [ISOF's guidance on
+fackspråk och terminologi](https://www.isof.se/svenska-spraket/facksprak-och-terminologi),
+together with project documentation and the configured project glossary. These
+sources guide human review; l10n-lint does not scrape or redistribute their data.
+
+For Swedish compounds, three equal consecutive letters are flagged as a likely
+spelling error. Normal Swedish spelling normally reduces the sequence to two, for
+example `process + status` → `processtatus`. Intentional dialogue exclamations
+and format tokens remain exempt.
+
 ### Context for Swedish checks
 
 Date-format tokens such as `yyyy` in `dd/mm/yyyy` are excluded from spelling

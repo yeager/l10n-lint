@@ -134,3 +134,11 @@ def test_reported_examples_pass_strict_cli(tmp_path):
 
 def test_other_swedish_terminology_is_preserved():
     assert any(i.rule == 'terminology' for i in lint('Editor', 'Redaktör').issues)
+
+@pytest.mark.parametrize('word,warning', [
+    ('processstatus', True),
+    ('processtatus', False),
+])
+def test_triple_letters_in_swedish_compounds_are_typos(word, warning):
+    result = lint('Process status', word)
+    assert any(issue.rule == 'typo' for issue in result.issues) is warning

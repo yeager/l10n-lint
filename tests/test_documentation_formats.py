@@ -145,3 +145,9 @@ def test_reported_messages_have_no_errors_with_default_rules():
     for source, target, flags in examples:
         result = L10nLinter().lint_file('sv.po', catalog(source, target, flags))
         assert result.error_count == 0, result.issues
+
+
+def test_explicit_c_format_ignores_percentage_prose_with_space_flag_shape():
+    source = 'One unit is roughly a 2% change in camera distance.'
+    target = 'En enhet motsvarar ungefär en ändring på 2 % av kamerans avstånd.'
+    assert not issues(source, target, 'c-format')

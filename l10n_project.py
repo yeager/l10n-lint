@@ -100,7 +100,19 @@ def placeholder_signature(text, kind, *, explicit=True):
         args, sequential = [], 1
         # %% consumes no argument and must not be reconsidered as a placeholder.
         for match in PRINTF.finditer(text):
-            if match['type'] == '%' or (not explicit and not _unambiguous_printf(match, text)):
+            # Qt/Gettext often marks prose as c-format.  A number followed by
+            # `% ` and a word (for example `2% change`) is a percentage, not
+            # a space-flagged `%c` conversion, even with that explicit flag.
+            previous = match.start() - 1
+            while previous >= 0 and text[previous].isspace():
+                previous -= 1
+            prose_percentage = (
+                previous >= 0 and text[previous].isdigit()
+                and match.group().startswith('% ')
+                and len(match.group()) == 3
+                and match['type'].isalpha()
+            )
+            if match['type'] == '%' or prose_percentage or (not explicit and not _unambiguous_printf(match, text)):
                 continue
             for field in ('width', 'precision'):
                 value = match[field] or ''

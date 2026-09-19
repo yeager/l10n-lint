@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.21.2] - 2026-09-19
+
+- Flag three identical consecutive letters in Swedish text as a likely spelling error; Swedish compound spelling normally reduces the sequence to two, for example `process + status` → `processtatus`.
+- Document Computer Swedens IT-ord as the first terminology source for IT terms, with Svenska Akademiens ordböcker, TEPA, IATE, Rikstermbanken and ISOF as supporting sources.
+
 ## [1.21.1] - 2026-09-19
 
 - Add incremental pull-request linting, translation memory and project terminology policies.

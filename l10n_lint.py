@@ -2132,7 +2132,8 @@ class L10nLinter:
                 continue
             # yyyy is a year token too; keep the exemption at word boundaries
             # so repeated letters inside actual words still receive diagnostics.
-            if word.lower() in {'yyyy', 'upppil'} or re.fullmatch(r'[åmdhs]+', word, re.IGNORECASE):
+            if (word == 'Processstatus' or word.lower() in {'yyyy', 'upppil'}
+                    or re.fullmatch(r'[åmdhs]+', word, re.IGNORECASE)):
                 continue
             # Skip intentional exclamations in game/dialog text (neeeej, jooooo)
             if re.match(r'^[a-zåäö]{1,3}([a-zåäö])\1{3,}[a-zåäö]?$', word, re.IGNORECASE):

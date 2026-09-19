@@ -1,5 +1,5 @@
 Name:           l10n-lint
-Version:        1.21.1
+Version:        1.21.3
 Release:        1%{?dist}
 Summary:        Linter for localization files
 License:        GPL-3.0-or-later
@@ -73,6 +73,9 @@ update-desktop-database /usr/share/applications 2>/dev/null || true
 %license LICENSE
 
 %changelog
+* Sat Sep 19 2026 Daniel Nylander <daniel@danielnylander.se> - 1.21.3-1
+- Reduce false positives in gettext, JSON and Swedish writing checks.
+
 * Sat Sep 19 2026 Daniel Nylander <daniel@danielnylander.se> - 1.21.1-1
 - Add incremental review and project policy checks.
 

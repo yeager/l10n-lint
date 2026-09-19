@@ -48,6 +48,9 @@
   <url type="vcs-browser">https://github.com/yeager/l10n-lint</url>
 
   <releases>
+    <release version="1.21.3" date="2026-09-19">
+      <description><p>Reduce false positives for printf suffixes, JSON keys, plural headers, command-line options and preserved Swedish source tokens.</p></description>
+    </release>
     <release version="1.21.1" date="2026-09-19">
       <description><p>Add incremental review, project terminology policies and Unicode/CLDR validation.</p></description>
     </release>

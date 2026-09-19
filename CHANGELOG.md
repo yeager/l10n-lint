@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## [1.21.3] - 2026-09-19
+
+- Recognize attached integer time units and ignore prose percentages even when marked as `c-format`.
+- Skip placeholder comparison against standalone JSON key names, while still validating explicit source/translation entries.
+- Preserve Patron subscription tier names without domain-terminology warnings.
 
 - Require a plural header only when a catalog has plural entries; continue checking malformed headers that are present.
 - Recognize matching printf argument contracts with attached literal suffixes in catalogs decompiled by `msgunfmt`, while preserving type, count and prose-percentage checks.

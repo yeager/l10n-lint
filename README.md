@@ -171,11 +171,13 @@ other checks and reports.
 
 ### Swedish terminology sources
 
-The built-in Swedish rules are deliberately conservative. Their curated terms and
-recommendations are reviewed against [SAOL, SO and SAOB](https://svenska.se/),
+The built-in Swedish rules are deliberately conservative. For IT terms, curated
+terms and recommendations use [Computer Swedens IT-ord](https://it-ord.computersweden.se/)
+as the first reference source. [SAOL, SO and SAOB](https://svenska.se/),
 [TEPA](https://termipankki.fi/tepa/sv/), [IATE](https://iate.europa.eu/home),
 [Rikstermbanken](https://www.rikstermbanken.se/) and [ISOF's guidance on
-fackspråk och terminologi](https://www.isof.se/svenska-spraket/facksprak-och-terminologi),
+fackspråk och terminologi](https://www.isof.se/svenska-spraket/facksprak-och-terminologi)
+then support general Swedish, public-sector terminology and domains outside IT,
 together with project documentation and the configured project glossary. These
 sources guide human review; l10n-lint does not scrape or redistribute their data.
 

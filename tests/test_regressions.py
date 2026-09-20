@@ -368,3 +368,14 @@ def test_false_friend_patron_allows_preserved_capitalized_tier_name():
         'target': 'Supporter, Patron och Benefactor',
     }]))
     assert not any(issue.rule == 'false-friends' for issue in result.issues)
+
+def test_ts_fix_preview_apply_preservation_and_idempotence(tmp_path):
+    p = tmp_path / 'sv.ts'
+    p.write_text('<?xml version="1.0"?><TS><context><name>Ctx</name><message><source>Wait...</source><translation> Vänta... </translation></message></context></TS>')
+    original = p.read_bytes()
+    preview = cli(tmp_path, '--fix', 'whitespace,ellipsis', p)
+    assert 'Vänta…' in preview.stderr and p.read_bytes() == original
+    applied = cli(tmp_path, '--fix', 'whitespace,ellipsis', '--apply', p)
+    assert applied.returncode in (0, 1, 2)
+    assert '<translation>Vänta…</translation>' in p.read_text()
+    assert preview_fixes(p, {'whitespace', 'ellipsis'})[2] == ''

@@ -306,14 +306,34 @@ def compare_catalog(filepath, content, reference_path, result):
 
 
 def preview_fixes(path, enabled):
-    """Conservative PO edits only: preserve source, comments and unrelated bytes."""
+    """Preview conservative local PO or Qt TS fixes without changing source text."""
     from l10n_lint import POParser
     path = Path(path)
-    if path.suffix.lower() != '.po':
-        raise ValueError('--fix currently supports local PO files only')
+    suffix = path.suffix.lower()
+    if suffix not in {'.po', '.ts'}:
+        raise ValueError('--fix currently supports local PO and Qt TS files only')
     if path.is_symlink():
         raise ValueError('Refusing to rewrite a symlink')
     original = path.read_bytes().decode('utf-8')
+    if suffix == '.ts':
+        # Qt TS keeps ordinary targets as XML text. Restrict this to text-only
+        # translation forms so markup-bearing targets and source strings stay intact.
+        target = re.compile(r'(?P<open><(?:translation|numerusform)(?:\s+[^>]*)?>)(?P<text>[^<]*)(?P<close></(?:translation|numerusform)>)')
+        def replace(match):
+            old = match.group('text')
+            new = old
+            if 'whitespace' in enabled:
+                new = new.strip(' \t')
+            if 'ellipsis' in enabled and new.endswith('...') and not new.endswith('....'):
+                new = new[:-3] + '…'
+            return match.group('open') + new + match.group('close')
+        updated = target.sub(replace, original)
+        # Parsing validates that a mechanical change did not damage the catalog.
+        import xml.etree.ElementTree as ET
+        ET.fromstring(updated)
+        diff = ''.join(difflib.unified_diff(original.splitlines(True), updated.splitlines(True),
+                                            fromfile=str(path), tofile=str(path)))
+        return original, updated, diff
     parser = POParser(original, str(path))
     lines = original.splitlines(keepends=True)
     edits = []
@@ -337,7 +357,7 @@ def preview_fixes(path, enabled):
                 suffix = newline if lines[end - 1].endswith(('\n', '\r')) else ''
                 escapes = {'\\': r'\\', '"': r'\"', '\n': r'\n', '\r': r'\r',
                            '\t': r'\t', '\b': r'\b', '\f': r'\f', '\a': r'\a', '\v': r'\v'}
-                encoded = '"' + ''.join(escapes.get(char, char) for char in new) + '"' 
+                encoded = '"' + ''.join(escapes.get(char, char) for char in new) + '"'
                 edits.append((start, end, key + ' ' + encoded + suffix))
     for start, end, value in reversed(edits):
         lines[start:end] = [value]

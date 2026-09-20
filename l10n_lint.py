@@ -3189,7 +3189,7 @@ def main():
     parser.add_argument('--baseline', help='Report only findings absent from this baseline')
     parser.add_argument('--write-baseline', metavar='FILE', help='Save current findings before baseline filtering')
     parser.add_argument('--reference', help='Compare with a .pot/.po, .ts, .xlf/.xliff, or .json source catalog')
-    parser.add_argument('--fix', metavar='RULES', help='Preview local PO fixes: whitespace,ellipsis (diff on stderr)')
+    parser.add_argument('--fix', metavar='RULES', help='Preview local PO or Qt TS fixes: whitespace,ellipsis (diff on stderr)')
     parser.add_argument('--apply', action='store_true', help='Apply the fixes requested by --fix, then lint again')
     parser.add_argument('--verbose', '-V', action='store_true')
     parser.add_argument('--gtk', '-G', action='store_true')
@@ -3253,7 +3253,7 @@ def main():
             if not fix_rules or fix_rules - {'whitespace', 'ellipsis'}:
                 raise ValueError('--fix accepts whitespace,ellipsis')
             if args.github or any(is_url(p) for p in args.paths):
-                raise ValueError('--fix requires local PO files')
+                raise ValueError('--fix requires local PO or Qt TS files')
             previews = {}
             # Validate every input before applying any changes.
             for path in args.paths:

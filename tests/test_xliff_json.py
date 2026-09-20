@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from l10n_lint import JSONParser, L10nLinter, PropertiesParser, XLIFFParser, find_l10n_files, lint_inputs
+from l10n_lint import AndroidXMLParser, JSONParser, L10nLinter, PropertiesParser, XLIFFParser, find_l10n_files, lint_inputs
 
 
 XLIFF_12 = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -31,6 +31,21 @@ XLIFF_20 = '''<?xml version="1.0" encoding="UTF-8"?>
 
 def rules(result):
     return [issue.rule for issue in result.issues]
+
+
+def test_android_xml_parses_strings_plurals_and_skips_internal_resources():
+    content = '''<resources>
+      <string name="save">Spara</string>
+      <string name="internal" translatable="false"/>
+      <plurals name="files"><item quantity="one">en fil</item><item quantity="other">%d filer</item></plurals>
+      <string name="missing"></string>
+    </resources>'''
+    parser = AndroidXMLParser(content, 'values-sv.xml')
+    assert [entry['_id'] for entry in parser.entries] == ['save', 'files', 'missing']
+    assert parser.entries[1]['_translations'] == ['en fil', '%d filer']
+    result = L10nLinter({'language': 'sv'}).lint_file('values-sv.xml', content)
+    assert result.entries_checked == 3
+    assert rules(result) == ['missing-translation']
 
 
 def test_xliff_12_parses_languages_context_inline_codes_and_nontranslatable_units():

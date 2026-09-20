@@ -35,7 +35,7 @@ if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
 __version__ = "1.21.4"
-L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.rc', '.properties'})
+L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.rc', '.properties', '.xml'})
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -353,6 +353,62 @@ class RCParser:
             })
         if not self.entries:
             raise ValueError('No Windows RC UI strings found')
+
+
+class AndroidXMLParser:
+    """Extract target-only strings from an Android ``res/values`` XML file.
+
+    Android resource files do not include English source text.  Treat their
+    resource names as context and deliberately restrict source-dependent
+    checks, just as the RC and properties parsers do.  ``string`` values and
+    all plural ``item`` values are user-facing; ``translatable=false`` values
+    are intentionally excluded.
+    """
+
+    def __init__(self, content: str, filename: str = '<unknown>'):
+        self.content = content
+        self.filename = filename
+        self.language = 'sv' if re.search(r'[-_.]s(?:v|e)(?:[-_.]|$)', filename, re.IGNORECASE) else ''
+        self.entries = []
+        self._parse()
+
+    def _parse(self):
+        import xml.etree.ElementTree as ET
+        from xml.parsers import expat
+        root = ET.fromstring(self.content)
+        if root.tag != 'resources':
+            raise ValueError('Expected an Android resources document')
+        lines = []
+        parser = expat.ParserCreate()
+        def start(name, attrs):
+            if name in ('string', 'plurals'):
+                lines.append(parser.CurrentLineNumber)
+        parser.StartElementHandler = start
+        parser.Parse(self.content, True)
+        line_iter = iter(lines)
+        for node in root:
+            if node.tag not in ('string', 'plurals'):
+                continue
+            line = next(line_iter, 1)
+            if node.get('translatable') == 'false':
+                continue
+            name = node.get('name')
+            if not name:
+                raise ValueError(f'Line {line}: Android resource without name')
+            values = ([''.join(node.itertext())] if node.tag == 'string'
+                      else [''.join(item.itertext()) for item in node.findall('item')])
+            self.entries.append({
+                '_context': name,
+                '_id': name,
+                '_line': line,
+                'source': '',
+                'translation': values[0] if values else '',
+                '_translations': values or [''],
+                '_source_is_key': True,
+                '_type': '',
+            })
+        if not self.entries:
+            raise ValueError('No Android UI strings found')
 
 
 class TSParser:
@@ -837,6 +893,8 @@ class L10nLinter:
                     self._lint_po(filepath, content, result)
                 elif ext == '.ts':
                     self._lint_ts(filepath, content, result)
+                elif ext == '.xml':
+                    self._lint_android_xml(filepath, content, result)
                 elif ext in ('.xlf', '.xliff'):
                     self._lint_xliff(filepath, content, result)
                 elif ext == '.rc':
@@ -1041,6 +1099,9 @@ class L10nLinter:
                 if value.strip():
                     self._check_translation(filepath, line, source, value, result)
 
+    def _lint_android_xml(self, filepath: str, content: str, result: LintResult):
+        self._lint_external_entries(filepath, AndroidXMLParser(content, filepath), result)
+
     def _lint_xliff(self, filepath: str, content: str, result: LintResult):
         self._lint_external_entries(filepath, XLIFFParser(content, filepath), result)
 
@@ -1062,7 +1123,9 @@ class L10nLinter:
         for entry in parser.entries:
             source = entry['source']
             translations = entry['_translations']
-            if not source.strip() and all(not value.strip() for value in translations):
+            if (not entry.get('_source_is_key', False)
+                    and not source.strip()
+                    and all(not value.strip() for value in translations)):
                 continue
             result.entries_checked += 1
             self._current_lang = self.config.get('language') or entry.get('_language') or default_language

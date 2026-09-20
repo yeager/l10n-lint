@@ -324,8 +324,8 @@ def preview_fixes(path, enabled):
             new = old
             if 'whitespace' in enabled:
                 new = new.strip(' \t')
-            if 'ellipsis' in enabled and new.endswith('...') and not new.endswith('....'):
-                new = new[:-3] + '…'
+            if 'ellipsis' in enabled:
+                new = re.sub(r'(?<!\.)\.\.\.(?!\.)', '…', new)
             return match.group('open') + new + match.group('close')
         updated = target.sub(replace, original)
         # Parsing validates that a mechanical change did not damage the catalog.

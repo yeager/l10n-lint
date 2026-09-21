@@ -153,3 +153,7 @@ def test_triple_letters_in_swedish_compounds_are_typos(word, warning):
 def test_datetime_format_token_case_does_not_trigger_capitalization():
     result = lint('MM/dd/yy hh:mm:ss AP', 'dd/MM/yy HH:mm:ss', checks=('inconsistent-capitalization',))
     assert not result.issues
+
+def test_leading_runtime_placeholder_does_not_trigger_capitalization():
+    result = lint('Down %{change} from %{value}', '%{change} lägre än %{value}', checks=('inconsistent-capitalization',))
+    assert not result.issues

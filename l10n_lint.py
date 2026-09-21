@@ -1318,6 +1318,13 @@ class L10nLinter:
         if re.fullmatch(r'[dMyhHmsAP/:.\- ]+', source) and re.fullmatch(r'[dMyhHmsAP/:.\- ]+', translation):
             return
         
+        # A translation may intentionally begin with a runtime placeholder where
+        # the source starts with ordinary text.  Comparing the identifier inside
+        # `%{change}` (or an equivalent template placeholder) to source case is
+        # meaningless and caused false capitalization warnings.
+        if re.match(r'^\s*(?:%\{[^}]+\}|%\d*\$?[A-Za-z]|\{\{[^}]+\}\})', translation):
+            return
+
         # Get first letter of each
         source_first = next((c for c in source if c.isalpha()), None)
         trans_first = next((c for c in translation if c.isalpha()), None)

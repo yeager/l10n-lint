@@ -37,7 +37,7 @@ def test_date_tokens_are_not_typos(fmt, kind):
     assert not lint('Date: ' + fmt, 'Datum: ' + fmt, kind=kind).issues
 
 
-@pytest.mark.parametrize('word', ['kommmando', 'felyyyyaktig'])
+@pytest.mark.parametrize('word', ['kommmando', 'feltttaktig'])
 def test_date_exception_does_not_hide_real_typos(word):
     result = lint('Date: yyyy-mm-dd', word + ' yyyy-mm-dd')
     assert [i.rule for i in result.issues] == ['typo']
@@ -135,8 +135,15 @@ def test_reported_examples_pass_strict_cli(tmp_path):
 def test_other_swedish_terminology_is_preserved():
     assert any(i.rule == 'terminology' for i in lint('Editor', 'Redaktör').issues)
 
+def test_technical_url_with_www_is_not_a_triple_consonant_compound():
+    result = lint('https://www.example.org', 'https://www.example.org')
+    assert not any(issue.rule == 'typo' for issue in result.issues)
+
 @pytest.mark.parametrize('word,warning', [
     ('processstatus', True),
+    ('Processstatus', True),
+    ('upppil', True),
+    ('neeej', False),
     ('processtatus', False),
 ])
 def test_triple_letters_in_swedish_compounds_are_typos(word, warning):

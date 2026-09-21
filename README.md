@@ -189,8 +189,7 @@ sources guide human review; l10n-lint does not scrape or redistribute their data
 
 For Swedish compounds, three equal consecutive letters are flagged as a likely
 spelling error. Normal Swedish spelling normally reduces the sequence to two, for
-example `process + status` → `processtatus`. Intentional dialogue exclamations
-and format tokens remain exempt.
+example `process + status` → `processtatus`. Intentional dialogue exclamations, date-format tokens and technical source tokens remain exempt.
 
 ### Context for Swedish checks
 

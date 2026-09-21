@@ -2185,7 +2185,7 @@ class L10nLinter:
 
     # Pattern-based typo detection (no external dictionary needed)
     # Swedish spelling normally reduces a compound boundary with three equal
-    # consecutive letters to two (process + status → processtatus).  Treat all
+    # consecutive consonants to two (process + status → processtatus).  Treat all
     # triple-letter runs as suspicious; _check_typos exempts intentional
     # exclamations and format tokens before reporting them.
     _TYPO_DOUBLED_RE = re.compile(
@@ -2220,13 +2220,18 @@ class L10nLinter:
 
     def _check_typos(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for typos in translation using pattern-based detection."""
-        # Skip very short strings
-        if len(translation) < 8 or not any(c.isalpha() for c in translation):
+        # Very short labels are normally not useful for typo heuristics, but a
+        # three-letter consonant run is significant even in a short compound
+        # such as 'upppil' or 'ägggula'.
+        if not any(c.isalpha() for c in translation):
+            return
+        if len(translation) < 8 and not re.search(r'([bcdfghjklmnpqrstvwxz])\1{2,}', translation, re.IGNORECASE):
             return
         
         # Clean the translation
         clean = re.sub(r'%[sd\d$.#+ -]*[sdifcpxXeEgGulLhqn]', ' ', translation)
         clean = re.sub(r'<[^>]+>', ' ', clean)
+        clean = re.sub(r'(?:https?://|www\.)\S+', ' ', clean)
         clean = re.sub(r'\\[nt"\\]', ' ', clean)
         clean = re.sub(r'\{[^}]+\}', ' ', clean)
         clean = re.sub(r'&\w+;', ' ', clean)
@@ -2241,20 +2246,20 @@ class L10nLinter:
                 typos_found.append(f"{w} → {self._COMMON_TYPOS[wl]}")
         
         # Swedish compounds normally reduce three equal consecutive letters to
-        # two.  Flag triples, while retaining the narrowly scoped exemptions
+        # two.  Flag consonant triples, while retaining the narrowly scoped exemptions
         # required for intentional dialogue and format tokens.
-        source_words = set(re.findall(r'\b\w+\b', source))
+        source_words = {source_word.lower() for source_word in re.findall(r'\b\w+\b', source)}
         for word in re.findall(r'\b[a-zåäö]+\b', clean, re.IGNORECASE):
-            if not re.search(r'([a-zåäö])\1{2,}', word, re.IGNORECASE):
+            if not re.search(r'([bcdfghjklmnpqrstvwxz])\1{2,}', word, re.IGNORECASE):
                 continue
             # Unchanged source tokens (IEEE, PPP, pppd, III, www) are
             # technical names, not Swedish compounds. Curated typo checks
             # above still apply, including when the source repeats a typo.
-            if word in source_words:
+            if word.lower() in source_words:
                 continue
             # yyyy is a year token too; keep the exemption at word boundaries
             # so repeated letters inside actual words still receive diagnostics.
-            if (word == 'Processstatus' or word.lower() in {'yyyy', 'upppil'}
+            if (word.lower() == 'yyyy'
                     or re.fullmatch(r'[åmdhs]+', word, re.IGNORECASE)):
                 continue
             # Skip intentional exclamations in game/dialog text (neeeej, jooooo)

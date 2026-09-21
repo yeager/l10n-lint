@@ -1,6 +1,6 @@
 # l10n-lint
 
-[![Version](https://img.shields.io/badge/version-1.21.5-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.21.5)
+[![Version](https://img.shields.io/badge/version-1.21.6-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.21.6)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -9,11 +9,11 @@ invalid syntax, placeholder mismatches, plural errors and inconsistent formattin
 Use the command line in CI or the GTK4 desktop interface for interactive review.
 Swedish-specific checks cover spelling patterns, terminology and localization conventions.
 
-[Download 1.21.5](https://github.com/yeager/l10n-lint/releases/tag/v1.21.5)
+[Download 1.21.6](https://github.com/yeager/l10n-lint/releases/tag/v1.21.6)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
-Version **1.21.5** fixes CI coverage and Swedish compound spelling while preserving
-title-case UI labels. Version **1.21.3** reduces false positives in decompiled gettext catalogs and JSON
+Version **1.21.6** keeps boundary and numeric checks accurate for natural Swedish word order.
+Version **1.21.5** adds reviewable translation-boundary diagnostics, while version **1.21.3** reduces false positives in decompiled gettext catalogs and JSON
 translations, including printf suffixes, plural headers and Swedish spelling checks.
 
 ## Features
@@ -31,21 +31,21 @@ translations, including printf suffixes, plural headers and Swedish spelling che
 
 ### Install the current release
 
-Download the package for your system from [release 1.21.5](https://github.com/yeager/l10n-lint/releases/tag/v1.21.5).
+Download the package for your system from [release 1.21.6](https://github.com/yeager/l10n-lint/releases/tag/v1.21.6).
 The release includes `.deb`, `.rpm`, a Python wheel, a source archive and `SHA256SUMS`.
 
 | System | Download | Install command |
 |--------|----------|-----------------|
-| Debian / Ubuntu | [Debian package](https://github.com/yeager/l10n-lint/releases/download/v1.21.5/l10n-lint_1.21.5-1_all.deb) | `sudo apt install ./l10n-lint_1.21.5-1_all.deb` |
-| Fedora | [RPM package](https://github.com/yeager/l10n-lint/releases/download/v1.21.5/l10n-lint-1.21.5-1.noarch.rpm) | `sudo dnf install ./l10n-lint-1.21.5-1.noarch.rpm` |
+| Debian / Ubuntu | [Debian package](https://github.com/yeager/l10n-lint/releases/download/v1.21.6/l10n-lint_1.21.6-1_all.deb) | `sudo apt install ./l10n-lint_1.21.6-1_all.deb` |
+| Fedora | [RPM package](https://github.com/yeager/l10n-lint/releases/download/v1.21.6/l10n-lint-1.21.6-1.noarch.rpm) | `sudo dnf install ./l10n-lint-1.21.6-1.noarch.rpm` |
 
-For the Python CLI, download the [wheel](https://github.com/yeager/l10n-lint/releases/download/v1.21.5/l10n_lint-1.21.5-py3-none-any.whl)
+For the Python CLI, download the [wheel](https://github.com/yeager/l10n-lint/releases/download/v1.21.6/l10n_lint-1.21.6-py3-none-any.whl)
 and use Python 3.9 or newer in a virtual environment:
 
 ```sh
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install ./l10n_lint-1.21.5-py3-none-any.whl
+python -m pip install ./l10n_lint-1.21.6-py3-none-any.whl
 l10n-lint --version
 ```
 
@@ -405,7 +405,7 @@ Contributions welcome!
 
 ## Changelog
 
-- **1.21.5**: Fix CI coverage and Swedish compound spelling regressions
+- **1.21.6**: Preserve natural Swedish word order in boundary and numeric checks
 - **1.21.2**: Add incremental review, project policy and CLDR/Unicode validation
 - **1.20.2**: Recognize year tokens in typo checks; require context for ambiguous Swedish terminology
 - **1.20.1**: Fix false format errors in percentage prose and reST documentation; repair APT setup

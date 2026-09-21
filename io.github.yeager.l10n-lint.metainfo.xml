@@ -48,6 +48,9 @@
   <url type="vcs-browser">https://github.com/yeager/l10n-lint</url>
 
   <releases>
+    <release version="1.21.6" date="2026-09-21">
+      <description><p>Keep translation-boundary and numeric checks accurate for moved runtime placeholders and Swedish cardinal words.</p></description>
+    </release>
     <release version="1.21.4" date="2026-09-19">
       <description><p>Fix CI coverage for JSON placeholder checks and distinguish lowercase Swedish compound typos from title-case UI labels.</p></description>
     </release>

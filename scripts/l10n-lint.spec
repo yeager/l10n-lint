@@ -1,5 +1,5 @@
 Name:           l10n-lint
-Version:        1.21.4
+Version:        1.21.6
 Release:        1%{?dist}
 Summary:        Linter for localization files
 License:        GPL-3.0-or-later
@@ -73,6 +73,9 @@ update-desktop-database /usr/share/applications 2>/dev/null || true
 %license LICENSE
 
 %changelog
+* Mon Sep 21 2026 Daniel Nylander <daniel@danielnylander.se> - 1.21.6-1
+- Preserve natural Swedish word order in boundary and numeric checks.
+
 * Sat Sep 19 2026 Daniel Nylander <daniel@danielnylander.se> - 1.21.4-1
 - Fix CI coverage and Swedish compound spelling regressions.
 

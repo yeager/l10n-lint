@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.21.5"
+__version__ = "1.21.6"
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.rc', '.properties', '.xml'})
 
 # Translation setup
@@ -1327,9 +1327,21 @@ class L10nLinter:
             return {left, right} == {'…', '.'}
 
         # Runtime placeholders can move naturally in Swedish word order.  Do
-        # not treat their braces as meaningful text boundaries.
-        source_boundary = re.sub(r'%\{[^}]+\}', '', source).strip() or source
-        translation_boundary = re.sub(r'%\{[^}]+\}', '', translation).strip() or translation
+        # not treat their braces, or whitespace exposed by removing one at an
+        # edge, as meaningful boundaries.  Preserve ordinary leading/trailing
+        # whitespace so it remains reviewable.
+        def boundary_text(text: str) -> str:
+            without_placeholders = re.sub(r'%\{[^}]+\}', '', text)
+            if not without_placeholders.strip():
+                return text
+            if re.match(r'^\s*%\{[^}]+\}', text):
+                without_placeholders = without_placeholders.lstrip()
+            if re.search(r'%\{[^}]+\}\s*$', text):
+                without_placeholders = without_placeholders.rstrip()
+            return without_placeholders
+
+        source_boundary = boundary_text(source)
+        translation_boundary = boundary_text(translation)
         for position, left, right in (
             ('start', source_boundary[0], translation_boundary[0]),
             ('end', source_boundary[-1], translation_boundary[-1]),

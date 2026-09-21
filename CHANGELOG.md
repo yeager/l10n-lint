@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## [1.21.6] - 2026-09-21
 
-- Restrict the Swedish compound rule to three equal consonants, apply source-token exemptions case-insensitively, and cover short compounds such as `upppil`.
+- Keep boundary-character checks accurate when runtime placeholders move or are adjacent to punctuation.
+- Accept Swedish words for single-digit source numbers in numeric checks.
 
 ## [1.21.5] - 2026-09-21
 

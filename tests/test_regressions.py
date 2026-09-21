@@ -106,6 +106,11 @@ def test_boundary_characters_are_reviewed_but_typographic_quotes_are_equivalent(
     assert not any(i.rule == 'boundary-character-mismatch' for i in quotes.issues)
 
 
+def test_boundary_checks_ignore_only_whitespace_exposed_by_moved_placeholders():
+    moved = lint(po('%{item} failed', 'Misslyckades för %{item}'), checks=['punctuation'])
+    assert not any(i.rule == 'boundary-character-mismatch' for i in moved.issues)
+
+
 def test_plural_hole_is_reported():
     text = HEADER + 'msgid "File"\nmsgid_plural "Files"\nmsgstr[1] "Filer"\n'
     assert any(i.rule == 'plural-forms-missing' for i in lint(text).issues)

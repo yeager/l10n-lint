@@ -1,3 +1,9 @@
+l10n-lint (1.21.6-1) unstable; urgency=medium
+
+  * Preserve natural Swedish word order in boundary and numeric checks.
+
+ -- Daniel Nylander <daniel@danielnylander.se>  Sun, 21 Sep 2026 13:00:00 +0200
+
 l10n-lint (1.21.5-1) unstable; urgency=medium
 
   * Report boundary character mismatches for translation review.

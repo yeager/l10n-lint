@@ -1313,6 +1313,10 @@ class L10nLinter:
         """Check for capitalization mismatches."""
         if not source or not translation:
             return
+        # Date/time format tokens use case for token semantics, not sentence
+        # capitalization (for example MM/dd/yy → dd/MM/yy).
+        if re.fullmatch(r'[dMyhHmsAP/:.\- ]+', source) and re.fullmatch(r'[dMyhHmsAP/:.\- ]+', translation):
+            return
         
         # Get first letter of each
         source_first = next((c for c in source if c.isalpha()), None)

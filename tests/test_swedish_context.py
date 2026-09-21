@@ -149,3 +149,7 @@ def test_technical_url_with_www_is_not_a_triple_consonant_compound():
 def test_triple_letters_in_swedish_compounds_are_typos(word, warning):
     result = lint('Process status', word)
     assert any(issue.rule == 'typo' for issue in result.issues) is warning
+
+def test_datetime_format_token_case_does_not_trigger_capitalization():
+    result = lint('MM/dd/yy hh:mm:ss AP', 'dd/MM/yy HH:mm:ss', checks=('inconsistent-capitalization',))
+    assert not result.issues

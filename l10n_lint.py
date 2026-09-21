@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.21.4"
+__version__ = "1.21.5"
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.rc', '.properties', '.xml'})
 
 # Translation setup
@@ -153,6 +153,7 @@ RULES = {
     'length-ratio': RuleSpec('_check_length', 'info', '', 'Length ratio'),
     'suspicious-length': RuleSpec('_check_length', 'warning', '', 'Suspicious length'),
     'inconsistent-punctuation': RuleSpec('_check_punctuation', 'info', '', 'Inconsistent punctuation'),
+    'boundary-character-mismatch': RuleSpec('_check_punctuation', 'info', '', 'Boundary character mismatch'),
     'inconsistent-capitalization': RuleSpec('_check_capitalization', 'warning', '', 'Inconsistent capitalization'),
     'trailing-whitespace': RuleSpec('_check_whitespace', 'warning', '', 'Trailing whitespace'),
     'missing-trailing-space': RuleSpec('_check_whitespace', 'warning', '', 'Missing trailing space'),
@@ -1309,6 +1310,36 @@ class L10nLinter:
                 message=_("Extra ending punctuation (source has none)"),
                 context=source[:50]
             ))
+
+        # Leading and trailing non-alphanumeric characters often carry layout
+        # or syntax meaning: a fragment may begin with a blank, a value may be
+        # enclosed in brackets, or a message may deliberately end in a newline.
+        # They are not always required to be identical in translation (notably
+        # typographic quote styles and ellipses), so report a reviewable note.
+        # Whitespace gets its more specific diagnostics in _check_whitespace.
+        quote_chars = frozenset('"\'`“”‘’«»')
+
+        def equivalent_boundary(left: str, right: str) -> bool:
+            if left == right:
+                return True
+            if left in quote_chars and right in quote_chars:
+                return True
+            return {left, right} == {'…', '.'}
+
+        for position, left, right in (
+            ('start', source[0], translation[0]),
+            ('end', source[-1], translation[-1]),
+        ):
+            if (not left.isalnum() or not right.isalnum()) and not equivalent_boundary(left, right):
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.INFO,
+                    rule='boundary-character-mismatch',
+                    message=_("Source and translation differ at {position} boundary ({source_char!r} / {translation_char!r})").format(
+                        position=position, source_char=left, translation_char=right),
+                    context=source[:50],
+                ))
     
     def _check_capitalization(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for capitalization mismatches."""

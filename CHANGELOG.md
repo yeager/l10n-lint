@@ -4,6 +4,10 @@
 
 - Restrict the Swedish compound rule to three equal consonants, apply source-token exemptions case-insensitively, and cover short compounds such as `upppil`.
 
+## [1.21.5] - 2026-09-21
+
+- Report source/translation boundary-character mismatches for manual review, preserving quote-style and ellipsis equivalents. This catches missing or extra layout punctuation without making intentional list formatting an error.
+
 ## [1.21.4] - 2026-09-19
 
 - Fix CI coverage for JSON placeholder checks and Swedish compound spelling.

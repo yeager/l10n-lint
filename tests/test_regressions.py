@@ -97,6 +97,15 @@ def test_plural_all_forms_receive_shared_rules():
     assert any(i.rule == 'url-preservation' for i in lint(text).issues)
 
 
+def test_boundary_characters_are_reviewed_but_typographic_quotes_are_equivalent():
+    trailing = lint(po(' (%s bytes)', ' (%s byte) '), checks=['punctuation'])
+    assert any(i.rule == 'boundary-character-mismatch' for i in trailing.issues)
+    missing_bracket = lint(po('[value]', 'värde'), checks=['punctuation'])
+    assert any(i.rule == 'boundary-character-mismatch' for i in missing_bracket.issues)
+    quotes = lint(po('"value"', '”värde”'), checks=['punctuation'])
+    assert not any(i.rule == 'boundary-character-mismatch' for i in quotes.issues)
+
+
 def test_plural_hole_is_reported():
     text = HEADER + 'msgid "File"\nmsgid_plural "Files"\nmsgstr[1] "Filer"\n'
     assert any(i.rule == 'plural-forms-missing' for i in lint(text).issues)

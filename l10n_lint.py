@@ -1565,6 +1565,19 @@ class L10nLinter:
         
         # Numbers in source but not in translation
         missing = source_nums - trans_nums
+        # Swedish UI copy commonly spells small cardinal numbers out.  A
+        # source requirement such as "at least 1 project" is fully retained
+        # by "minst ett projekt" and must not be reported as a mismatch.
+        swedish_cardinals = {
+            '0': {'noll'}, '1': {'en', 'ett'}, '2': {'två'}, '3': {'tre'},
+            '4': {'fyra'}, '5': {'fem'}, '6': {'sex'}, '7': {'sju'},
+            '8': {'åtta'}, '9': {'nio'}, '10': {'tio'},
+        }
+        translation_words = set(re.findall(r'\b[\wåäöÅÄÖ]+\b', translation.lower()))
+        missing = {
+            number for number in missing
+            if not (number in swedish_cardinals and translation_words & swedish_cardinals[number])
+        }
         if missing and len(source_nums) <= 3:  # Only inform for few numbers
             result.add(LintIssue(
                 file=filepath,

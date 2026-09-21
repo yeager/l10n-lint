@@ -127,6 +127,13 @@ def test_json_placeholder_mismatch_and_nontranslatable_entry_are_handled():
     assert rules(result) == ['placeholder-mismatch']
 
 
+def test_json_root_entry_allows_locale_metadata():
+    content = json.dumps({'@locale': 'sv', 'source': 'Save %s', 'target': 'Spara %d'})
+    result = L10nLinter().lint_file('sv.json', content)
+    assert result.entries_checked == 1
+    assert rules(result) == ['placeholder-mismatch']
+
+
 def test_json_null_target_is_an_empty_translation():
     result = L10nLinter().lint_file('sv.json', json.dumps({'source': 'Save', 'target': None}))
     assert result.entries_checked == 1

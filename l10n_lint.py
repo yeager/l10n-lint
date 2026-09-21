@@ -745,8 +745,9 @@ class JSONParser:
         # It is an explicit source/target entry only when it also declares a
         # recognized target member.
         if ('source' in value and any(key in value for key in ('target', 'translation', 'value'))
-                and set(value) <= {'id', 'context', 'source', 'target', 'translation', 'value', 'targetLanguage',
-                                   'target_language', 'state', 'translate', 'translatable', 'flags', 'note'}):
+                and set(value) <= {'@locale', 'locale', 'language', '$schema', 'id', 'context', 'source', 'target',
+                                   'translation', 'value', 'targetLanguage', 'target_language', 'state', 'translate',
+                                   'translatable', 'flags', 'note'}):
             if self.format == 'nested':
                 raise ValueError('JSON format policy only allows nested catalogs')
             target_key = next((key for key in ('target', 'translation', 'value') if key in value), None)

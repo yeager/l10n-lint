@@ -1328,8 +1328,8 @@ class L10nLinter:
 
         # Runtime placeholders can move naturally in Swedish word order.  Do
         # not treat their braces as meaningful text boundaries.
-        source_boundary = re.sub(r'%\{[^}]+\}', '', source) or source
-        translation_boundary = re.sub(r'%\{[^}]+\}', '', translation) or translation
+        source_boundary = re.sub(r'%\{[^}]+\}', '', source).strip() or source
+        translation_boundary = re.sub(r'%\{[^}]+\}', '', translation).strip() or translation
         for position, left, right in (
             ('start', source_boundary[0], translation_boundary[0]),
             ('end', source_boundary[-1], translation_boundary[-1]),

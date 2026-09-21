@@ -1326,9 +1326,13 @@ class L10nLinter:
                 return True
             return {left, right} == {'…', '.'}
 
+        # Runtime placeholders can move naturally in Swedish word order.  Do
+        # not treat their braces as meaningful text boundaries.
+        source_boundary = re.sub(r'%\{[^}]+\}', '', source) or source
+        translation_boundary = re.sub(r'%\{[^}]+\}', '', translation) or translation
         for position, left, right in (
-            ('start', source[0], translation[0]),
-            ('end', source[-1], translation[-1]),
+            ('start', source_boundary[0], translation_boundary[0]),
+            ('end', source_boundary[-1], translation_boundary[-1]),
         ):
             if (not left.isalnum() or not right.isalnum()) and not equivalent_boundary(left, right):
                 result.add(LintIssue(

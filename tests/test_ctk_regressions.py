@@ -35,3 +35,7 @@ def test_triple_consonants_in_swedish_compounds_are_typos():
 def test_angle_bracket_command_metavariables_can_be_translated():
     assert not issues_for(L10nLinter._check_xml_tags_mismatch, '<file> ...', '<fil> …')
     assert not issues_for(L10nLinter._check_xml_tags_mismatch, 'mail -s <subject> -c <cc> <to>', 'mail -s <ämne> -c <kopia> <till>')
+
+
+def test_unicode_angle_bracket_sentinel_can_be_translated():
+    assert not issues_for(L10nLinter._check_xml_tags_mismatch, '<Unknown user>', '<Okänd användare>')

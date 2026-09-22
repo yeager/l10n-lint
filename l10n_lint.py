@@ -2649,6 +2649,13 @@ class L10nLinter:
         tag_pattern = r'<(/?)([a-zA-Z][a-zA-Z0-9]*)(?=[\s/>])[^>]*>'
         source_tags = re.findall(tag_pattern, source)
         trans_tags = re.findall(tag_pattern, translation)
+
+        # Command synopses and visible sentinel values commonly use angle
+        # brackets for metavariables (``<file>``, ``<subject>``) rather than
+        # markup. Such tokens have no closing tag on either side, so their
+        # contents may be translated without changing program syntax.
+        if source_tags and trans_tags and not any(slash for slash, _ in source_tags + trans_tags):
+            return
         
         # Convert to sorted lists of (closing_slash, tag_name) pairs - keep case for comparison
         source_tag_list = sorted([(slash, tag) for slash, tag in source_tags])

@@ -1031,12 +1031,24 @@ class L10nLinter:
             '_check_typos', '_check_repeated_words', '_check_zero_width_space',
             '_check_unicode_integrity',
         }
+        # CrowdIn exports sometimes encode a context key as ``key|Text``.
+        # Run the leak detector on the full source, then use only the visible
+        # text for every source-dependent quality check.
+        original_source = source
+        if '|' in source:
+            prefix, visible_text = source.split('|', 1)
+            if prefix and len(prefix) <= 64 and re.fullmatch(r'[\w.-]+', prefix):
+                if 'context-prefix-leak' not in self.disabled_rules:
+                    self._check_context_prefix_leak(filepath, line, original_source, translation, result)
+                source = visible_text
         for rule, spec in RULES.items():
             if not spec.method or spec.method in ('_check_plural_forms', '_check_same_plurals'):
                 continue
             if getattr(self, '_source_is_key', False) and spec.method not in target_only_methods:
                 continue
             if rule in self.disabled_rules or spec.method in seen:
+                continue
+            if spec.method == '_check_context_prefix_leak':
                 continue
             if spec.language and getattr(self, '_current_lang', '').split('_')[0].split('-')[0] != spec.language:
                 continue
@@ -1610,7 +1622,7 @@ class L10nLinter:
         if '|' not in source:
             return
         prefix, text = source.split('|', 1)
-        if not prefix or not text or len(prefix) > 64 or not re.fullmatch(r'[A-Za-z0-9_.-]+', prefix):
+        if not prefix or not text or len(prefix) > 64 or not re.fullmatch(r'[\w.-]+', prefix):
             return
         if translation.startswith(prefix + '|'):
             result.add(LintIssue(filepath, line, Severity.WARNING, 'context-prefix-leak',

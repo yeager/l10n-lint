@@ -169,6 +169,7 @@ RULES = {
     'repeated-words': RuleSpec('_check_repeated_words', 'warning', '', 'Repeated words'),
     'cross-newline-duplicate': RuleSpec('_check_cross_newline_duplicates', 'warning', '', 'Cross newline duplicate'),
     'source-equals-translation': RuleSpec('_check_source_equals_translation', 'warning', '', 'Source equals translation'),
+    'context-prefix-leak': RuleSpec('_check_context_prefix_leak', 'warning', '', 'Context prefix leaked into translation'),
     'option-value-missing': RuleSpec('_check_option_values', 'warning', '', 'Option value missing'),
     'number-localization': RuleSpec('_check_number_localization', 'info', 'sv', 'Number localization'),
     'decimal-separator': RuleSpec('_check_decimal_separator', 'warning', 'sv', 'Decimal separator'),
@@ -1604,6 +1605,17 @@ class L10nLinter:
                 context=source[:50]
             ))
     
+    def _check_context_prefix_leak(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Detect XLIFF/CrowdIn context keys accidentally shown to users."""
+        if '|' not in source:
+            return
+        prefix, text = source.split('|', 1)
+        if not prefix or not text or len(prefix) > 64 or not re.fullmatch(r'[A-Za-z0-9_.-]+', prefix):
+            return
+        if translation.startswith(prefix + '|'):
+            result.add(LintIssue(filepath, line, Severity.WARNING, 'context-prefix-leak',
+                _("Translation starts with the source context key '{prefix}|' ").format(prefix=prefix), source[:50]))
+
     def _check_untranslated(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for common English words left in translation."""
         # Only check if source looks English

@@ -224,3 +224,9 @@ def test_properties_catalog_lints_values_without_treating_keys_as_source():
 def test_properties_catalog_requires_key_value_separator():
     result = L10nLinter().lint_file('broken.properties', 'missing separator\n')
     assert rules(result) == ['syntax-error']
+
+def test_xliff_context_prefix_leak_is_reported():
+    content = '''<xliff version="1.2"><file target-language="sv"><body>
+    <trans-unit id="x"><source>Security|Protect secrets</source><target>Security|Skydda hemligheter</target></trans-unit>
+    </body></file></xliff>'''
+    assert 'context-prefix-leak' in rules(L10nLinter().lint_file('sv.xlf', content))

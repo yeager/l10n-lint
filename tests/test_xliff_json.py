@@ -233,9 +233,11 @@ def test_xliff_context_prefix_leak_is_reported():
 
 def test_xliff_context_prefix_is_removed_before_source_checks():
     content = '''<xliff version="1.2"><file target-language="sv"><body>
-    <trans-unit id="x"><source>greeting|Translate</source><target>Översätt</target></trans-unit>
-    <trans-unit id="y"><source>greeting|Translate</source><target>greeting|Översätt</target></trans-unit>
+    <trans-unit id="x"><source>hejpådig|Translate</source><target>Översätt</target></trans-unit>
+    <trans-unit id="y"><source>hejpådig|Translate</source><target>hejpådig|Översätt</target></trans-unit>
+    <trans-unit id="z"><source>%{reason_text} Manage notifications | Help: %{help_url}</source><target>%{reason_text} Hantera aviseringar | Hjälp: %{help_url}</target></trans-unit>
     </body></file></xliff>'''
     result = L10nLinter().lint_file('sv.xlf', content)
     assert [issue.rule for issue in result.issues].count('context-prefix-leak') == 1
     assert all(issue.rule != 'source-equals-translation' for issue in result.issues)
+    assert all(issue.rule != 'python-format' for issue in result.issues)

@@ -1036,9 +1036,11 @@ class L10nLinter:
         # text for every source-dependent quality check.
         original_source = source
         if '|' in source:
-            if 'context-prefix-leak' not in self.disabled_rules:
-                self._check_context_prefix_leak(filepath, line, original_source, translation, result)
-            source = source.split('|', 1)[1]
+            prefix, visible_text = source.split('|', 1)
+            if prefix and len(prefix) <= 64 and re.fullmatch(r'[\w.-]+', prefix):
+                if 'context-prefix-leak' not in self.disabled_rules:
+                    self._check_context_prefix_leak(filepath, line, original_source, translation, result)
+                source = visible_text
         for rule, spec in RULES.items():
             if not spec.method or spec.method in ('_check_plural_forms', '_check_same_plurals'):
                 continue
@@ -1620,7 +1622,7 @@ class L10nLinter:
         if '|' not in source:
             return
         prefix, text = source.split('|', 1)
-        if not prefix or not text or len(prefix) > 64 or not re.fullmatch(r'[A-Za-z0-9_.-]+', prefix):
+        if not prefix or not text or len(prefix) > 64 or not re.fullmatch(r'[\w.-]+', prefix):
             return
         if translation.startswith(prefix + '|'):
             result.add(LintIssue(filepath, line, Severity.WARNING, 'context-prefix-leak',

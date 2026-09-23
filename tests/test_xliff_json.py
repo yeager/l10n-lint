@@ -230,3 +230,12 @@ def test_xliff_context_prefix_leak_is_reported():
     <trans-unit id="x"><source>Security|Protect secrets</source><target>Security|Skydda hemligheter</target></trans-unit>
     </body></file></xliff>'''
     assert 'context-prefix-leak' in rules(L10nLinter().lint_file('sv.xlf', content))
+
+def test_xliff_context_prefix_is_removed_before_source_checks():
+    content = '''<xliff version="1.2"><file target-language="sv"><body>
+    <trans-unit id="x"><source>greeting|Translate</source><target>Översätt</target></trans-unit>
+    <trans-unit id="y"><source>greeting|Translate</source><target>greeting|Översätt</target></trans-unit>
+    </body></file></xliff>'''
+    result = L10nLinter().lint_file('sv.xlf', content)
+    assert [issue.rule for issue in result.issues].count('context-prefix-leak') == 1
+    assert all(issue.rule != 'source-equals-translation' for issue in result.issues)

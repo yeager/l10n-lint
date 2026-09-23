@@ -145,6 +145,7 @@ scope. These are some useful rule groups and individual IDs:
 | `length`, `whitespace` | Length limits, missing boundary spaces and extra whitespace |
 | `punctuation`, `capitalization`, `quotes` | Text formatting and consistency |
 | `html-tags`, `xml-tags-mismatch`, `url-preservation` | Markup and URLs |
+| `context-prefix-leak` | CrowdIn `key|Text` context keys are excluded from source checks; leaked prefixes are reported |
 | `escapes`, `newline-mismatch`, `accelerators` | Escapes, newlines and shortcuts |
 | `numerics`, `option-values` | Numbers and command-line option values |
 | `typo`, `terminology`, `false-friends` | Swedish spelling patterns and word choices |

@@ -29,6 +29,7 @@ REST_MATH = re.compile(
     r'(?<![\w\\]):math:`(?:\\.|[^`])+`'
     r'|(?<![`\\])`(?:\\.|[^`])+`:math:(?!\w)')
 REST_LITERAL = re.compile(r'(?<![`\\])``([^`]+)``(?!`)')
+TEXINFO_BRACE = re.compile(r'@[A-Za-z][A-Za-z0-9_-]*\{[^{}]*\}')
 ICU_START = re.compile(r'\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*,\s*(plural|select|selectordinal)\s*,')
 
 
@@ -59,6 +60,7 @@ def python_format_text(text):
     Other lint rules continue to receive the original, unmodified message.
     """
     text = REST_MATH.sub(lambda match: ' ' * len(match.group()), text)
+    text = TEXINFO_BRACE.sub(lambda match: ' ' * len(match.group()), text)
     def literal(match):
         body = match.group(1)
         if body.strip() and not body.strip(' {}\t\r\n') and '{}' not in body:

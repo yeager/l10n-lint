@@ -60,7 +60,34 @@ def python_format_text(text):
     Other lint rules continue to receive the original, unmodified message.
     """
     text = REST_MATH.sub(lambda match: ' ' * len(match.group()), text)
-    text = TEXINFO_BRACE.sub(lambda match: ' ' * len(match.group()), text)
+    # Texinfo commands may nest (for example, @uref{URL,@code{label}}).
+    # The old regular expression only masked one-level commands, leaving the
+    # braces of an outer command visible to str.format detection.
+    chars = list(text)
+    index = 0
+    while index < len(text):
+        if text[index] != '@':
+            index += 1
+            continue
+        command = re.match(r'@[A-Za-z][A-Za-z0-9_-]*\{', text[index:])
+        if not command:
+            index += 1
+            continue
+        start = index
+        cursor = index + len(command.group())
+        depth = 1
+        while cursor < len(text) and depth:
+            if text[cursor] == '{':
+                depth += 1
+            elif text[cursor] == '}':
+                depth -= 1
+            cursor += 1
+        if depth == 0:
+            chars[start:cursor] = ' ' * (cursor - start)
+            index = cursor
+        else:
+            index += 1
+    text = ''.join(chars)
     def literal(match):
         body = match.group(1)
         if body.strip() and not body.strip(' {}\t\r\n') and '{}' not in body:

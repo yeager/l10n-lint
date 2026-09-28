@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.21.7] - 2026-09-28
+
+- Preserve nested Texinfo markup while checking Python-format fields.
+- Accept translated command metavariables enclosed in angle brackets.
+- Remove Crowdin and XLIFF context prefixes before linguistic checks, while reporting prefixes that leak into visible translations.
+
 ## [1.21.6] - 2026-09-21
 
 - Keep boundary-character checks accurate when runtime placeholders move or are adjacent to punctuation.

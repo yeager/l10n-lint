@@ -1,3 +1,10 @@
+l10n-lint (1.21.7-1) unstable; urgency=medium
+
+  * Preserve nested Texinfo markup and translated command metavariables.
+  * Handle CrowdIn and XLIFF context prefixes safely.
+
+ -- Daniel Nylander <github@danielnylander.se>  Mon, 28 Sep 2026 09:00:00 +0200
+
 l10n-lint (1.21.6-1) unstable; urgency=medium
 
   * Preserve natural Swedish word order in boundary and numeric checks.

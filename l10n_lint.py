@@ -803,7 +803,9 @@ class L10nLinter:
     HTML_TAG_PATTERN = re.compile(r'<[^>]+>')
     
     # Keyboard accelerator patterns (&File, _File) - include unicode letters
-    ACCELERATOR_PATTERN = re.compile(r'[&_](\w)', re.UNICODE)
+    # ``_File`` is a GTK-style accelerator; underscores inside identifiers
+    # such as ``Today_and_Now`` are ordinary text, not shortcuts.
+    ACCELERATOR_PATTERN = re.compile(r'&(\w)|(?<!\w)_(\w)', re.UNICODE)
     
     # Escaped characters
     ESCAPE_PATTERN = re.compile(r'\\[nrt\\"]')
@@ -1231,6 +1233,13 @@ class L10nLinter:
                     if suffixed_before and suffixed_before == suffixed_after:
                         before, after = suffixed_before, suffixed_after
             except ValueError as exc:
+                # PO files without an explicit python-brace-format flag often
+                # contain literal braces in package descriptions and examples.
+                # Only report an invalid Python format when the catalog marks
+                # the entry as such; otherwise it is not evidence of a format
+                # contract.
+                if kind == 'python' and 'python-brace-format' not in flags:
+                    continue
                 result.add(LintIssue(filepath, line, Severity.ERROR, rule,
                                      f"Invalid {kind} format: {exc}", source))
                 continue
@@ -1557,8 +1566,10 @@ class L10nLinter:
         # Strip HTML entities before checking — &amp; is not an accelerator
         source_clean = self._strip_html_entities(source)
         trans_clean = self._strip_html_entities(translation)
-        source_accels = self.ACCELERATOR_PATTERN.findall(source_clean)
-        trans_accels = self.ACCELERATOR_PATTERN.findall(trans_clean)
+        source_accels = [match.group(1) or match.group(2)
+                         for match in self.ACCELERATOR_PATTERN.finditer(source_clean)]
+        trans_accels = [match.group(1) or match.group(2)
+                        for match in self.ACCELERATOR_PATTERN.finditer(trans_clean)]
         
         # Check if accelerator exists in source but not translation
         if source_accels and not trans_accels:

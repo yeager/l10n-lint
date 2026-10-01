@@ -113,6 +113,25 @@ def test_markup_masking_is_narrow():
     assert python_format_text(literal) == literal
 
 
+def test_unflagged_literal_braces_do_not_report_invalid_python_format():
+    assert not issues('Literal braces: { } and "{}}"',
+                      'Bokstavliga klamrar: { } och "{}}"')
+    assert any(i.rule == 'python-format' for i in issues(
+        'Literal braces: { } and "{}}"',
+        'Bokstavliga klamrar: { } och "{}}"',
+        'python-brace-format'))
+
+
+def test_embedded_underscores_are_not_keyboard_accelerators():
+    def accelerator_issues(source, target):
+        return L10nLinter(disabled_rules=set(RULES) - resolve_rules(['accelerators'])).lint_file(
+            'sv.po', catalog(source, target)).issues
+
+    assert not accelerator_issues('Today_and_Now', 'Idag_och_nu')
+    assert any(i.rule == 'nordic-accelerator'
+               for i in accelerator_issues('&Open', '&Öppna'))
+
+
 @pytest.mark.parametrize('flags', ['no-c-format', 'no-python-format'])
 def test_no_format_flags_continue_to_disable_printf(flags):
     assert not issues('%s', '%d', flags)

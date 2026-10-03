@@ -1703,13 +1703,17 @@ class L10nLinter:
     def _check_repeated_words(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for repeated words."""
         words = re.findall(r'\b(\w+)\s+\1\b', translation, re.IGNORECASE)
-        if words:
+        source_words = re.findall(r'\b(\w+)\s+\1\b', source, re.IGNORECASE)
+        # A translated sound effect can use a different word (COUGH → HOST),
+        # while retaining the intentional repetition from the source.
+        unexpected = [] if source_words else words
+        if unexpected:
             result.add(LintIssue(
                 file=filepath,
                 line=line,
                 severity=Severity.WARNING,
                 rule="repeated-words",
-                message=_("Repeated word: '{word}'").format(word=words[0]),
+                message=_("Repeated word: '{word}'").format(word=unexpected[0]),
                 context=source[:50]
             ))
     
@@ -2750,10 +2754,19 @@ class L10nLinter:
     def _check_duplicate_words(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Enhanced check for duplicate words, with Swedish exceptions."""
         words = translation.lower().split()
+        source_words = source.lower().split()
+
+        def repeated_in_source(count: int) -> bool:
+            """Keep deliberate repeated sound effects that the source also repeats."""
+            return any(
+                all(source_words[start + offset] == source_words[start] for offset in range(count))
+                for start in range(len(source_words) - count + 1)
+            )
         
-        # Check for triple words (always wrong)
+        # Check for triple words, except deliberate repetitions present in source.
         for i in range(len(words) - 2):
-            if words[i] == words[i + 1] == words[i + 2] and words[i].isalpha():
+            if (words[i] == words[i + 1] == words[i + 2] and words[i].isalpha()
+                    and not repeated_in_source(3)):
                 result.add(LintIssue(
                     file=filepath,
                     line=line,
@@ -2768,7 +2781,7 @@ class L10nLinter:
         for i in range(len(words) - 1):
             if words[i] == words[i + 1] and words[i].isalpha():
                 double_phrase = f"{words[i]} {words[i + 1]}"
-                if double_phrase not in swedish_ok_doubles:
+                if double_phrase not in swedish_ok_doubles and not repeated_in_source(2):
                     result.add(LintIssue(
                         file=filepath,
                         line=line,

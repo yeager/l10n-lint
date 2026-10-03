@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.22.2] - 2026-10-03
+
+- Keep intentional translated sound-effect repetitions when the source repeats a sound effect.
+
 ## [1.22.1] - 2026-10-03
 
 - Accept Swedish cardinal words through twelve in number checks.

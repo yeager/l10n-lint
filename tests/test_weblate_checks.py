@@ -89,6 +89,7 @@ def test_duplicate_words():
         ("The message", "ett ett meddelande", True),  # Regular duplicates
         ("Preposition test", "text med i i början", False),  # Swedish exception
         ("Another preposition", "text med på på slutet", False),  # Swedish exception
+        ("COUGH COUGH COUGH COUGH", "HOST HOST HOST HOST", False),  # Source sound effect
         ("Normal text", "normal text", False),  # No duplicates
     ]
     

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.22.6] - 2026-10-03
+
+- Recognize Swedish `tupplur` as the idiomatic equivalent of “forty winks”.
+
 ## [1.22.5] - 2026-10-03
 
 - Treat English comma-grouped and Swedish space-grouped thousands as the same number.

@@ -1,6 +1,6 @@
 # l10n-lint
 
-[![Version](https://img.shields.io/badge/version-1.21.7-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.21.7)
+[![Version](https://img.shields.io/badge/version-1.22.2-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.22.2)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -9,12 +9,13 @@ invalid syntax, placeholder mismatches, plural errors and inconsistent formattin
 Use the command line in CI or the GTK4 desktop interface for interactive review.
 Swedish-specific checks cover spelling patterns, terminology and localization conventions.
 
-[Download 1.21.7](https://github.com/yeager/l10n-lint/releases/tag/v1.21.7)
+[Download 1.22.2](https://github.com/yeager/l10n-lint/releases/tag/v1.22.2)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
-Version **1.21.7** keeps boundary and numeric checks accurate for natural Swedish word order.
-Version **1.21.5** adds reviewable translation-boundary diagnostics, while version **1.21.3** reduces false positives in decompiled gettext catalogs and JSON
-translations, including printf suffixes, plural headers and Swedish spelling checks.
+Version **1.22.2** preserves deliberate translated sound effects when the source
+repeats the effect. Version **1.22.1** accepts Swedish cardinal words through
+twelve in numerical checks, and version **1.22.0** adds Swedish typography and
+number-format diagnostics.
 
 ## Features
 
@@ -31,21 +32,21 @@ translations, including printf suffixes, plural headers and Swedish spelling che
 
 ### Install the current release
 
-Download the package for your system from [release 1.21.7](https://github.com/yeager/l10n-lint/releases/tag/v1.21.7).
+Download the package for your system from [release 1.22.2](https://github.com/yeager/l10n-lint/releases/tag/v1.22.2).
 The release includes `.deb`, `.rpm`, a Python wheel, a source archive and `SHA256SUMS`.
 
 | System | Download | Install command |
 |--------|----------|-----------------|
-| Debian / Ubuntu | [Debian package](https://github.com/yeager/l10n-lint/releases/download/v1.21.7/l10n-lint_1.21.7-1_all.deb) | `sudo apt install ./l10n-lint_1.21.7-1_all.deb` |
-| Fedora | [RPM package](https://github.com/yeager/l10n-lint/releases/download/v1.21.7/l10n-lint-1.21.7-1.noarch.rpm) | `sudo dnf install ./l10n-lint-1.21.7-1.noarch.rpm` |
+| Debian / Ubuntu | [Debian package](https://github.com/yeager/l10n-lint/releases/download/v1.22.2/l10n-lint_1.22.2-1_all.deb) | `sudo apt install ./l10n-lint_1.22.2-1_all.deb` |
+| Fedora | [RPM package](https://github.com/yeager/l10n-lint/releases/download/v1.22.2/l10n-lint-1.22.2-1.noarch.rpm) | `sudo dnf install ./l10n-lint-1.22.2-1.noarch.rpm` |
 
-For the Python CLI, download the [wheel](https://github.com/yeager/l10n-lint/releases/download/v1.21.7/l10n_lint-1.21.7-py3-none-any.whl)
+For the Python CLI, download the [wheel](https://github.com/yeager/l10n-lint/releases/download/v1.22.2/l10n_lint-1.22.2-py3-none-any.whl)
 and use Python 3.9 or newer in a virtual environment:
 
 ```sh
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install ./l10n_lint-1.21.7-py3-none-any.whl
+python -m pip install ./l10n_lint-1.22.2-py3-none-any.whl
 l10n-lint --version
 ```
 
@@ -130,6 +131,24 @@ See the manual or CLI help for complete options:
 man l10n-lint
 l10n-lint --help
 ```
+
+## Svensk granskningsprocess
+
+Använd l10n-lint först för katalogstruktur, platshållare, markering, URL:er och
+format. Komplettera med [svlang](https://github.com/yeager/svlang) för
+skrivregler, [hunspell-sv](https://github.com/yeager/hunspell-sv) för stavning,
+[swedish-foss-terminology](https://github.com/yeager/swedish-foss-terminology)
+för etablerade facktermer och [swedish-tm](https://github.com/yeager/swedish-tm)
+för kontextbundna förslag. Godkänn aldrig en automatisk träff utan att läsa
+källtext och måltext i sin användningsmiljö.
+
+För svenska kontrolleras bland annat projektets regel att inte sätta komma
+omedelbart före `och`, felaktiga mellanslag före skiljetecken, svenska
+citattecken, `…` i stället för tre punkter, procentformat, talgruppering och
+tankstreck i intervall. Regeln gäller synlig text: Crowdin-prefixet före `|` är
+metadata och får inte översättas eller lämnas kvar i måltexten. Regler om
+innebörd, tilltal, stilnivå och kontextberoende terminologi kräver alltid
+manuell granskning.
 
 ## Checks and rule selection
 

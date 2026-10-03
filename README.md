@@ -4,6 +4,43 @@
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
+## Svenska
+
+l10n-lint granskar gettext-PO, Qt-TS, XLIFF 1.2/2.x och JSON-kataloger. Det
+hittar tomma översättningar, syntaxfel, skillnader i platshållare och pluraler,
+felaktig formatering, brutna taggar och URL:er. Använd det i CI eller med
+GTK-gränssnittet vid manuell granskning.
+
+### Installera och köra
+
+Använd den aktuella källkoden för exakt version:
+
+```bash
+git clone https://github.com/yeager/l10n-lint
+cd l10n-lint
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e .
+l10n-lint translations/sv.po
+```
+
+Kör `l10n-lint ./po/` för en katalog, `l10n-lint --help` för samtliga
+alternativ och `l10n-lint --list-rules` för regelidentifierare och nivåer.
+
+### Svensk kvalitetskontroll
+
+Kör l10n-lint först för katalogstruktur, formatsträngar, markup och URL:er.
+Granska sedan med svlang, hunspell-sv, swedish-foss-terminology och swedish-tm.
+Kontrollera varje träff i dess gränssnittskontext. Svenska regler omfattar ingen
+komma omedelbart före `och`, korrekt skiljeteckensmellanrum, citattecken,
+utelämningstecknet `…`, procentformat, siffergruppering och tankstreck i
+intervall. Crowdin-text före `|` är metadata och får inte synas i måltexten.
+
+Betydelse, tilltal, stilnivå och kontextberoende facktermer kräver alltid
+mänsklig granskning.
+
+## English reference
+
 l10n-lint checks gettext PO, Qt TS, XLIFF 1.2/2.x and JSON translation catalogs for missing translations,
 invalid syntax, placeholder mismatches, plural errors and inconsistent formatting.
 Use the command line in CI or the GTK4 desktop interface for interactive review.
@@ -111,23 +148,22 @@ man l10n-lint
 l10n-lint --help
 ```
 
-## Svensk granskningsprocess
+## Swedish review workflow
 
-Använd l10n-lint först för katalogstruktur, platshållare, markering, URL:er och
-format. Komplettera med [svlang](https://github.com/yeager/svlang) för
-skrivregler, [hunspell-sv](https://github.com/yeager/hunspell-sv) för stavning,
+Run l10n-lint first for catalog structure, placeholders, markup, URLs and
+format. Follow with [svlang](https://github.com/yeager/svlang) for style,
+[hunspell-sv](https://github.com/yeager/hunspell-sv) for spelling,
 [swedish-foss-terminology](https://github.com/yeager/swedish-foss-terminology)
-för etablerade facktermer och [swedish-tm](https://github.com/yeager/swedish-tm)
-för kontextbundna förslag. Godkänn aldrig en automatisk träff utan att läsa
-källtext och måltext i sin användningsmiljö.
+for established terms and [swedish-tm](https://github.com/yeager/swedish-tm)
+for context-aware suggestions. Never accept an automatic finding without reading
+source and target in their product context.
 
-För svenska kontrolleras bland annat projektets regel att inte sätta komma
-omedelbart före `och`, felaktiga mellanslag före skiljetecken, svenska
-citattecken, `…` i stället för tre punkter, procentformat, talgruppering och
-tankstreck i intervall. Regeln gäller synlig text: Crowdin-prefixet före `|` är
-metadata och får inte översättas eller lämnas kvar i måltexten. Regler om
-innebörd, tilltal, stilnivå och kontextberoende terminologi kräver alltid
-manuell granskning.
+Swedish checks include the project rule against a comma directly before `och`,
+punctuation spacing, Swedish quotation marks, `…` rather than three dots,
+percent formatting, digit grouping and en dashes in ranges. A Crowdin prefix
+before `|` is metadata and must not be translated or retained in visible text.
+Meaning, address, register and context-sensitive terminology always need manual
+review.
 
 ## Checks and rule selection
 

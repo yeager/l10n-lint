@@ -157,3 +157,9 @@ def test_datetime_format_token_case_does_not_trigger_capitalization():
 def test_leading_runtime_placeholder_does_not_trigger_capitalization():
     result = lint('Down %{change} from %{value}', '%{change} lägre än %{value}', checks=('inconsistent-capitalization',))
     assert not result.issues
+
+
+def test_comma_before_och_is_reported_for_swedish_targets():
+    result = lint('Open the file, and save it.', 'Öppna filen, och spara den.', checks=('comma-before-och',))
+    assert [issue.rule for issue in result.issues] == ['comma-before-och']
+    assert not lint('Open the file and save it.', 'Öppna filen och spara den.', checks=('comma-before-och',)).issues

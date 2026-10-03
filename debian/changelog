@@ -1,3 +1,9 @@
+l10n-lint (1.21.8-1) unstable; urgency=medium
+
+  * Flag commas immediately before “och” in Swedish translations.
+
+ -- Daniel Nylander <github@danielnylander.se>  Sat, 03 Oct 2026 09:30:00 +0200
+
 l10n-lint (1.21.7-1) unstable; urgency=medium
 
   * Preserve nested Texinfo markup and translated command metavariables.

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.21.8] - 2026-10-03
+
+- Flag commas immediately before `och` in Swedish translations.
+
 ## [1.21.7] - 2026-09-28
 
 - Preserve nested Texinfo markup while checking Python-format fields.

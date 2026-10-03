@@ -173,6 +173,7 @@ RULES = {
     'option-value-missing': RuleSpec('_check_option_values', 'warning', '', 'Option value missing'),
     'number-localization': RuleSpec('_check_number_localization', 'info', 'sv', 'Number localization'),
     'decimal-separator': RuleSpec('_check_decimal_separator', 'warning', 'sv', 'Decimal separator'),
+    'comma-before-och': RuleSpec('_check_comma_before_och', 'warning', 'sv', 'Comma before och'),
     'currency-localization': RuleSpec('_check_currency_localization', 'info', 'sv', 'Currency localization'),
     'date-format': RuleSpec('_check_date_format', 'warning', 'sv', 'Date format'),
     'newline-mismatch': RuleSpec('_check_newline_mismatch', 'warning', '', 'Newline mismatch'),
@@ -1076,6 +1077,14 @@ class L10nLinter:
             if isinstance(term, str) and re.search(r'(?<!\w)' + re.escape(term) + r'(?!\w)', translation, re.IGNORECASE):
                 result.add(LintIssue(filepath, line, Severity.WARNING, 'forbidden-term',
                     f"Forbidden term '{term}'", source))
+
+    def _check_comma_before_och(self, filepath, line, source, translation, result):
+        """Flag the English comma-before-and pattern in Swedish targets."""
+        if re.search(r',\s+och\b', translation, re.IGNORECASE):
+            result.add(LintIssue(
+                filepath, line, Severity.WARNING, 'comma-before-och',
+                'Remove the comma before “och” in Swedish', source,
+            ))
 
     def _check_unicode_integrity(self, filepath, line, source, translation, result):
         """Expose invisible direction controls and non-normalized text to reviewers."""

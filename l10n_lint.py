@@ -174,6 +174,10 @@ RULES = {
     'number-localization': RuleSpec('_check_number_localization', 'info', 'sv', 'Number localization'),
     'decimal-separator': RuleSpec('_check_decimal_separator', 'warning', 'sv', 'Decimal separator'),
     'space-before-punctuation': RuleSpec('_check_swedish_punctuation_spacing', 'warning', 'sv', 'Punctuation spacing'),
+    'quote-style': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Swedish quote style'),
+    'large-number-grouping': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Large number grouping'),
+    'percent-spacing': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Percent spacing'),
+    'number-range-dash': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Number range dash'),
     'comma-before-och': RuleSpec('_check_comma_before_och', 'warning', 'sv', 'Comma before och'),
     'currency-localization': RuleSpec('_check_currency_localization', 'info', 'sv', 'Currency localization'),
     'date-format': RuleSpec('_check_date_format', 'warning', 'sv', 'Date format'),
@@ -1078,6 +1082,18 @@ class L10nLinter:
             if isinstance(term, str) and re.search(r'(?<!\w)' + re.escape(term) + r'(?!\w)', translation, re.IGNORECASE):
                 result.add(LintIssue(filepath, line, Severity.WARNING, 'forbidden-term',
                     f"Forbidden term '{term}'", source))
+
+    def _check_swedish_style_forms(self, filepath, line, source, translation, result):
+        """Check unambiguous Swedish typography forms from the style guide."""
+        checks = (
+            (r'“', 'quote-style', 'Use Swedish quotation marks ”…”'),
+            (r'\b\d{1,3}(?:\.\d{3}){2,}\b', 'large-number-grouping', 'Group large Swedish numbers with spaces, not periods'),
+            (r'\b\d+(?:,\d+)?%(?!\w)', 'percent-spacing', 'Insert a space before the percent sign in Swedish'),
+            (r'\b\d+[ \t]+-[ \t]+\d+\b', 'number-range-dash', 'Use an en dash for a Swedish number range'),
+        )
+        for pattern, rule, message in checks:
+            if re.search(pattern, translation):
+                result.add(LintIssue(filepath, line, Severity.WARNING, rule, message, source))
 
     def _check_swedish_punctuation_spacing(self, filepath, line, source, translation, result):
         """Flag whitespace before ordinary Swedish punctuation."""

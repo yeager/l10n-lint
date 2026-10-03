@@ -174,3 +174,11 @@ def test_space_before_swedish_punctuation_is_reported():
     result = lint('Hello!', 'Hej !', checks=('space-before-punctuation',))
     assert [issue.rule for issue in result.issues] == ['space-before-punctuation']
     assert not lint('Hello!', 'Hej!', checks=('space-before-punctuation',)).issues
+
+
+def test_swedish_quote_number_percent_and_range_forms_are_reported():
+    result = lint('Example', '“Exempel” 1.000.000, 8,65% och 11 - 12.', checks='quote-style,large-number-grouping,percent-spacing,number-range-dash')
+    assert {issue.rule for issue in result.issues} == {
+        'quote-style', 'large-number-grouping', 'percent-spacing', 'number-range-dash',
+    }
+    assert not lint('Example', '”Exempel” 1 000 000, 8,65 % och 11–12.', checks='quote-style,large-number-grouping,percent-spacing,number-range-dash').issues

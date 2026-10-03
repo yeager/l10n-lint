@@ -1,3 +1,9 @@
+l10n-lint (1.22.0-1) unstable; urgency=medium
+
+  * Add Swedish quotation, number, percent and range-style checks.
+
+ -- Daniel Nylander <github@danielnylander.se>  Sat, 03 Oct 2026 09:55:00 +0200
+
 l10n-lint (1.21.9-1) unstable; urgency=medium
 
   * Flag spaces before Swedish punctuation.

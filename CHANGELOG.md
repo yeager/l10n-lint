@@ -1,7 +1,8 @@
 # Changelog
 
-## [1.21.9] - 2026-10-03
+## [1.22.0] - 2026-10-03
 
+- Add Swedish quote, number-grouping, percent-spacing and range-dash checks.
 - Flag spaces before Swedish punctuation.
 - Avoid treating personnel `staff` as a music-staff context.
 

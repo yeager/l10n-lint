@@ -23,6 +23,10 @@ def test_swedish_thousands_grouping_is_equivalent():
     assert not issues_for(L10nLinter._check_numerics, '1,400 cases', '1 400 lådor')
 
 
+def test_forty_winks_is_equivalent_to_tupplur():
+    assert not issues_for(L10nLinter._check_numerics, 'catch 40 winks', 'ta en tupplur')
+
+
 def test_swedish_spelled_out_cardinal_is_equivalent():
     assert not issues_for(L10nLinter._check_numerics, 'at least 1 project', 'minst ett projekt')
 

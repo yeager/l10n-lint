@@ -1667,6 +1667,10 @@ class L10nLinter:
             number for number in missing
             if not (number in swedish_cardinals and translation_words & swedish_cardinals[number])
         }
+        # Some fixed idioms carry a literal source number that Swedish renders
+        # naturally without it: “forty winks” is a “tupplur”.
+        if ('forty winks' in source.lower() or '40 winks' in source.lower()) and 'tupplur' in translation_words:
+            missing.discard('40')
         if missing and len(source_nums) <= 3:  # Only inform for few numbers
             result.add(LintIssue(
                 file=filepath,

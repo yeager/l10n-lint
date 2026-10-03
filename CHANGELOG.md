@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.22.3] - 2026-10-03
+
+- Preserve intentional repeated song text when source punctuation separates repeated words.
+
 ## [1.22.2] - 2026-10-03
 
 - Keep intentional translated sound-effect repetitions when the source repeats a sound effect.

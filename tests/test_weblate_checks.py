@@ -90,6 +90,7 @@ def test_duplicate_words():
         ("Preposition test", "text med i i början", False),  # Swedish exception
         ("Another preposition", "text med på på slutet", False),  # Swedish exception
         ("COUGH COUGH COUGH COUGH", "HOST HOST HOST HOST", False),  # Source sound effect
+        ("La la la, la la la", "La la la, la la la", False),  # Punctuated source song
         ("Normal text", "normal text", False),  # No duplicates
     ]
     

@@ -2753,8 +2753,8 @@ class L10nLinter:
 
     def _check_duplicate_words(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Enhanced check for duplicate words, with Swedish exceptions."""
-        words = translation.lower().split()
-        source_words = source.lower().split()
+        words = re.findall(r'\b\w+\b', translation.lower())
+        source_words = re.findall(r'\b\w+\b', source.lower())
 
         def repeated_in_source(count: int) -> bool:
             """Keep deliberate repeated sound effects that the source also repeats."""

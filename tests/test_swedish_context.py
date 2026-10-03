@@ -163,3 +163,14 @@ def test_comma_before_och_is_reported_for_swedish_targets():
     result = lint('Open the file, and save it.', 'Öppna filen, och spara den.', checks=('comma-before-och',))
     assert [issue.rule for issue in result.issues] == ['comma-before-och']
     assert not lint('Open the file and save it.', 'Öppna filen och spara den.', checks=('comma-before-och',)).issues
+
+
+def test_personal_is_not_music_terminology_for_staff_meetings():
+    result = lint('Big staff meeting in a few minutes.', 'Stort personalmöte om några minuter.', checks=('domain-terminology',))
+    assert not result.issues
+
+
+def test_space_before_swedish_punctuation_is_reported():
+    result = lint('Hello!', 'Hej !', checks=('space-before-punctuation',))
+    assert [issue.rule for issue in result.issues] == ['space-before-punctuation']
+    assert not lint('Hello!', 'Hej!', checks=('space-before-punctuation',)).issues

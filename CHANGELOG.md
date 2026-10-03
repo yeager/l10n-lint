@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.21.9] - 2026-10-03
+
+- Flag spaces before Swedish punctuation.
+- Avoid treating personnel `staff` as a music-staff context.
+
 ## [1.21.8] - 2026-10-03
 
 - Flag commas immediately before `och` in Swedish translations.

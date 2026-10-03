@@ -173,6 +173,7 @@ RULES = {
     'option-value-missing': RuleSpec('_check_option_values', 'warning', '', 'Option value missing'),
     'number-localization': RuleSpec('_check_number_localization', 'info', 'sv', 'Number localization'),
     'decimal-separator': RuleSpec('_check_decimal_separator', 'warning', 'sv', 'Decimal separator'),
+    'space-before-punctuation': RuleSpec('_check_swedish_punctuation_spacing', 'warning', 'sv', 'Punctuation spacing'),
     'comma-before-och': RuleSpec('_check_comma_before_och', 'warning', 'sv', 'Comma before och'),
     'currency-localization': RuleSpec('_check_currency_localization', 'info', 'sv', 'Currency localization'),
     'date-format': RuleSpec('_check_date_format', 'warning', 'sv', 'Date format'),
@@ -1077,6 +1078,14 @@ class L10nLinter:
             if isinstance(term, str) and re.search(r'(?<!\w)' + re.escape(term) + r'(?!\w)', translation, re.IGNORECASE):
                 result.add(LintIssue(filepath, line, Severity.WARNING, 'forbidden-term',
                     f"Forbidden term '{term}'", source))
+
+    def _check_swedish_punctuation_spacing(self, filepath, line, source, translation, result):
+        """Flag whitespace before ordinary Swedish punctuation."""
+        if re.search(r'\S[ \t]+[,.!?;:](?!\w)', translation):
+            result.add(LintIssue(
+                filepath, line, Severity.WARNING, 'space-before-punctuation',
+                'Remove the space before Swedish punctuation', source,
+            ))
 
     def _check_comma_before_och(self, filepath, line, source, translation, result):
         """Flag the English comma-before-and pattern in Swedish targets."""
@@ -2033,9 +2042,11 @@ class L10nLinter:
         """Detect domain from source text content."""
         source_lower = source_text.lower()
         
-        # Music domain keywords
-        music_keywords = {'staff', 'note', 'chord', 'tempo', 'clef', 'measure', 'bar', 'scale', 'key'}
-        if any(keyword in source_lower for keyword in music_keywords):
+        # Music domain keywords. “Staff” is commonly a personnel word, so
+        # only treat it as music when the surrounding source makes that sense.
+        music_keywords = {'note', 'chord', 'tempo', 'clef', 'measure', 'bar', 'scale', 'key'}
+        music_staff = re.search(r'\b(?:musical|music|notation|five-line) staff\b|\bstaff (?:notation|lines?)\b', source_lower)
+        if music_staff or any(keyword in source_lower for keyword in music_keywords):
             return 'music'
         
         # Web platform domain keywords

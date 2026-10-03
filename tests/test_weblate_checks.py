@@ -91,6 +91,7 @@ def test_duplicate_words():
         ("Another preposition", "text med på på slutet", False),  # Swedish exception
         ("COUGH COUGH COUGH COUGH", "HOST HOST HOST HOST", False),  # Source sound effect
         ("La la la, la la la", "La la la, la la la", False),  # Punctuated source song
+        ("Sure we are. We have to be.", "Visst är vi det. Det måste vi vara.", False),  # Sentence boundary
         ("Normal text", "normal text", False),  # No duplicates
     ]
     

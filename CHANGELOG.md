@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.22.4] - 2026-10-03
+
+- Do not flag a repeated word when it appears on opposite sides of a sentence boundary.
+
 ## [1.22.3] - 2026-10-03
 
 - Preserve intentional repeated song text when source punctuation separates repeated words.

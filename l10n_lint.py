@@ -2753,8 +2753,15 @@ class L10nLinter:
 
     def _check_duplicate_words(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Enhanced check for duplicate words, with Swedish exceptions."""
-        words = re.findall(r'\b\w+\b', translation.lower())
+        translation_tokens = list(re.finditer(r'\b\w+\b', translation.lower()))
+        words = [token.group() for token in translation_tokens]
         source_words = re.findall(r'\b\w+\b', source.lower())
+
+        def crosses_sentence_boundary(first: int, second: int) -> bool:
+            """Do not call a repeated word across sentences a duplicate."""
+            return bool(re.search(r'[.!?]', translation[
+                translation_tokens[first].end():translation_tokens[second].start()
+            ]))
 
         def repeated_in_source(count: int) -> bool:
             """Keep deliberate repeated sound effects that the source also repeats."""
@@ -2766,6 +2773,8 @@ class L10nLinter:
         # Check for triple words, except deliberate repetitions present in source.
         for i in range(len(words) - 2):
             if (words[i] == words[i + 1] == words[i + 2] and words[i].isalpha()
+                    and not crosses_sentence_boundary(i, i + 1)
+                    and not crosses_sentence_boundary(i + 1, i + 2)
                     and not repeated_in_source(3)):
                 result.add(LintIssue(
                     file=filepath,
@@ -2779,7 +2788,8 @@ class L10nLinter:
         # Check for double words with Swedish exceptions
         swedish_ok_doubles = {'i i', 'på på', 'till till', 'om om'}
         for i in range(len(words) - 1):
-            if words[i] == words[i + 1] and words[i].isalpha():
+            if (words[i] == words[i + 1] and words[i].isalpha()
+                    and not crosses_sentence_boundary(i, i + 1)):
                 double_phrase = f"{words[i]} {words[i + 1]}"
                 if double_phrase not in swedish_ok_doubles and not repeated_in_source(2):
                     result.add(LintIssue(

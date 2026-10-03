@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.22.1] - 2026-10-03
+
+- Accept Swedish cardinal words through twelve in number checks.
+
 ## [1.22.0] - 2026-10-03
 
 - Add Swedish quote, number-grouping, percent-spacing and range-dash checks.

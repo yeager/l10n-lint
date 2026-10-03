@@ -1646,6 +1646,7 @@ class L10nLinter:
             '0': {'noll'}, '1': {'en', 'ett'}, '2': {'två'}, '3': {'tre'},
             '4': {'fyra'}, '5': {'fem'}, '6': {'sex'}, '7': {'sju'},
             '8': {'åtta'}, '9': {'nio'}, '10': {'tio'},
+            '11': {'elva'}, '12': {'tolv'},
         }
         translation_words = set(re.findall(r'\b[\wåäöÅÄÖ]+\b', translation.lower()))
         missing = {

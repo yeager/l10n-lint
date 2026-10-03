@@ -1,6 +1,6 @@
 # l10n-lint
 
-[![Version](https://img.shields.io/badge/version-1.22.4-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.22.4)
+[![Version](https://img.shields.io/badge/version-1.22.5-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.22.5)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -46,10 +46,10 @@ invalid syntax, placeholder mismatches, plural errors and inconsistent formattin
 Use the command line in CI or the GTK4 desktop interface for interactive review.
 Swedish-specific checks cover spelling patterns, terminology and localization conventions.
 
-[Download 1.22.4](https://github.com/yeager/l10n-lint/releases/tag/v1.22.4)
+[Download 1.22.5](https://github.com/yeager/l10n-lint/releases/tag/v1.22.5)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
-Version **1.22.4** keeps intentional repetition and sentence boundaries from producing duplicate-word warnings. Version **1.22.1** accepts Swedish cardinal words through
+Version **1.22.5** recognizes Swedish space-grouped thousands as equivalent to English comma-grouped values. Version **1.22.1** accepts Swedish cardinal words through
 twelve in numerical checks, and version **1.22.0** adds Swedish typography and
 number-format diagnostics.
 
@@ -68,7 +68,7 @@ number-format diagnostics.
 
 ### Install the current release
 
-[Release 1.22.4](https://github.com/yeager/l10n-lint/releases/tag/v1.22.4)
+[Release 1.22.5](https://github.com/yeager/l10n-lint/releases/tag/v1.22.5)
 records the current annotated tag and release notes. Build from the checked-out
 source below to use this exact revision. Package repositories and PyPI can lag
 behind the GitHub release.

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.22.5] - 2026-10-03
+
+- Treat English comma-grouped and Swedish space-grouped thousands as the same number.
+
 ## [1.22.4] - 2026-10-03
 
 - Do not flag a repeated word when it appears on opposite sides of a sentence boundary.

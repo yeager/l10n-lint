@@ -19,6 +19,10 @@ def test_swedish_decimal_separator_is_equivalent():
     assert not issues_for(L10nLinter._check_numerics, 'between 0.5 and 5', 'mellan 0,5 och 5')
 
 
+def test_swedish_thousands_grouping_is_equivalent():
+    assert not issues_for(L10nLinter._check_numerics, '1,400 cases', '1 400 lådor')
+
+
 def test_swedish_spelled_out_cardinal_is_equivalent():
     assert not issues_for(L10nLinter._check_numerics, 'at least 1 project', 'minst ett projekt')
 

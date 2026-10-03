@@ -1634,8 +1634,22 @@ class L10nLinter:
         # Swedish decimal separators normally use a comma, while source text
         # commonly uses a decimal point.  Compare a normalized representation
         # so that 0.5 → 0,5 does not become a false positive.
-        source_nums = {number.replace(',', '.') for number in re.findall(r'\b\d+(?:[.,]\d+)?\b', source)}
-        trans_nums = {number.replace(',', '.') for number in re.findall(r'\b\d+(?:[.,]\d+)?\b', translation)}
+        def localized_numbers(text: str) -> set[str]:
+            """Return numeric values while preserving grouped thousands."""
+            grouped_pattern = r'\b\d{1,3}(?:[ ,]\d{3})+\b'
+            grouped = re.findall(grouped_pattern, text)
+            values = {number.replace(',', '').replace(' ', '') for number in grouped}
+            # Mask grouped values so ``1 400`` is compared as 1400, rather
+            # than as two independent values.
+            remainder = re.sub(grouped_pattern, ' ', text)
+            values |= {
+                number.replace(',', '.')
+                for number in re.findall(r'\b\d+(?:[.,]\d+)?\b', remainder)
+            }
+            return values
+
+        source_nums = localized_numbers(source)
+        trans_nums = localized_numbers(translation)
         
         # Numbers in source but not in translation
         missing = source_nums - trans_nums

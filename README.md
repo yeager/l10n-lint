@@ -32,30 +32,10 @@ number-format diagnostics.
 
 ### Install the current release
 
-Download the package for your system from [release 1.22.2](https://github.com/yeager/l10n-lint/releases/tag/v1.22.2).
-The release includes `.deb`, `.rpm`, a Python wheel, a source archive and `SHA256SUMS`.
-
-| System | Download | Install command |
-|--------|----------|-----------------|
-| Debian / Ubuntu | [Debian package](https://github.com/yeager/l10n-lint/releases/download/v1.22.2/l10n-lint_1.22.2-1_all.deb) | `sudo apt install ./l10n-lint_1.22.2-1_all.deb` |
-| Fedora | [RPM package](https://github.com/yeager/l10n-lint/releases/download/v1.22.2/l10n-lint-1.22.2-1.noarch.rpm) | `sudo dnf install ./l10n-lint-1.22.2-1.noarch.rpm` |
-
-For the Python CLI, download the [wheel](https://github.com/yeager/l10n-lint/releases/download/v1.22.2/l10n_lint-1.22.2-py3-none-any.whl)
-and use Python 3.9 or newer in a virtual environment:
-
-```sh
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install ./l10n_lint-1.22.2-py3-none-any.whl
-l10n-lint --version
-```
-
-The Python package installs both launchers. The GUI additionally needs PyGObject,
-GTK4 and libadwaita from your system; launch it with `l10n-lint-gtk`.
-The virtual-environment instructions above are sufficient for the CLI.
-
-External APT/RPM repositories and PyPI may contain an older version. GitHub releases
-provide the packages verified for the version shown here.
+[Release 1.22.2](https://github.com/yeager/l10n-lint/releases/tag/v1.22.2)
+records the current annotated tag and release notes. Build from the checked-out
+source below to use this exact revision. Package repositories and PyPI can lag
+behind the GitHub release.
 
 ### APT repository (Debian/Ubuntu)
 

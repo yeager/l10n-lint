@@ -2811,26 +2811,43 @@ class L10nLinter:
                 context=source[:50]
             ))
 
-    _PROTECTED_MARKUP_TAGS = ("code", "command", "filename", "programlisting")
+    _PROTECTED_MARKUP_TAGS = ("code", "command", "filename", "programlisting", "function")
 
     def _check_protected_markup_content(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Warn when executable/document-reference content inside markup changes.
 
-        DocBook catalogs mark command names, file names and runnable examples with
-        these tags. Translating or moving punctuation into them breaks copyable
+        DocBook catalogs mark command names, function identifiers, file names and runnable
+        examples with these tags. Identifier-like <varname> values are checked too;
+        localized UI paths in <varname> markup are intentionally excluded. Translating or moving punctuation into them breaks copyable
         commands and, in the worst case, makes an example invalid.
         """
         tag_names = "|".join(self._PROTECTED_MARKUP_TAGS)
         pattern = re.compile(r"<(" + tag_names + r")(?:\s[^>]*)?>(.*?)</\1>", re.DOTALL)
         source_content = [(tag, value) for tag, value in pattern.findall(source)]
         translation_content = [(tag, value) for tag, value in pattern.findall(translation)]
-        if source_content != translation_content:
+
+        # DocBook also uses <varname> for environment variables, SQL identifiers
+        # and placeholders. It is occasionally used for localized UI paths, so only
+        # protect identifier-shaped values. Compare corresponding values to retain
+        # their order without treating a localized path such as “Control Panel” as
+        # executable syntax.
+        varname_pattern = re.compile(r"<varname(?:\s[^>]*)?>(.*?)</varname>", re.DOTALL)
+        source_varnames = varname_pattern.findall(source)
+        translation_varnames = varname_pattern.findall(translation)
+        identifier = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?:\(\))?$")
+        protected_varnames = [value for value in source_varnames if identifier.fullmatch(value)]
+        translated_varnames = [
+            target for source_value, target in zip(source_varnames, translation_varnames)
+            if identifier.fullmatch(source_value)
+        ]
+
+        if source_content != translation_content or protected_varnames != translated_varnames:
             result.add(LintIssue(
                 file=filepath,
                 line=line,
                 severity=Severity.WARNING,
                 rule="protected-markup-content",
-                message=_("Content in code, command, filename or programlisting markup differs from source"),
+                message=_("Content in protected DocBook markup differs from source"),
                 context=source[:80],
             ))
 

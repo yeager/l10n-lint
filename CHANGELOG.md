@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- Detect altered DocBook content in `function` tags and identifier-shaped `varname` tags, in addition to code, command, filename and programlisting markup. Localized UI paths inside `varname` remain exempt.
+
 ## [1.22.6] - 2026-10-03
 
 - Recognize Swedish `tupplur` as the idiomatic equivalent of “forty winks”.

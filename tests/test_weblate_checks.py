@@ -223,6 +223,11 @@ def test_protected_markup_content():
         ("Run <command>make check</command>.", "Kör <command>make check</command>.", False),
         ("Use <filename>postgis.sql</filename>.", "Använd <filename>postgis.sq</filename>l.", True),
         ("Call <code>ST_Foo(1)</code>.", "Anropa <code>ST_Foo(1).</code>", True),
+        ("Use <function>ST_Buffer</function> with <varname>radius</varname>.",
+         "Använd <function>ST_Buf</function> med <varname>radie</varname>.", True),
+        ("Set <varname>work_mem</varname>.", "Ange <varname>arbetsminne</varname>.", True),
+        ("Open <varname>Control Panel\\System</varname>.",
+         "Öppna <varname>Kontrollpanelen\\System</varname>.", False),
     ]
     return check_cases(
         L10nLinter._check_protected_markup_content,

@@ -9,7 +9,9 @@
 l10n-lint granskar gettext-PO, Qt-TS, XLIFF 1.2/2.x, JSON-kataloger och
 Dart/Flutter-ARB-filer. Det
 hittar tomma översättningar, syntaxfel, skillnader i platshållare och pluraler,
-felaktig formatering, brutna taggar och URL:er. Använd det i CI eller med
+felaktig formatering, brutna taggar och URL:er. Kod, kommandon, filnamn,
+funktionsnamn och identifierliknande variabelnamn i DocBook-markup kontrolleras
+också mot källtexten. Använd det i CI eller med
 GTK-gränssnittet vid manuell granskning.
 
 ### Installera och köra
@@ -43,7 +45,8 @@ mänsklig granskning.
 ## English reference
 
 l10n-lint checks gettext PO, Qt TS, XLIFF 1.2/2.x, JSON translation catalogs and Dart/Flutter ARB files for missing translations,
-invalid syntax, placeholder mismatches, plural errors and inconsistent formatting.
+invalid syntax, placeholder mismatches, plural errors and inconsistent formatting. It also preserves
+executable DocBook content such as code, commands, filenames, function names and identifiers.
 Use the command line in CI or the GTK4 desktop interface for interactive review.
 Swedish-specific checks cover spelling patterns, terminology and localization conventions.
 

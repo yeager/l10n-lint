@@ -1628,6 +1628,17 @@ class L10nLinter:
         trans_accels = [match.group(1) or match.group(2)
                         for match in self.ACCELERATOR_PATTERN.finditer(trans_clean)]
         
+        # Some importers need a mnemonic marker placed after the first
+        # character to distinguish a valid Swedish translation from source
+        # text (for example `_OK` → `O_K`).  Treat that single marker as an
+        # accelerator only when the source already has one.
+        if source_accels and not trans_accels and translation.count('_') == 1:
+            fallback = re.search(r'_(\w)', trans_clean)
+            trailing = re.search(r'(\w)_', trans_clean)
+            if fallback:
+                trans_accels = [fallback.group(1)]
+            elif trailing:
+                trans_accels = [trailing.group(1)]
         # Check if accelerator exists in source but not translation
         if source_accels and not trans_accels:
             result.add(LintIssue(

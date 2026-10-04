@@ -21,6 +21,7 @@ import json
 import locale
 import os
 import re
+from collections import Counter
 import sys
 import tempfile
 import time
@@ -2841,7 +2842,12 @@ class L10nLinter:
             if identifier.fullmatch(source_value)
         ]
 
-        if source_content != translation_content or protected_varnames != translated_varnames:
+        # Swedish grammar can move a condition earlier in the sentence, so
+        # compare markup contents as multisets. This still detects edits,
+        # omissions and duplicates without treating a legitimate reordering as
+        # a technical change.
+        if (Counter(source_content) != Counter(translation_content)
+                or Counter(protected_varnames) != Counter(translated_varnames)):
             result.add(LintIssue(
                 file=filepath,
                 line=line,

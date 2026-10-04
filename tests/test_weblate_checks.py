@@ -228,6 +228,8 @@ def test_protected_markup_content():
         ("Set <varname>work_mem</varname>.", "Ange <varname>arbetsminne</varname>.", True),
         ("Open <varname>Control Panel\\System</varname>.",
          "Öppna <varname>Kontrollpanelen\\System</varname>.", False),
+        ("If <varname>torast</varname> is NULL, use <varname>fromband</varname>.",
+         "Använd <varname>fromband</varname> om <varname>torast</varname> är NULL.", False),
     ]
     return check_cases(
         L10nLinter._check_protected_markup_content,

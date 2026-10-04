@@ -2941,9 +2941,16 @@ class L10nLinter:
     def _check_url_preservation(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check that URLs in source are preserved in translation."""
         url_pattern = r'https?://[^\s<>"\']+'
-        source_urls = set(re.findall(url_pattern, source))
-        trans_urls = set(re.findall(url_pattern, translation))
-        
+
+        def urls(text: str) -> set[str]:
+            # Sentence punctuation is not normally part of a URL. Treat a
+            # trailing full stop, comma, colon, semicolon, question mark, or
+            # exclamation mark equally on source and target.
+            return {url.rstrip('.,;:!?') for url in re.findall(url_pattern, text)}
+
+        source_urls = urls(source)
+        trans_urls = urls(translation)
+
         missing_urls = source_urls - trans_urls
         if missing_urls:
             result.add(LintIssue(

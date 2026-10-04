@@ -117,6 +117,7 @@ def test_url_preservation():
         ("Visit https://example.com for info", "Besök vår webbplats för info", True),  # Missing URL
         ("Download from https://original.com/file", "Ladda ner från https://different.com/file", True),  # Changed URL  
         ("Visit https://example.com", "Besök https://example.com", False),  # URL preserved
+        ("Visit https://example.com.", "Besök https://example.com.", False),  # Sentence punctuation is not URL content
         ("No URLs here", "Inga URLer här", False),  # No URLs
     ]
     

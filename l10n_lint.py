@@ -811,7 +811,9 @@ class L10nLinter:
     # Keyboard accelerator patterns (&File, _File) - include unicode letters
     # ``_File`` is a GTK-style accelerator; underscores inside identifiers
     # such as ``Today_and_Now`` are ordinary text, not shortcuts.
-    ACCELERATOR_PATTERN = re.compile(r'&(\w)|(?<!\w)_(\w)', re.UNICODE)
+    # An underscore may follow Å/Ä/Ö in Swedish (for example Å_terställ).
+    # Only ASCII letters and digits make it part of an identifier.
+    ACCELERATOR_PATTERN = re.compile(r'&(\w)|(?<![A-Za-z0-9])_(\w)', re.UNICODE)
     
     # Escaped characters
     ESCAPE_PATTERN = re.compile(r'\\[nrt\\"]')
@@ -1044,8 +1046,13 @@ class L10nLinter:
         # text for every source-dependent quality check.
         original_source = source
         if '|' in source:
-            prefix, visible_text = source.split('|', 1)
-            if prefix and len(prefix) <= 64 and re.fullmatch(r'[\w.-]+', prefix):
+            # Only an identifier-like first segment is an internal context.
+            # Ordinary prose may itself contain a vertical bar or placeholder.
+            context_key = source.split('|', 1)[0]
+            if context_key and len(context_key) <= 64 and re.fullmatch(r'[\w.-]+', context_key):
+                # Some catalogs layer several context keys; only text after
+                # the final separator is user-visible.
+                _prefix, visible_text = source.rsplit('|', 1)
                 if 'context-prefix-leak' not in self.disabled_rules:
                     self._check_context_prefix_leak(filepath, line, original_source, translation, result)
                 source = visible_text
@@ -1091,13 +1098,20 @@ class L10nLinter:
             (r'\b\d+(?:,\d+)?%(?!\w)', 'percent-spacing', 'Insert a space before the percent sign in Swedish'),
             (r'\b\d+[ \t]+-[ \t]+\d+\b', 'number-range-dash', 'Use an en dash for a Swedish number range'),
         )
+        # C printf uses %% for a literal percent; it is not Swedish prose.
+        style_text = re.sub(r'%%', '', translation)
         for pattern, rule, message in checks:
-            if re.search(pattern, translation):
+            if re.search(pattern, style_text):
                 result.add(LintIssue(filepath, line, Severity.WARNING, rule, message, source))
 
     def _check_swedish_punctuation_spacing(self, filepath, line, source, translation, result):
         """Flag whitespace before ordinary Swedish punctuation."""
-        if re.search(r'\S[ \t]+[,.!?;:](?!\w)', translation):
+        # `...%40s` is a printf diagnostic fragment, not prose punctuation.
+        # A literal `: ?` mirrors an intentionally spaced unknown-value label.
+        if (re.search(r'\S[ \t]+[,.!?;:](?!\w)', translation)
+                and '?:' not in translation
+                and '...%' not in translation
+                and not (': ?' in translation and ': ?' in source)):
             result.add(LintIssue(
                 filepath, line, Severity.WARNING, 'space-before-punctuation',
                 'Remove the space before Swedish punctuation', source,
@@ -1173,6 +1187,9 @@ class L10nLinter:
         default_language = self.config.get('language') or parser.language
         for entry in parser.entries:
             source = entry['source']
+            # Several UI catalogs encode an internal context before `|`.  The
+            # displayable source is the suffix; an empty suffix is intentional.
+            source_for_checks = source.rsplit('|', 1)[-1] if '|' in source else source
             translations = entry['_translations']
             if (not entry.get('_source_is_key', False)
                     and not source.strip()
@@ -1185,7 +1202,8 @@ class L10nLinter:
             previous_source_is_key = getattr(self, '_source_is_key', False)
             self._source_is_key = entry.get('_source_is_key', False)
             self._check_cldr_plural_categories(filepath, line, entry, result)
-            if any(not value.strip() for value in translations):
+            context_only_entry = '|' in source and not source_for_checks.strip()
+            if any(not value.strip() for value in translations) and not context_only_entry:
                 result.add(LintIssue(filepath, line, Severity.ERROR, 'missing-translation',
                                      'Unfinished/missing translation', source))
             # Plural variants are alternative forms of one entry, so they must
@@ -1429,9 +1447,14 @@ class L10nLinter:
         if re.match(r'^\s*(?:%\{[^}]+\}|%\d*\$?[A-Za-z]|\{\{[^}]+\}\})', translation):
             return
 
-        # Get first letter of each
-        source_first = next((c for c in source if c.isalpha()), None)
-        trans_first = next((c for c in translation if c.isalpha()), None)
+        # Compare sentence capitalization only.  Labels that begin with a
+        # number (for example code pages) do not inherit English title case.
+        source_trimmed = source.lstrip()
+        trans_trimmed = translation.lstrip()
+        if not source_trimmed or not trans_trimmed or not source_trimmed[0].isalpha() or not trans_trimmed[0].isalpha():
+            return
+        source_first = source_trimmed[0]
+        trans_first = trans_trimmed[0]
         
         if source_first and trans_first:
             if source_first.isupper() and trans_first.islower():
@@ -1720,7 +1743,9 @@ class L10nLinter:
     
     def _check_repeated_words(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for repeated words."""
-        words = re.findall(r'\b(\w+)\s+\1\b', translation, re.IGNORECASE)
+        # Swedish “är det det” is a grammatical demonstrative construction.
+        translation_for_repeat = re.sub(r'\bär det det\b', 'är det', translation, flags=re.IGNORECASE)
+        words = re.findall(r'\b(\w+)\s+\1\b', translation_for_repeat, re.IGNORECASE)
         source_words = re.findall(r'\b(\w+)\s+\1\b', source, re.IGNORECASE)
         # A translated sound effect can use a different word (COUGH → HOST),
         # while retaining the intentional repetition from the source.
@@ -1747,6 +1772,7 @@ class L10nLinter:
             start_word = start_words[0].strip('.,;:!?"\'()[]{}')
             # Skip short words (prepositions etc.), markdown headers, list markers, digits
             if (len(end_word) < 3 or len(start_word) < 3
+                    or end_word.startswith('%') or start_word.startswith('%')
                     or end_word.startswith('#') or end_word.startswith('-')
                     or end_word.startswith('*') or end_word.startswith('>')
                     or end_word.isdigit()):
@@ -2083,7 +2109,9 @@ class L10nLinter:
         
         # Music domain keywords. “Staff” is commonly a personnel word, so
         # only treat it as music when the surrounding source makes that sense.
-        music_keywords = {'note', 'chord', 'tempo', 'clef', 'measure', 'bar', 'scale', 'key'}
+        # `key` and `scale` are common in font editors; they alone are not
+        # sufficient evidence of musical notation.
+        music_keywords = {'note', 'chord', 'tempo', 'clef', 'measure', 'bar'}
         music_staff = re.search(r'\b(?:musical|music|notation|five-line) staff\b|\bstaff (?:notation|lines?)\b', source_lower)
         if music_staff or any(keyword in source_lower for keyword in music_keywords):
             return 'music'
@@ -2804,7 +2832,7 @@ class L10nLinter:
                 ))
         
         # Check for double words with Swedish exceptions
-        swedish_ok_doubles = {'i i', 'på på', 'till till', 'om om'}
+        swedish_ok_doubles = {'i i', 'på på', 'till till', 'om om', 'det det'}
         for i in range(len(words) - 1):
             if (words[i] == words[i + 1] and words[i].isalpha()
                     and not crosses_sentence_boundary(i, i + 1)):

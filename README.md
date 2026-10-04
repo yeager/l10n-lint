@@ -6,7 +6,8 @@
 
 ## Svenska
 
-l10n-lint granskar gettext-PO, Qt-TS, XLIFF 1.2/2.x och JSON-kataloger. Det
+l10n-lint granskar gettext-PO, Qt-TS, XLIFF 1.2/2.x, JSON-kataloger och
+Dart/Flutter-ARB-filer. Det
 hittar tomma översättningar, syntaxfel, skillnader i platshållare och pluraler,
 felaktig formatering, brutna taggar och URL:er. Använd det i CI eller med
 GTK-gränssnittet vid manuell granskning.
@@ -41,7 +42,7 @@ mänsklig granskning.
 
 ## English reference
 
-l10n-lint checks gettext PO, Qt TS, XLIFF 1.2/2.x and JSON translation catalogs for missing translations,
+l10n-lint checks gettext PO, Qt TS, XLIFF 1.2/2.x, JSON translation catalogs and Dart/Flutter ARB files for missing translations,
 invalid syntax, placeholder mismatches, plural errors and inconsistent formatting.
 Use the command line in CI or the GTK4 desktop interface for interactive review.
 Swedish-specific checks cover spelling patterns, terminology and localization conventions.
@@ -361,6 +362,7 @@ CI run. `baseline = "l10n-baseline.json"` is also supported in configuration.
 l10n-lint --reference messages.pot po/sv.po
 l10n-lint --reference source.ts translations/sv.ts
 l10n-lint --reference source.xlf translations/sv.xlf
+l10n-lint --reference app_en.arb app_sv.arb
 ```
 
 PO comparison keys include `msgctxt` and `msgid`; Qt keys use explicit IDs or

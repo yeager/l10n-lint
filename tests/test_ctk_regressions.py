@@ -54,6 +54,11 @@ def test_swedish_cardinals_through_twelve_are_equivalent():
     assert not issues_for(L10nLinter._check_numerics, '12 dollars', 'tolv dollar')
 
 
+def test_english_time_colon_is_not_missing_in_swedish_clock():
+    assert not issues_for(L10nLinter._check_punctuation_mismatch, 'Starts at 9:00 am.', 'Startar klockan 9.00.')
+    assert not issues_for(L10nLinter._check_punctuation_mismatch, 'Ends at 4:30 pm.', 'Slutar klockan 16.30.')
+
+
 def test_english_12_hour_times_match_swedish_24_hour_clock():
     assert not issues_for(L10nLinter._check_numerics, 'Starts at 9:00 am.', 'Startar klockan 9.00.')
     assert not issues_for(L10nLinter._check_numerics, 'Ends at 4:30 pm.', 'Slutar klockan 16.30.')

@@ -2990,8 +2990,32 @@ class L10nLinter:
                     message=_("Translation ends with '{punct}' but source does not").format(punct=punct),
                     context=source[:50]
                 ))
-            # Check general presence for punctuation like semicolon
-            elif punct in [';', ':'] and source_has_any and not trans_has_any:
+            # A colon that appears solely as an English clock separator is
+            # localized as a dot in Swedish (9:00 am → 9.00). Do not treat
+            # that time-format conversion as missing punctuation.
+            elif punct == ':' and source_has_any and not trans_has_any:
+                source_times = re.findall(r'\b(\d{1,2}):(\d{2})(?:\s*([AaPp][Mm]))?\b', source_clean)
+                source_without_times = re.sub(r'\b\d{1,2}:\d{2}(?:\s*[AaPp][Mm])?\b', '', source_clean)
+                def normalized_clock(hour: str, minute: str, suffix: str) -> str:
+                    value = int(hour)
+                    if suffix.lower() == 'pm' and value < 12:
+                        value += 12
+                    elif suffix.lower() == 'am' and value == 12:
+                        value = 0
+                    return f"{value}.{minute}"
+                converted = {normalized_clock(*clock) for clock in source_times}
+                translated_times = set(re.findall(r'\b\d{1,2}\.\d{2}\b', trans_clean))
+                if ':' not in source_without_times and converted <= translated_times:
+                    continue
+                result.add(LintIssue(
+                    file=filepath,
+                    line=line,
+                    severity=Severity.WARNING,
+                    rule="punctuation-mismatch",
+                    message=_("Source contains '{punct}' but translation does not").format(punct=punct),
+                    context=source[:50]
+                ))
+            elif punct == ';' and source_has_any and not trans_has_any:
                 result.add(LintIssue(
                     file=filepath,
                     line=line,

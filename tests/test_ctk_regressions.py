@@ -54,6 +54,12 @@ def test_swedish_cardinals_through_twelve_are_equivalent():
     assert not issues_for(L10nLinter._check_numerics, '12 dollars', 'tolv dollar')
 
 
+def test_english_12_hour_times_match_swedish_24_hour_clock():
+    assert not issues_for(L10nLinter._check_numerics, 'Starts at 9:00 am.', 'Startar klockan 9.00.')
+    assert not issues_for(L10nLinter._check_numerics, 'Ends at 4:30 pm.', 'Slutar klockan 16.30.')
+    assert not issues_for(L10nLinter._check_numerics, 'Opens at 0:00 am.', 'Öppnar klockan 0.00.')
+
+
 def test_swedish_time_with_single_digit_hour_is_not_a_decimal():
     assert not issues_for(
         L10nLinter._check_decimal_separator,

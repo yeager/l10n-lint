@@ -4,6 +4,7 @@
 
 - Detect altered DocBook content in `function` tags and identifier-shaped `varname` tags, in addition to code, command, filename and programlisting markup. Localized UI paths inside `varname` remain exempt.
 - Permit Swedish sentence-level reordering of protected DocBook values while continuing to detect changed, missing and duplicated values.
+- Treat English 12-hour times and Swedish 24-hour dot times as equivalent in numeric checks.
 
 ## [1.22.6] - 2026-10-03
 

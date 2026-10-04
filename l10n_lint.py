@@ -1673,10 +1673,26 @@ class L10nLinter:
         # commonly uses a decimal point.  Compare a normalized representation
         # so that 0.5 → 0,5 does not become a false positive.
         def localized_numbers(text: str) -> set[str]:
-            """Return numeric values while preserving grouped thousands."""
+            """Return numeric values while preserving grouped thousands and clocks."""
+            # Normalize English 12-hour times before extracting individual
+            # numbers. Swedish commonly uses a 24-hour clock with a dot, for
+            # example ``4:30 pm`` → ``16.30`` and ``9:00 am`` → ``9.00``.
+            clock_pattern = r'\b(\d{1,2}):(\d{2})\s*([AaPp][Mm])\b'
+            clock_values: set[str] = set()
+
+            def clock(match: re.Match) -> str:
+                hour, minute, suffix = int(match.group(1)), match.group(2), match.group(3).lower()
+                if suffix == 'pm' and hour < 12:
+                    hour += 12
+                elif suffix == 'am' and hour == 12:
+                    hour = 0
+                clock_values.add(f"{hour}.{minute}")
+                return ' '
+
+            text = re.sub(clock_pattern, clock, text)
             grouped_pattern = r'\b\d{1,3}(?:[ ,]\d{3})+\b'
             grouped = re.findall(grouped_pattern, text)
-            values = {number.replace(',', '').replace(' ', '') for number in grouped}
+            values = clock_values | {number.replace(',', '').replace(' ', '') for number in grouped}
             # Mask grouped values so ``1 400`` is compared as 1400, rather
             # than as two independent values.
             remainder = re.sub(grouped_pattern, ' ', text)

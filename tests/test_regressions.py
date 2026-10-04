@@ -19,6 +19,16 @@ ROOT = Path(__file__).resolve().parents[1]
 HEADER = 'msgid ""\nmsgstr "Language: sv\\nPlural-Forms: nplurals=2; plural=(n != 1);\\n"\n\n'
 
 
+def test_runtime_version_matches_package_metadata():
+    if sys.version_info >= (3, 11):
+        import tomllib
+    else:
+        import tomli as tomllib
+    with (ROOT / 'pyproject.toml').open('rb') as metadata:
+        package_version = tomllib.load(metadata)['project']['version']
+    assert core.__version__ == package_version
+
+
 def po(source='Hello', translation='Hej', flags=''):
     return HEADER + (f'#, {flags}\n' if flags else '') + f'msgid {json.dumps(source, ensure_ascii=False)}\nmsgstr {json.dumps(translation, ensure_ascii=False)}\n'
 

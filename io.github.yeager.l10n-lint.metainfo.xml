@@ -48,6 +48,9 @@
   <url type="vcs-browser">https://github.com/yeager/l10n-lint</url>
 
   <releases>
+    <release version="1.23.0" date="2026-10-04">
+      <description><p>Add Dart/Flutter ARB catalogs and improve protected markup and Swedish time checks.</p></description>
+    </release>
     <release version="1.21.6" date="2026-09-21">
       <description><p>Keep translation-boundary and numeric checks accurate for moved runtime placeholders and Swedish cardinal words.</p></description>
     </release>

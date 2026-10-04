@@ -1,3 +1,11 @@
+l10n-lint (1.23.0-1) unstable; urgency=medium
+
+  * Add Dart/Flutter ARB catalog support.
+  * Improve DocBook content preservation and Swedish time checks.
+  * Align CLI, package and release artifact versions.
+
+ -- Daniel Nylander <github@danielnylander.se>  Sun, 04 Oct 2026 20:23:00 +0200
+
 l10n-lint (1.22.1-1) unstable; urgency=medium
 
   * Accept Swedish cardinal words through twelve in number checks.

@@ -1,6 +1,6 @@
 # l10n-lint
 
-[![Version](https://img.shields.io/badge/version-1.22.6-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.22.6)
+[![Version](https://img.shields.io/badge/version-1.23.0-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.23.0)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -50,18 +50,18 @@ executable DocBook content such as code, commands, filenames, function names and
 Use the command line in CI or the GTK4 desktop interface for interactive review.
 Swedish-specific checks cover spelling patterns, terminology and localization conventions.
 
-[Download 1.22.6](https://github.com/yeager/l10n-lint/releases/tag/v1.22.6)
+[Download 1.23.0](https://github.com/yeager/l10n-lint/releases/tag/v1.23.0)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
-Version **1.22.6** recognizes Swedish idiomatic number equivalents and localized grouped thousands. Version **1.22.1** accepts Swedish cardinal words through
+Version **1.23.0** adds Dart/Flutter ARB catalogs, protects more DocBook content and improves Swedish time checks. Version **1.22.6** recognizes Swedish idiomatic number equivalents and localized grouped thousands. Version **1.22.1** accepts Swedish cardinal words through
 twelve in numerical checks, and version **1.22.0** adds Swedish typography and
 number-format diagnostics.
 
 ## Features
 
-- Validate PO/TS/XLIFF/JSON syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
+- Validate PO/TS/XLIFF/JSON/ARB syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
 - Share diagnostic IDs and input handling between the CLI and GTK4 interface.
-- Scan local files, directories, remote PO/TS/XLIFF/JSON URLs and GitHub repositories.
+- Scan local files, directories, remote PO/TS/XLIFF/JSON/ARB URLs and GitHub repositories.
 - Select individual rules or groups, configure severities and load custom TSV glossaries.
 - Store project settings in `pyproject.toml` and baseline existing findings.
 - Compare translations with a source catalog to find missing or obsolete entries.
@@ -72,7 +72,7 @@ number-format diagnostics.
 
 ### Install the current release
 
-[Release 1.22.6](https://github.com/yeager/l10n-lint/releases/tag/v1.22.6)
+[Release 1.23.0](https://github.com/yeager/l10n-lint/releases/tag/v1.23.0)
 records the current annotated tag and release notes. Build from the checked-out
 source below to use this exact revision. Package repositories and PyPI can lag
 behind the GitHub release.

@@ -2,10 +2,13 @@
 
 ## [Unreleased]
 
-- Detect altered DocBook content in `function` tags and identifier-shaped `varname` tags, in addition to code, command, filename and programlisting markup. Localized UI paths inside `varname` remain exempt.
-- Permit Swedish sentence-level reordering of protected DocBook values while continuing to detect changed, missing and duplicated values.
-- Treat English 12-hour times and Swedish 24-hour dot times as equivalent in numeric checks.
-- Do not report an English clock colon as missing when its Swedish 24-hour dot equivalent is present.
+## [1.23.0] - 2026-10-04
+
+- Add Dart/Flutter ARB catalog support and document it in the README.
+- Improve XLIFF context checks and recognize relocated import mnemonics.
+- Avoid false URL preservation warnings.
+- Protect additional DocBook function and identifier content, detect changes to protected markup, and allow reordered protected values in Swedish sentences.
+- Recognize single-digit Swedish times and equivalent 12-hour and 24-hour clock notation, including Swedish dot punctuation.
 
 ## [1.22.6] - 2026-10-03
 

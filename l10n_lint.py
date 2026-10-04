@@ -200,6 +200,7 @@ RULES = {
     'end-stop-mismatch': RuleSpec('_check_end_stop_mismatch', 'warning', '', 'End stop mismatch'),
     'ellipsis': RuleSpec('_check_ellipsis', 'info', '', 'Ellipsis'),
     'xml-tags-mismatch': RuleSpec('_check_xml_tags_mismatch', 'warning', '', 'Xml tags mismatch'),
+    'protected-markup-content': RuleSpec('_check_protected_markup_content', 'warning', '', 'Protected markup content changed'),
     'duplicate-words': RuleSpec('_check_duplicate_words', 'warning', '', 'Duplicate words'),
     'same-plurals': RuleSpec('_check_same_plurals', 'warning', '', 'Same plurals'),
     'punctuation-mismatch': RuleSpec('_check_punctuation_mismatch', 'warning', '', 'Punctuation mismatch'),
@@ -2808,6 +2809,29 @@ class L10nLinter:
                     src=source_tag_names, trans=trans_tag_names
                 ),
                 context=source[:50]
+            ))
+
+    _PROTECTED_MARKUP_TAGS = ("code", "command", "filename", "programlisting")
+
+    def _check_protected_markup_content(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
+        """Warn when executable/document-reference content inside markup changes.
+
+        DocBook catalogs mark command names, file names and runnable examples with
+        these tags. Translating or moving punctuation into them breaks copyable
+        commands and, in the worst case, makes an example invalid.
+        """
+        tag_names = "|".join(self._PROTECTED_MARKUP_TAGS)
+        pattern = re.compile(r"<(" + tag_names + r")(?:\s[^>]*)?>(.*?)</\1>", re.DOTALL)
+        source_content = [(tag, value) for tag, value in pattern.findall(source)]
+        translation_content = [(tag, value) for tag, value in pattern.findall(translation)]
+        if source_content != translation_content:
+            result.add(LintIssue(
+                file=filepath,
+                line=line,
+                severity=Severity.WARNING,
+                rule="protected-markup-content",
+                message=_("Content in code, command, filename or programlisting markup differs from source"),
+                context=source[:80],
             ))
 
     def _check_duplicate_words(self, filepath: str, line: int, source: str, translation: str, result: LintResult):

@@ -215,3 +215,17 @@ def run_all_tests():
 if __name__ == '__main__':
     success = run_all_tests()
     sys.exit(0 if success else 1)
+
+
+def test_protected_markup_content():
+    """Command and filename tags keep their literal content."""
+    test_cases = [
+        ("Run <command>make check</command>.", "Kör <command>make check</command>.", False),
+        ("Use <filename>postgis.sql</filename>.", "Använd <filename>postgis.sq</filename>l.", True),
+        ("Call <code>ST_Foo(1)</code>.", "Anropa <code>ST_Foo(1).</code>", True),
+    ]
+    return check_cases(
+        L10nLinter._check_protected_markup_content,
+        test_cases,
+        "protected-markup-content",
+    )

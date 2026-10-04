@@ -184,6 +184,29 @@ def test_xliff_and_json_are_discovered_in_directories_and_by_input_pipeline(tmp_
     assert rules(result).count('missing-translation') == 2
 
 
+def test_arb_catalogs_are_discovered_and_use_json_metadata_rules(tmp_path):
+    path = tmp_path / 'sv.arb'
+    path.write_text(json.dumps({
+        '@@locale': 'sv',
+        'save': 'Spara',
+        '@save': {'description': 'Save button'},
+    }), encoding='utf-8')
+    assert list(find_l10n_files(path)) == [str(path)]
+    result = lint_inputs([str(path)])
+    assert result.files_checked == 1
+    assert result.entries_checked == 1
+    assert not result.issues
+
+
+def test_arb_catalogs_can_be_compared_with_an_arb_reference(tmp_path):
+    source = tmp_path / 'en.arb'
+    target = tmp_path / 'sv.arb'
+    source.write_text(json.dumps({'@@locale': 'en', 'save': 'Save'}), encoding='utf-8')
+    target.write_text(json.dumps({'@@locale': 'sv', 'save': 'Spara'}), encoding='utf-8')
+    result = L10nLinter({'reference': str(source)}).lint_file(str(target))
+    assert not [issue for issue in result.issues if issue.rule == 'reference-error']
+
+
 def test_xliff_and_json_catalog_comparison_uses_matching_formats(tmp_path):
     source = tmp_path / 'source.xlf'
     target = tmp_path / 'sv.xlf'

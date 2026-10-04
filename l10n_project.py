@@ -311,11 +311,11 @@ def compare_catalog(filepath, content, reference_path, result):
         if Path(path).suffix.lower() in ('.xlf', '.xliff'):
             return {('xliff', e['_id'] or e['_context'], e['source']): ((e['source'], False), e['_line'])
                     for e in XLIFFParser(text, path).entries}
-        if Path(path).suffix.lower() == '.json':
+        if Path(path).suffix.lower() in ('.json', '.arb'):
             return {('json', e['_id'] or e['_context'], e['source']): ((e['source'], False), e['_line'])
                     for e in JSONParser(text, path).entries}
-        raise ValueError('Reference must be .pot, .po, .ts, .xlf/.xliff, or .json')
-    formats = {'.po': 'po', '.pot': 'po', '.xlf': 'xliff', '.xliff': 'xliff'}
+        raise ValueError('Reference must be .pot, .po, .ts, .xlf/.xliff, .json, or .arb')
+    formats = {'.po': 'po', '.pot': 'po', '.xlf': 'xliff', '.xliff': 'xliff', '.arb': 'json'}
     target_format = formats.get(Path(filepath).suffix.lower(), Path(filepath).suffix.lower())
     reference_format = formats.get(Path(reference_path).suffix.lower(), Path(reference_path).suffix.lower())
     if target_format != reference_format:

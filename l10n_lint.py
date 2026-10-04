@@ -4,7 +4,7 @@
 # l10n-lint - Linter for localization files
 # Copyright (C) 2026 Daniel Nylander <daniel@danielnylander.se>
 """
-l10n-lint - Linter for localization files (.po, .ts, .xlf/.xliff, .json)
+l10n-lint - Linter for localization files (.po, .ts, .xlf/.xliff, .json/.arb)
 
 Checks for:
 - Missing translations (empty msgstr)
@@ -35,7 +35,9 @@ if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
 __version__ = "1.21.7"
-L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.rc', '.properties', '.xml'})
+# ARB is Dart's Application Resource Bundle format.  It is JSON with
+# ``@key`` metadata members, which JSONParser already understands.
+L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml'})
 
 # Translation setup
 DOMAIN = "l10n-lint"

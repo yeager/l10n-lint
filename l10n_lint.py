@@ -1983,10 +1983,10 @@ class L10nLinter:
             if num in source_decimals:
                 continue
             
-            # Skip time formats: HH.MM where both parts are exactly 2 digits
-            # (00.00, 12.30, 23.59 — Swedish uses . for time)
+            # Skip time formats: H.MM or HH.MM (for example 9.00, 12.30, 23.59).
+            # Swedish uses a dot between hours and minutes.
             parts = num.split('.')
-            if len(parts) == 2 and len(parts[0]) == 2 and len(parts[1]) == 2:
+            if len(parts) == 2 and len(parts[0]) in (1, 2) and len(parts[1]) == 2:
                 try:
                     h, m = int(parts[0]), int(parts[1])
                     if 0 <= h <= 23 and 0 <= m <= 59:

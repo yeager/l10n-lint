@@ -52,3 +52,19 @@ def test_unicode_angle_bracket_sentinel_can_be_translated():
 def test_swedish_cardinals_through_twelve_are_equivalent():
     assert not issues_for(L10nLinter._check_numerics, '11 dollars', 'elva dollar')
     assert not issues_for(L10nLinter._check_numerics, '12 dollars', 'tolv dollar')
+
+
+def test_swedish_time_with_single_digit_hour_is_not_a_decimal():
+    assert not issues_for(
+        L10nLinter._check_decimal_separator,
+        'The service opens at 9:00 am.',
+        'Tjänsten öppnar klockan 9.00.',
+    )
+
+
+def test_swedish_decimal_with_two_digits_is_still_flagged():
+    assert issues_for(
+        L10nLinter._check_decimal_separator,
+        'The result is 9.9.',
+        'Resultatet är 9.99.',
+    )

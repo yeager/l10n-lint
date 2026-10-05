@@ -1137,7 +1137,12 @@ class L10nLinter:
         """Flag whitespace before ordinary Swedish punctuation."""
         # `...%40s` is a printf diagnostic fragment, not prose punctuation.
         # A literal `: ?` mirrors an intentionally spaced unknown-value label.
-        if (re.search(r'\S[ \t]+(?:[.,?;:]|!(?!=))(?!\w)', translation)
+        spacing_matches = re.finditer(r'\S[ \t]+(?:[.,?;:]|!(?!=))(?!\w)', translation)
+        has_spacing_error = any(
+            not (match.group().endswith('.') and translation[match.end():match.end() + 2] == '..')
+            for match in spacing_matches
+        )
+        if (has_spacing_error
                 and '?:' not in translation
                 and '...%' not in translation
                 and not (': ?' in translation and ': ?' in source)):
@@ -1800,9 +1805,13 @@ class L10nLinter:
     def _check_repeated_words(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for repeated words."""
         # Swedish “är det det” is a grammatical demonstrative construction.
-        translation_for_repeat = re.sub(r'\bär det det\b', 'är det', translation, flags=re.IGNORECASE)
+        # Markup names such as <varname> are syntax, not repeated prose.
+        strip_markup = lambda text: re.sub(r'</?[A-Za-z][\w:.-]*(?:\s[^>]*)?>', '', text)
+        translation_for_repeat = strip_markup(translation)
+        source_for_repeat = strip_markup(source)
+        translation_for_repeat = re.sub(r'\bär det det\b', 'är det', translation_for_repeat, flags=re.IGNORECASE)
         words = re.findall(r'\b(\w+)\s+\1\b', translation_for_repeat, re.IGNORECASE)
-        source_words = re.findall(r'\b(\w+)\s+\1\b', source, re.IGNORECASE)
+        source_words = re.findall(r'\b(\w+)\s+\1\b', source_for_repeat, re.IGNORECASE)
         # A translated sound effect can use a different word (COUGH → HOST),
         # while retaining the intentional repetition from the source.
         unexpected = [] if source_words else words

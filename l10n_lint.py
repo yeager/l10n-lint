@@ -1114,6 +1114,7 @@ class L10nLinter:
             (r'\b\d+[ \t]+-[ \t]+\d+\b', 'number-range-dash', 'Use an en dash for a Swedish number range'),
         )
         # C printf uses %% for a literal percent; it is not Swedish prose.
+        # IPv4 addresses use periods as structural separators, not thousands grouping.
         style_text = re.sub(r'%%', '', translation)
         ipv4_spans = [match.span() for match in re.finditer(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', style_text)]
         for pattern, rule, message in checks:

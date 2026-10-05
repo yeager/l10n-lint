@@ -195,3 +195,4 @@ def test_php_percent_of_literal_is_not_rewritten_to_invalid_swedish_format():
                'msgstr "Håll under 80% of minnet."\n')
     result = L10nLinter(disabled_rules=set(RULES) - resolve_rules(('percent-spacing',))).lint_file('sv.po', content)
     assert not result.issues
+

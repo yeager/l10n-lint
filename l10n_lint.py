@@ -2278,7 +2278,10 @@ class L10nLinter:
         translated_line = re.search(
             r'\b(?:kommando|kod|källkods)?linje(?:n|ns|r|rs|rna|rnas)?\b',
             translation, re.IGNORECASE)
-        if translated_line and (code_line or (plain_line and code_context)):
+        geometry_context = re.search(
+            r'\b(?:geometry|geometries|polygon|linestring|spatial|buffer(?:ing)?)\b',
+            source + ' ' + message_context, re.IGNORECASE)
+        if translated_line and not geometry_context and (code_line or (plain_line and code_context)):
             result.add(LintIssue(
                 file=filepath,
                 line=line,

@@ -182,6 +182,14 @@ def test_source_preserved_cli_spacing_is_not_swedish_punctuation_error():
     assert not result.issues
 
 
+def test_symbolic_ipp_keys_are_context_not_english_source_prose():
+    content = ('msgid ""\nmsgstr "Language: sv\\n"\n\n'
+               'msgid "transmission-status.3"\nmsgstr "Klar"\n')
+    result = L10nLinter().lint_file('sv.po', content)
+    assert not any(issue.rule in {'numeric-mismatch', 'suspicious-length', 'boundary-character-mismatch'}
+                   for issue in result.issues)
+
+
 def test_swedish_quote_number_percent_and_range_forms_are_reported():
     result = lint('Example', '“Exempel” 1.000.000, 8,65% och 11 - 12.', checks='quote-style,large-number-grouping,percent-spacing,number-range-dash')
     assert {issue.rule for issue in result.issues} == {

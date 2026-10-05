@@ -40,6 +40,11 @@ __version__ = "1.23.1"
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings'})
 
+# IPP/CUPS catalogs use technical identifiers (for example
+# ``transmission-status.3``) as msgids and store the human-readable English
+# label separately.  Those identifiers are context, not source prose.
+SYMBOLIC_MESSAGE_KEY = re.compile(r'^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$')
+
 # Translation setup
 DOMAIN = "l10n-lint"
 
@@ -1058,10 +1063,15 @@ class L10nLinter:
             self._format_flags = set(flags)
             self._message_context = entry.get('msgctxt', '')
             forms = [(key, value) for key, value in entry.items() if key.startswith('msgstr[')] if msgid_plural else [('msgstr', msgstr)]
-            for key, value in forms:
-                if value:
-                    source = msgid if key in ('msgstr', 'msgstr[0]') else msgid_plural
-                    self._check_translation(filepath, line, source, value, result)
+            previous_source_is_key = getattr(self, '_source_is_key', False)
+            self._source_is_key = bool(SYMBOLIC_MESSAGE_KEY.fullmatch(msgid))
+            try:
+                for key, value in forms:
+                    if value:
+                        source = msgid if key in ('msgstr', 'msgstr[0]') else msgid_plural
+                        self._check_translation(filepath, line, source, value, result)
+            finally:
+                self._source_is_key = previous_source_is_key
 
             # Check: Duplicates (use msgctxt+msgid as key to avoid false positives)
             msgctxt = entry.get('msgctxt', '')

@@ -38,7 +38,7 @@ if __name__ == '__main__':
 __version__ = "1.23.1"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
-L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml'})
+L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings'})
 
 # Translation setup
 DOMAIN = "l10n-lint"
@@ -610,6 +610,40 @@ class XLIFFParser:
                 })
 
 
+class StringsParser:
+    """Parse CUPS ``.strings`` catalogs.
+
+    CUPS uses a compact C-style format where the English source is the key and
+    the translated text is the value.  Keeping both sides lets the ordinary
+    placeholder and Swedish-style checks apply to libcups catalogs as well.
+    """
+
+    _ENTRY = re.compile(r'^\s*("(?:\\.|[^"\\])*")\s*=\s*("(?:\\.|[^"\\])*");\s*$')
+
+    def __init__(self, content: str, filename: str = '<unknown>'):
+        self.entries = []
+        self.language = 'sv' if re.search(r'(?:^|[_-])sv(?:[_-]|\.)', Path(filename).name, re.IGNORECASE) else ''
+        for line_number, line in enumerate(content.splitlines(), 1):
+            stripped = line.strip()
+            if not stripped or stripped.startswith(('/*', '//', '#')):
+                continue
+            match = self._ENTRY.match(line)
+            if not match:
+                raise ValueError(f'Line {line_number}: invalid .strings entry')
+            try:
+                source, translation = (json.loads(value) for value in match.groups())
+            except json.JSONDecodeError as exc:
+                raise ValueError(f'Line {line_number}: invalid .strings escape: {exc.msg}') from exc
+            self.entries.append({
+                '_id': source, '_context': '', '_line': line_number,
+                '_language': self.language, 'source': source,
+                'translation': translation, '_translations': [translation],
+                '_plural_categories': (), '_type': '',
+            })
+        if not self.entries:
+            raise ValueError('.strings catalog contains no translation entries')
+
+
 class PropertiesParser:
     """Parse Java ``.properties`` localization exports.
 
@@ -929,6 +963,8 @@ class L10nLinter:
                     self._lint_rc(filepath, content, result)
                 elif ext == '.properties':
                     self._lint_properties(filepath, content, result)
+                elif ext == '.strings':
+                    self._lint_strings(filepath, content, result)
                 else:
                     self._lint_json(filepath, content, result)
             except (ValueError, SyntaxError) as exc:
@@ -1213,6 +1249,9 @@ class L10nLinter:
 
     def _lint_properties(self, filepath: str, content: str, result: LintResult):
         self._lint_external_entries(filepath, PropertiesParser(content, filepath), result)
+
+    def _lint_strings(self, filepath: str, content: str, result: LintResult):
+        self._lint_external_entries(filepath, StringsParser(content, filepath), result)
 
     def _lint_external_entries(self, filepath, parser, result):
         """Run the shared checks for XLIFF and JSON source/target entries."""

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from l10n_lint import AndroidXMLParser, JSONParser, L10nLinter, PropertiesParser, XLIFFParser, find_l10n_files, lint_inputs
+from l10n_lint import AndroidXMLParser, JSONParser, L10nLinter, PropertiesParser, StringsParser, XLIFFParser, find_l10n_files, lint_inputs
 
 
 XLIFF_12 = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -31,6 +31,24 @@ XLIFF_20 = '''<?xml version="1.0" encoding="UTF-8"?>
 
 def rules(result):
     return [issue.rule for issue in result.issues]
+
+
+def test_cups_strings_parses_escapes_and_runs_shared_checks():
+    content = '''"Save %s" = "Spara %s";
+"Close" = "";
+"With newline\\n" = "Med radbrytning\\n";
+'''
+    parser = StringsParser(content, 'sv.strings')
+    assert parser.language == 'sv'
+    assert parser.entries[2]['source'] == 'With newline\n'
+    result = L10nLinter().lint_file('sv.strings', content)
+    assert result.entries_checked == 3
+    assert rules(result) == ['missing-translation']
+
+
+def test_cups_strings_reports_invalid_syntax():
+    result = L10nLinter().lint_file('sv.strings', '"Save" = "Spara"\n')
+    assert rules(result) == ['syntax-error']
 
 
 def test_android_xml_parses_strings_plurals_and_skips_internal_resources():

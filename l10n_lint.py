@@ -1137,7 +1137,7 @@ class L10nLinter:
         """Flag whitespace before ordinary Swedish punctuation."""
         # `...%40s` is a printf diagnostic fragment, not prose punctuation.
         # A literal `: ?` mirrors an intentionally spaced unknown-value label.
-        if (re.search(r'\S[ \t]+[,.!?;:](?!\w)', translation)
+        if (re.search(r'\S[ \t]+(?:[.,?;:]|!(?!=))(?!\w)', translation)
                 and '?:' not in translation
                 and '...%' not in translation
                 and not (': ?' in translation and ': ?' in source)):

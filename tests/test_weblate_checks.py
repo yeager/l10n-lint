@@ -94,6 +94,7 @@ def test_duplicate_words():
         ("Sure we are. We have to be.", "Visst är vi det. Det måste vi vara.", False),  # Sentence boundary
         ("Normal text", "normal text", False),  # No duplicates
         ("%d x %d mm", "%d × %d mm", False),  # Format placeholders are not words
+        ("Quoted value", "&quot;värde&quot;", False),  # HTML entities are not words
     ]
     
     return check_cases(L10nLinter._check_duplicate_words, test_cases, "duplicate-words")

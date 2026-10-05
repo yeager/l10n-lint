@@ -2978,6 +2978,12 @@ class L10nLinter:
         markup_pattern = r'</?[A-Za-z][\w:.-]*(?:\s[^>]*)?>'
         translation_for_tokens = re.sub(markup_pattern, ' ', translation)
         source_for_tokens = re.sub(markup_pattern, ' ', source)
+        # HTML entities are punctuation/markup, not prose tokens.  In
+        # particular, opening and closing &quot; must not look like a repeated
+        # Swedish word.
+        entity_pattern = r'&(?:#\d+|#x[0-9A-Fa-f]+|[A-Za-z][A-Za-z0-9]+);'
+        translation_for_tokens = re.sub(entity_pattern, ' ', translation_for_tokens)
+        source_for_tokens = re.sub(entity_pattern, ' ', source_for_tokens)
         # C/Python printf placeholders such as %d and %1$s are technical
         # tokens, not prose words.  Remove them before detecting accidental
         # repetitions like "ord ord".

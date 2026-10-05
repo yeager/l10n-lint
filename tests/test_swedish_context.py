@@ -209,3 +209,13 @@ def test_php_percent_of_literal_is_not_rewritten_to_invalid_swedish_format():
                'msgstr "Håll under 80% of minnet."\n')
     result = L10nLinter(disabled_rules=set(RULES) - resolve_rules(('percent-spacing',))).lint_file('sv.po', content)
     assert not result.issues
+
+
+def test_math_subtraction_is_not_a_swedish_number_range():
+    result = lint('Formula', 'R * (2/√2 - 1)', checks='number-range-dash')
+    assert not result.issues
+
+
+def test_html_entity_apostrophe_is_not_terminal_punctuation():
+    result = lint('Mode &apos;custom&apos;', 'Läge ”custom”', checks='inconsistent-punctuation')
+    assert not result.issues

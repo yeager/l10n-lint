@@ -17,6 +17,7 @@ Checks for:
 
 import argparse
 import gettext
+from html import unescape
 import json
 import locale
 import os
@@ -1162,7 +1163,9 @@ class L10nLinter:
             (r'“', 'quote-style', 'Use Swedish quotation marks ”…”'),
             (r'\b\d{1,3}(?:\.\d{3}){2,}\b', 'large-number-grouping', 'Group large Swedish numbers with spaces, not periods'),
             (r'\b\d+(?:,\d+)?%(?!\w)', 'percent-spacing', 'Insert a space before the percent sign in Swedish'),
-            (r'\b\d+[ \t]+-[ \t]+\d+\b', 'number-range-dash', 'Use an en dash for a Swedish number range'),
+            # Do not mistake a mathematical expression such as ``2/√2 - 1``
+            # for a prose number range.
+            (r'(?<![*/√])\b\d+[ \t]+-[ \t]+\d+\b', 'number-range-dash', 'Use an en dash for a Swedish number range'),
         )
         # C printf uses %% for a literal percent; it is not Swedish prose.
         # IPv4 addresses use periods as structural separators, not thousands grouping.
@@ -1448,8 +1451,12 @@ class L10nLinter:
             return
         
         # Treat '...' and '…' (U+2026) as equivalent
-        source_stripped = source.rstrip()
-        trans_stripped = translation.rstrip()
+        # XLIFF catalogs may contain one level of HTML entities inside a
+        # string (for example ``&apos;custom&apos;``).  Decode it for punctuation
+        # comparison so the entity's terminating semicolon is not treated as
+        # sentence punctuation.
+        source_stripped = unescape(source).rstrip()
+        trans_stripped = unescape(translation).rstrip()
         if (source_stripped.endswith('...') and trans_stripped.endswith('\u2026')) or \
            (source_stripped.endswith('\u2026') and trans_stripped.endswith('...')):
             return

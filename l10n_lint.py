@@ -3049,15 +3049,8 @@ class L10nLinter:
                     message=_("Source contains '{punct}' but translation does not").format(punct=punct),
                     context=source[:50]
                 ))
-            elif punct == ';' and source_has_any and not trans_has_any:
-                result.add(LintIssue(
-                    file=filepath,
-                    line=line,
-                    severity=Severity.WARNING,
-                    rule="punctuation-mismatch",
-                    message=_("Source contains '{punct}' but translation does not").format(punct=punct),
-                    context=source[:50]
-                ))
+            # Internal semicolons often become commas or a rewritten clause in
+            # natural Swedish. Only an ending semicolon is a reliable match.
 
     def _check_url_preservation(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check that URLs in source are preserved in translation."""

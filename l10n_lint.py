@@ -1123,6 +1123,13 @@ class L10nLinter:
                     start <= match.start() and match.end() <= end
                     for start, end in ipv4_spans
                 ))
+            # Some legacy PHP catalogs encode a literal percentage as ``% of``.
+            # PHP's format parser treats the `o` as a conversion specifier, so
+            # rewriting it to Swedish `% av` makes msgfmt reject the catalog.
+            if rule == 'percent-spacing' and 'php-format' in getattr(self, '_format_flags', set()):
+                matches = (match for match in matches if not re.match(
+                    r'\d+(?:,\d+)?% of\b', style_text[match.start():]
+                ))
             if next(matches, None):
                 result.add(LintIssue(filepath, line, Severity.WARNING, rule, message, source))
 

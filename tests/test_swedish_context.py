@@ -187,3 +187,11 @@ def test_swedish_quote_number_percent_and_range_forms_are_reported():
 def test_ipv4_addresses_are_not_swedish_thousands_grouping():
     result = lint('Network range', 'Använd 192.168.1.0/255.255.255.0.', checks='large-number-grouping')
     assert not result.issues
+
+
+def test_php_percent_of_literal_is_not_rewritten_to_invalid_swedish_format():
+    content = ('msgid ""\nmsgstr "Language: sv\\n"\n\n'
+               '#, php-format\nmsgid "Keep below 80% of memory."\n'
+               'msgstr "Håll under 80% of minnet."\n')
+    result = L10nLinter(disabled_rules=set(RULES) - resolve_rules(('percent-spacing',))).lint_file('sv.po', content)
+    assert not result.issues

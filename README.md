@@ -6,8 +6,8 @@
 
 ## Svenska
 
-l10n-lint granskar gettext-PO, Qt-TS, XLIFF 1.2/2.x, JSON-kataloger och
-Dart/Flutter-ARB-filer. Det
+l10n-lint granskar gettext-PO, Qt-TS, XLIFF 1.2/2.x, JSON-kataloger,
+Dart/Flutter-ARB-filer och CUPS/libcups `.strings`-kataloger. Det
 hittar tomma översättningar, syntaxfel, skillnader i platshållare och pluraler,
 felaktig formatering, brutna taggar och URL:er. Kod, kommandon, filnamn,
 funktionsnamn och identifierliknande variabelnamn i DocBook-markup kontrolleras
@@ -44,7 +44,7 @@ mänsklig granskning.
 
 ## English reference
 
-l10n-lint checks gettext PO, Qt TS, XLIFF 1.2/2.x, JSON translation catalogs and Dart/Flutter ARB files for missing translations,
+l10n-lint checks gettext PO, Qt TS, XLIFF 1.2/2.x, JSON translation catalogs, Dart/Flutter ARB files, and CUPS/libcups `.strings` catalogs for missing translations,
 invalid syntax, placeholder mismatches, plural errors and inconsistent formatting. It also preserves
 executable DocBook content such as code, commands, filenames, function names and identifiers.
 Use the command line in CI or the GTK4 desktop interface for interactive review.
@@ -59,9 +59,9 @@ number-format diagnostics.
 
 ## Features
 
-- Validate PO/TS/XLIFF/JSON/ARB syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
+- Validate PO/TS/XLIFF/JSON/ARB/`.strings` syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
 - Share diagnostic IDs and input handling between the CLI and GTK4 interface.
-- Scan local files, directories, remote PO/TS/XLIFF/JSON/ARB URLs and GitHub repositories.
+- Scan local files, directories, remote PO/TS/XLIFF/JSON/ARB/`.strings` URLs and GitHub repositories.
 - Select individual rules or groups, configure severities and load custom TSV glossaries.
 - Store project settings in `pyproject.toml` and baseline existing findings.
 - Compare translations with a source catalog to find missing or obsolete entries.
@@ -291,10 +291,11 @@ glossary = "error"
 Operational errors (invalid syntax, unreadable/missing paths, incomplete
 network fetches and invalid references) cannot be disabled. An empty scan also
 fails, including when exclusions remove every input. Repeated local paths are
-deduplicated. Directory discovery accepts `.po`, `.ts`, `.xlf`, `.xliff` and `.json`
+deduplicated. Directory discovery accepts `.po`, `.ts`, `.xlf`, `.xliff`, `.json`
+and `.strings`
 case-insensitively.
 
-## XLIFF and JSON catalogs
+## XLIFF, JSON and CUPS strings catalogs
 
 XLIFF support covers XLIFF 1.2 `trans-unit` elements and XLIFF 2.x `unit`/`segment`
 elements. The linter reads the target language, skips units marked `translate="no"`,
@@ -309,6 +310,11 @@ Plural objects with CLDR forms such as `one` and `other` are validated form by f
 Set `json-format = "nested"` to allow only nested key/value catalogs, or
 `json-format = "entries"` to allow only explicit `source`/`target` entries.
 This policy is useful when a repository also contains non-localization JSON files.
+
+CUPS/libcups `.strings` catalogs use the English source as the quoted key and
+the target text as the quoted value. l10n-lint validates their syntax and runs
+the ordinary placeholder, whitespace, punctuation and Swedish-style checks on
+each key/value pair.
 
 ```json
 {

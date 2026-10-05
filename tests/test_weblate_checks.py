@@ -104,7 +104,8 @@ def test_punctuation_mismatch():
         ("Select option:", "Välj alternativ", True),  # Missing colon
         ("Error!", "Fel", True),  # Missing exclamation
         ("Are you sure?", "Är du säker", True),  # Missing question mark
-        ("First; second", "Första, andra", True),  # Missing semicolon
+        ("First; second", "Första, andra", False),  # Internal semicolon may be localized
+        ("First;", "Först", True),  # Missing ending semicolon
         ("Normal text", "Normal text", False),  # No punctuation
     ]
     

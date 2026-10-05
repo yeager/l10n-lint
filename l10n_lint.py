@@ -2984,10 +2984,16 @@ class L10nLinter:
         
         source_clean = source.strip()
         trans_clean = translation.strip()
-        
+
         if not source_clean or not trans_clean:
             return
-        
+
+        # DocBook and XML entities end in a semicolon. They are markup, not
+        # prose punctuation (for example ``&sqlmm_compliant;`` and ``&#x03C0;``).
+        entity_pattern = r'&(?:#x[0-9A-Fa-f]+|#\d+|[A-Za-z][\w.-]*);'
+        source_clean = re.sub(entity_pattern, '', source_clean)
+        trans_clean = re.sub(entity_pattern, '', trans_clean)
+
         source_end = source_clean[-1] if source_clean else ''
         trans_end = trans_clean[-1] if trans_clean else ''
         

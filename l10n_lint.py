@@ -312,6 +312,17 @@ class POParser:
             raise ValueError("No PO entries found")
 
     def _unescape(self, s: str) -> str:
+        # gettext also permits byte escapes.  Some established catalogs use
+        # consecutive UTF-8 byte escapes (for example ``\\xC2\\xB0`` for
+        # the degree sign), which must be decoded as one byte sequence rather
+        # than as separate Unicode code points.
+        def decode_hex(match):
+            raw = bytes(int(part, 16) for part in re.findall(r'\\x([0-9A-Fa-f]{2})', match.group(0)))
+            try:
+                return raw.decode('utf-8')
+            except UnicodeDecodeError as exc:
+                raise ValueError(f"Invalid UTF-8 PO hex escape: {match.group(0)}") from exc
+        s = re.sub(r'(?:\\x[0-9A-Fa-f]{2})+', decode_hex, s)
         escapes = {'n': '\n', 't': '\t', 'r': '\r', 'b': '\b', 'f': '\f',
                    'v': '\v', 'a': '\a', '"': '"', '\\': '\\'}
         def decode(match):

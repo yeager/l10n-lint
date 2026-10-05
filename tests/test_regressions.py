@@ -65,6 +65,11 @@ def test_po_no_blank_lines_escapes_context_and_obsolete():
     assert entries[1]['_line'] == 4
 
 
+def test_po_utf8_hex_escapes_are_decoded_as_one_sequence():
+    entries = POParser('msgid "Angle"\nmsgstr "90\\xC2\\xB0"\n').entries
+    assert entries[0]['msgstr'] == '90°'
+
+
 @pytest.mark.parametrize('source,target,flags,trigger', [
     ('%1$s', '%1$d', 'c-format', True),
     ('Hello', 'Hej %s', 'c-format', True),

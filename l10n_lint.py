@@ -2915,9 +2915,13 @@ class L10nLinter:
 
     def _check_duplicate_words(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Enhanced check for duplicate words, with Swedish exceptions."""
-        translation_tokens = list(re.finditer(r'\b\w+\b', translation.lower()))
+        # Do not treat DocBook/XML element names as prose tokens.
+        markup_pattern = r'</?[A-Za-z][\w:.-]*(?:\s[^>]*)?>'
+        translation_for_tokens = re.sub(markup_pattern, ' ', translation)
+        source_for_tokens = re.sub(markup_pattern, ' ', source)
+        translation_tokens = list(re.finditer(r'\b\w+\b', translation_for_tokens.lower()))
         words = [token.group() for token in translation_tokens]
-        source_words = re.findall(r'\b\w+\b', source.lower())
+        source_words = re.findall(r'\b\w+\b', source_for_tokens.lower())
 
         def crosses_sentence_boundary(first: int, second: int) -> bool:
             """Do not call a repeated word across sentences a duplicate."""

@@ -2169,12 +2169,15 @@ class L10nLinter:
         # sufficient evidence of musical notation.
         music_keywords = {'note', 'chord', 'tempo', 'clef', 'measure', 'bar'}
         music_staff = re.search(r'\b(?:musical|music|notation|five-line) staff\b|\bstaff (?:notation|lines?)\b', source_lower)
-        if music_staff or any(keyword in source_lower for keyword in music_keywords):
+        music_keyword = any(re.search(rf'\b{re.escape(keyword)}\b', source_lower) for keyword in music_keywords)
+        if music_staff or music_keyword:
             return 'music'
-        
-        # Web platform domain keywords
-        web_keywords = {'tracker', 'repository', 'commit', 'merge', 'branch', 'pull request', 'issue'}
-        if any(keyword in source_lower for keyword in web_keywords):
+
+        # A hardware tracker (for example PS Move Tracker) is not an issue tracker.
+        # Treat tracker as web terminology only when it is explicitly issue-related.
+        web_keywords = {'repository', 'commit', 'merge', 'branch', 'pull request', 'issue'}
+        issue_tracker = re.search(r'\b(?:issue|bug) tracker\b|\btracker (?:issue|bug)\b', source_lower)
+        if issue_tracker or any(keyword in source_lower for keyword in web_keywords):
             return 'web'
         
         # Mail domain keywords
@@ -2204,7 +2207,7 @@ class L10nLinter:
             pass  # OK, using one consistently
         # Flag "repostera/reposta" variants
         for anglicism in ['forwarda', 'patcha', 'committa', 'pusha', 'mergea', 'fetcha', 'brancha', 'deploya']:
-            if anglicism in translation.lower():
+            if re.search(rf'\b{re.escape(anglicism)}\b', translation.lower()):
                 result.add(LintIssue(
                     file=filepath,
                     line=line,

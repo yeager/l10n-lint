@@ -639,9 +639,11 @@ class StringsParser:
                 source, translation = (json.loads(value) for value in match.groups())
             except json.JSONDecodeError as exc:
                 raise ValueError(f'Line {line_number}: invalid .strings escape: {exc.msg}') from exc
+            source_is_key = bool(SYMBOLIC_MESSAGE_KEY.fullmatch(source))
             self.entries.append({
                 '_id': source, '_context': '', '_line': line_number,
                 '_language': self.language, 'source': source,
+                '_source_is_key': source_is_key,
                 'translation': translation, '_translations': [translation],
                 '_plural_categories': (), '_type': '',
             })

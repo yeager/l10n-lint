@@ -46,6 +46,14 @@ def test_cups_strings_parses_escapes_and_runs_shared_checks():
     assert rules(result) == ['missing-translation']
 
 
+def test_cups_strings_treats_symbolic_keys_as_context():
+    content = '"media.iso_a0_841x1189mm" = "A0";\n'
+    parser = StringsParser(content, 'sv.strings')
+    assert parser.entries[0]['_source_is_key'] is True
+    result = L10nLinter().lint_file('sv.strings', content)
+    assert rules(result) == []
+
+
 def test_cups_strings_reports_invalid_syntax():
     result = L10nLinter().lint_file('sv.strings', '"Save" = "Spara"\n')
     assert rules(result) == ['syntax-error']

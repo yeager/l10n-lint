@@ -176,6 +176,12 @@ def test_space_before_swedish_punctuation_is_reported():
     assert not lint('Hello!', 'Hej!', checks=('space-before-punctuation',)).issues
 
 
+def test_source_preserved_cli_spacing_is_not_swedish_punctuation_error():
+    result = lint('--exec utility [argument ...] ;', '--exec utility [argument ...] ;',
+                  checks=('space-before-punctuation',))
+    assert not result.issues
+
+
 def test_swedish_quote_number_percent_and_range_forms_are_reported():
     result = lint('Example', '“Exempel” 1.000.000, 8,65% och 11 - 12.', checks='quote-style,large-number-grouping,percent-spacing,number-range-dash')
     assert {issue.rule for issue in result.issues} == {
@@ -195,4 +201,3 @@ def test_php_percent_of_literal_is_not_rewritten_to_invalid_swedish_format():
                'msgstr "Håll under 80% of minnet."\n')
     result = L10nLinter(disabled_rules=set(RULES) - resolve_rules(('percent-spacing',))).lint_file('sv.po', content)
     assert not result.issues
-

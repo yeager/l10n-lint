@@ -1177,6 +1177,10 @@ class L10nLinter:
         spacing_matches = re.finditer(r'\S[ \t]+(?:[.,?;:]|!(?!=))(?!\w)', translation)
         has_spacing_error = any(
             not (match.group().endswith('.') and translation[match.end():match.end() + 2] == '..')
+            # Command grammars deliberately align punctuation, for example
+            # ``[argument ...] ;``.  Preserve it when the exact structural
+            # fragment is present in the source as well.
+            and match.group() not in source
             for match in spacing_matches
         )
         if (has_spacing_error

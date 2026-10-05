@@ -2997,6 +2997,10 @@ class L10nLinter:
         printf_pattern = r'(?<!%)%(?:\d+\$)?[-+ #0]*\d*(?:\.\d+)?[a-zA-Z]'
         translation_for_tokens = re.sub(printf_pattern, ' ', translation_for_tokens)
         source_for_tokens = re.sub(printf_pattern, ' ', source_for_tokens)
+        # Slash-separated UI alternatives such as "Lås/lås upp" are two
+        # commands, not an accidental doubled word.
+        translation_for_tokens = re.sub(r'(?<=\w)/(?=\w)', '. ', translation_for_tokens)
+        source_for_tokens = re.sub(r'(?<=\w)/(?=\w)', '. ', source_for_tokens)
         translation_tokens = list(re.finditer(r'\b\w+\b', translation_for_tokens.lower()))
         words = [token.group() for token in translation_tokens]
         source_words = re.findall(r'\b\w+\b', source_for_tokens.lower())

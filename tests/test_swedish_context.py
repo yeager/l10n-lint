@@ -219,3 +219,8 @@ def test_math_subtraction_is_not_a_swedish_number_range():
 def test_html_entity_apostrophe_is_not_terminal_punctuation():
     result = lint('Mode &apos;custom&apos;', 'Läge ”custom”', checks='inconsistent-punctuation')
     assert not result.issues
+
+
+def test_slash_separated_ui_actions_are_not_duplicate_words():
+    result = lint('Lock/Unlock View', 'Lås/lås upp vy', checks='duplicate-words')
+    assert not result.issues

@@ -2978,6 +2978,12 @@ class L10nLinter:
         markup_pattern = r'</?[A-Za-z][\w:.-]*(?:\s[^>]*)?>'
         translation_for_tokens = re.sub(markup_pattern, ' ', translation)
         source_for_tokens = re.sub(markup_pattern, ' ', source)
+        # C/Python printf placeholders such as %d and %1$s are technical
+        # tokens, not prose words.  Remove them before detecting accidental
+        # repetitions like "ord ord".
+        printf_pattern = r'(?<!%)%(?:\d+\$)?[-+ #0]*\d*(?:\.\d+)?[a-zA-Z]'
+        translation_for_tokens = re.sub(printf_pattern, ' ', translation_for_tokens)
+        source_for_tokens = re.sub(printf_pattern, ' ', source_for_tokens)
         translation_tokens = list(re.finditer(r'\b\w+\b', translation_for_tokens.lower()))
         words = [token.group() for token in translation_tokens]
         source_words = re.findall(r'\b\w+\b', source_for_tokens.lower())

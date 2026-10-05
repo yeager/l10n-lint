@@ -1115,8 +1115,15 @@ class L10nLinter:
         )
         # C printf uses %% for a literal percent; it is not Swedish prose.
         style_text = re.sub(r'%%', '', translation)
+        ipv4_spans = [match.span() for match in re.finditer(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', style_text)]
         for pattern, rule, message in checks:
-            if re.search(pattern, style_text):
+            matches = re.finditer(pattern, style_text)
+            if rule == 'large-number-grouping':
+                matches = (match for match in matches if not any(
+                    start <= match.start() and match.end() <= end
+                    for start, end in ipv4_spans
+                ))
+            if next(matches, None):
                 result.add(LintIssue(filepath, line, Severity.WARNING, rule, message, source))
 
     def _check_swedish_punctuation_spacing(self, filepath, line, source, translation, result):

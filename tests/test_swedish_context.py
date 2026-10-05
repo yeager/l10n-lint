@@ -182,3 +182,8 @@ def test_swedish_quote_number_percent_and_range_forms_are_reported():
         'quote-style', 'large-number-grouping', 'percent-spacing', 'number-range-dash',
     }
     assert not lint('Example', '”Exempel” 1 000 000, 8,65 % och 11–12.', checks='quote-style,large-number-grouping,percent-spacing,number-range-dash').issues
+
+
+def test_ipv4_addresses_are_not_swedish_thousands_grouping():
+    result = lint('Network range', 'Använd 192.168.1.0/255.255.255.0.', checks='large-number-grouping')
+    assert not result.issues

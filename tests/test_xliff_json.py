@@ -152,6 +152,15 @@ def test_json_root_entry_allows_locale_metadata():
     assert rules(result) == ['placeholder-mismatch']
 
 
+def test_crowdin_explicit_entries_allow_numeric_catalog_metadata():
+    content = json.dumps([{
+        'stringId': 42, 'fileId': 7, 'source': 'Save %s', 'translation': 'Spara %s',
+    }])
+    result = L10nLinter({'language': 'sv'}).lint_file('sv.json', content)
+    assert result.entries_checked == 1
+    assert not result.issues
+
+
 def test_json_null_target_is_an_empty_translation():
     result = L10nLinter().lint_file('sv.json', json.dumps({'source': 'Save', 'target': None}))
     assert result.entries_checked == 1

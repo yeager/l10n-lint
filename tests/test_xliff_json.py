@@ -270,6 +270,24 @@ def test_nested_json_does_not_compare_placeholders_against_key_names(tmp_path):
     assert not [issue for issue in result.issues if issue.rule == 'placeholder-mismatch']
 
 
+def test_webextension_message_metadata_is_not_treated_as_a_translation():
+    content = json.dumps({
+        'save': {'message': 'Spara', 'description': ''},
+        'greeting': {
+            'message': 'Hej $NAME$',
+            'description': 'A greeting',
+            'placeholders': {'name': {'content': '$1'}},
+        },
+    })
+    parser = JSONParser(content, 'sv.json')
+    assert [(entry['_id'], entry['translation']) for entry in parser.entries] == [
+        ('save', 'Spara'), ('greeting', 'Hej $NAME$'),
+    ]
+    result = L10nLinter().lint_file('sv.json', content)
+    assert result.entries_checked == 2
+    assert 'missing-translation' not in rules(result)
+
+
 def test_properties_catalog_lints_values_without_treating_keys_as_source():
     content = 'menu.open=Öppna\nmenu.empty=\n'
     parser = PropertiesParser(content, 'sv.properties')

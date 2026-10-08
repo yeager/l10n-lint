@@ -805,6 +805,17 @@ class JSONParser:
             return
         if not isinstance(value, dict):
             raise ValueError('JSON catalog root must be an object or entry list')
+        # Chromium/WebExtension locale bundles use an object per message, with
+        # a translated ``message`` plus optional non-translatable metadata such
+        # as ``description`` and ``placeholders``.  Do not mistake an empty
+        # description for an unfinished translation.
+        if ('message' in value and isinstance(value.get('message'), str)
+                and set(value) <= {'message', 'description', 'placeholders'}):
+            if self.format == 'entries':
+                raise ValueError('JSON format policy only allows explicit entries')
+            key = path[-1] if path else 'message'
+            self._append(key, value['message'], path, value, source_is_key=True)
+            return
         # A nested catalog can legitimately have a translated key named
         # ``source`` (for example a UI label "Source" alongside other fields).
         # It is an explicit source/target entry only when it also declares a

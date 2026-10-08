@@ -171,7 +171,18 @@ def test_same_plurals():
     else:
         print("✅ PASS: same-plurals correctly triggered for different source, same translation")
     
-    # Test case 2: Same source plurals, same translation plurals (should NOT trigger)
+    # Test case 2: Swedish "byte" has the same singular and plural form.
+    entry_byte = {
+        'msgstr[0]': '%d byte',
+        'msgstr[1]': '%d byte'
+    }
+    result_byte = LintResult()
+    linter._check_same_plurals('test.po', 2, '%d byte', '%d bytes', entry_byte, result_byte)
+    if any(issue.rule == 'same-plurals' for issue in result_byte.issues):
+        print("❌ FAIL: same-plurals should allow Swedish byte")
+        raise AssertionError("Lint check returned unexpected results")
+
+    # Test case 3: Same source plurals, same translation plurals (should NOT trigger)
     entry2 = {
         'msgstr[0]': 'Får', 
         'msgstr[1]': 'Får'

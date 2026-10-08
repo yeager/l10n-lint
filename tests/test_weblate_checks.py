@@ -122,6 +122,7 @@ def test_url_preservation():
         ("Visit https://example.com", "Besök https://example.com", False),  # URL preserved
         ("Visit https://example.com.", "Besök https://example.com.", False),  # Sentence punctuation is not URL content
         ('Open "https://vault.passky.org"', 'Öppna ”https://vault.passky.org”', False),  # Swedish quotation marks are not URL content
+        ('Use https://, http://, or androidapp://', 'Använd https://, http:// eller androidapp://', False),  # Bare protocols are preserved
         ("No URLs here", "Inga URLer här", False),  # No URLs
     ]
     

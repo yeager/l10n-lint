@@ -3194,7 +3194,7 @@ class L10nLinter:
 
     def _check_url_preservation(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check that URLs in source are preserved in translation."""
-        url_pattern = r'https?://[^\s<>"\']+'
+        url_pattern = r'https?://[^\s<>"\']*'
 
         def urls(text: str) -> set[str]:
             # Sentence punctuation is not normally part of a URL. Treat a

@@ -162,6 +162,9 @@ def test_leading_runtime_placeholder_does_not_trigger_capitalization():
 @pytest.mark.parametrize('source,translation', [
     ('April', 'april'), ('September', 'september'),
     ('November', 'november'), ('December', 'december'),
+    ('Jan', 'jan'), ('Feb', 'feb'), ('Apr', 'apr'), ('Jun', 'jun'),
+    ('Jul', 'jul'), ('Aug', 'aug'), ('Sep', 'sep'), ('Nov', 'nov'),
+    ('Dec', 'dec'),
 ])
 def test_swedish_month_labels_use_lowercase(source, translation):
     result = lint(source, translation, checks=('inconsistent-capitalization',))

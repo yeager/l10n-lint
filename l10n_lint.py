@@ -1580,6 +1580,11 @@ class L10nLinter:
             'April': 'april', 'May': 'maj', 'June': 'juni', 'July': 'juli',
             'August': 'augusti', 'September': 'september',
             'October': 'oktober', 'November': 'november', 'December': 'december',
+            # Calendar widgets often use title-cased English abbreviations.
+            # Swedish abbreviations remain lowercase when displayed as labels.
+            'Jan': 'jan', 'Feb': 'feb', 'Mar': 'mar', 'Apr': 'apr',
+            'May': 'maj', 'Jun': 'jun', 'Jul': 'jul', 'Aug': 'aug',
+            'Sep': 'sep', 'Oct': 'okt', 'Nov': 'nov', 'Dec': 'dec',
         }
         if source_trimmed == source and translation.strip() == swedish_months.get(source_trimmed):
             return

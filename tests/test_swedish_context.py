@@ -7,7 +7,7 @@ from xml.sax.saxutils import escape
 
 import pytest
 
-from l10n_lint import L10nLinter, RULES, resolve_rules
+from l10n_lint import L10nLinter, LintResult, RULES, resolve_rules
 
 
 def catalog(source, translation, context='', kind='po'):
@@ -259,3 +259,11 @@ def test_crlf_and_lf_have_equivalent_escape_counts():
     result = lint('First line\r\nSecond line', 'Första raden\nAndra raden',
                   checks=('escaped-chars-mismatch',))
     assert not result.issues
+
+
+def test_same_plural_forms_allow_invariant_swedish_trad():
+    result = LintResult()
+    L10nLinter()._check_same_plurals(
+        'test.po', 1, 'Tree', 'Trees',
+        {'msgstr[0]': 'Ta bort träd', 'msgstr[1]': 'Ta bort träd'}, result)
+    assert not any(issue.rule == 'same-plurals' for issue in result.issues)

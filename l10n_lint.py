@@ -3123,8 +3123,9 @@ class L10nLinter:
         # Check if all plural forms are identical
         if len(set(msgstr_values)) == 1:
             # Swedish uses the same form for the measurement unit "byte" in
-            # singular and plural ("1 byte", "2 byte").
-            if re.search(r'\bbyte\b', msgstr_values[0], re.IGNORECASE):
+            # singular and plural ("1 byte", "2 byte").  The neuter noun
+            # "träd" is likewise invariant ("ett träd", "flera träd").
+            if re.search(r'\b(?:byte|träd)\b', msgstr_values[0], re.IGNORECASE):
                 return
             # Exception: if source plural/singular are also identical
             if msgid != msgid_plural:

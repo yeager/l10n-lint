@@ -1689,6 +1689,10 @@ class L10nLinter:
     
     def _check_escapes(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for escaped character mismatches (newlines, tabs, etc.)."""
+        # PO imports can normalize Windows CRLF line endings to LF. They carry
+        # the same line structure and must not be treated as a missing escape.
+        source = source.replace('\r\n', '\n')
+        translation = translation.replace('\r\n', '\n')
         # Count actual escape characters (after unescape has been applied)
         escape_chars = {'\n': '\\n', '\t': '\\t', '\r': '\\r'}
         

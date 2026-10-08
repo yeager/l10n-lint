@@ -241,3 +241,9 @@ def test_end_stop_inside_matching_markup_is_preserved():
     result = lint('Choose <em>Default.</em>', 'Välj <em>Standard.</em>',
                   checks=('end-stop-mismatch',))
     assert not result.issues
+
+
+def test_crlf_and_lf_have_equivalent_escape_counts():
+    result = lint('First line\r\nSecond line', 'Första raden\nAndra raden',
+                  checks=('escaped-chars-mismatch',))
+    assert not result.issues

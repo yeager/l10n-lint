@@ -4,6 +4,7 @@
 
 - Avoid Swedish false positives for generic UI notes, symbolic runtime keys and
   terminal punctuation enclosed by closing XML/HTML tags.
+- Treat equivalent CRLF and LF line endings as the same escaped newline shape.
 
 ## [1.23.0] - 2026-10-04
 

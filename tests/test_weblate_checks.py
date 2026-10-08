@@ -77,6 +77,7 @@ def test_xml_tags_mismatch():
         ("This is <b>bold</b> text", "Detta är <b>fet text", True),  # Missing closing tag
         ("Simple text", "Enkel <b>text</b>", True),  # Extra tags
         ("<b>Bold</b> and <i>italic</i>", "<b>Fet</b> och <i>kursiv</i>", False),  # Perfect match
+        ("%*s<not executed on terminal>", "%*s<kördes inte i terminal>", False),  # Visible terminal label
         ("Text with <B>bold</B>", "Text med <b>fet</b>", True),  # Case mismatch
     ]
     

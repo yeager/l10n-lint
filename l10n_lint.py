@@ -2961,7 +2961,11 @@ class L10nLinter:
         # brackets for metavariables (``<file>``, ``<subject>``) rather than
         # markup. Such tokens have no closing tag on either side, so their
         # contents may be translated without changing program syntax.
-        if source_tags and trans_tags and not any(slash for slash, _ in source_tags + trans_tags):
+        # A tag-like token with no closing companion is normally a visible
+        # terminal label or a command metavariable, not markup. Keep genuine
+        # HTML void elements checkable because they are structural markup.
+        html_void_tags = frozenset({'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'})
+        if source_tags and not any(slash for slash, _ in source_tags + trans_tags) and not any(tag.lower() in html_void_tags for _, tag in source_tags + trans_tags):
             return
         
         # Convert to sorted lists of (closing_slash, tag_name) pairs - keep case for comparison

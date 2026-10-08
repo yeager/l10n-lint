@@ -159,6 +159,15 @@ def test_leading_runtime_placeholder_does_not_trigger_capitalization():
     assert not result.issues
 
 
+@pytest.mark.parametrize('source,translation', [
+    ('April', 'april'), ('September', 'september'),
+    ('November', 'november'), ('December', 'december'),
+])
+def test_swedish_month_labels_use_lowercase(source, translation):
+    result = lint(source, translation, checks=('inconsistent-capitalization',))
+    assert not result.issues
+
+
 def test_comma_before_och_is_reported_for_swedish_targets():
     result = lint('Open the file, and save it.', 'Öppna filen, och spara den.', checks=('comma-before-och',))
     assert [issue.rule for issue in result.issues] == ['comma-before-och']

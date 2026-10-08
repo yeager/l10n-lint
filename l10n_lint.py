@@ -1568,6 +1568,17 @@ class L10nLinter:
             return
         source_first = source_trimmed[0]
         trans_first = trans_trimmed[0]
+
+        # Swedish month names use lowercase even when English calendar labels
+        # use title case.  They are labels, not sentence openings.
+        swedish_months = {
+            'January': 'januari', 'February': 'februari', 'March': 'mars',
+            'April': 'april', 'May': 'maj', 'June': 'juni', 'July': 'juli',
+            'August': 'augusti', 'September': 'september',
+            'October': 'oktober', 'November': 'november', 'December': 'december',
+        }
+        if source_trimmed == source and translation.strip() == swedish_months.get(source_trimmed):
+            return
         
         if source_first and trans_first:
             if source_first.isupper() and trans_first.islower():

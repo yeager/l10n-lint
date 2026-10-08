@@ -53,6 +53,7 @@ def test_end_stop_mismatch():
         ("OK.", "OK", False),  # Short string ignored
         ("Contact Mr. Johnson for details.", "Kontakta Mr. Johnson för detaljer", False),  # Abbreviation
         ("Loading...", "Laddar…", False),  # Ellipsis mapping allowed
+        ("Login", "Inloggn.", False),  # Swedish fixed-width column abbreviation
         ("Save file.", "Spara fil.", False),  # Both have period
     ]
     

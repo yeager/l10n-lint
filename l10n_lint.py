@@ -1470,6 +1470,10 @@ class L10nLinter:
         # sentence punctuation.
         source_stripped = unescape(source).rstrip()
         trans_stripped = unescape(translation).rstrip()
+        # Standard abbreviations used as fixed-width Swedish column headings
+        # carry a period as part of the abbreviation.
+        if trans_stripped in frozenset({'Inloggn.'}):
+            return
         if (source_stripped.endswith('...') and trans_stripped.endswith('\u2026')) or \
            (source_stripped.endswith('\u2026') and trans_stripped.endswith('...')):
             return
@@ -2893,6 +2897,13 @@ class L10nLinter:
         
         source_ends_dot = source_punctuation.endswith('.')
         trans_ends_dot = trans_punctuation.endswith('.')
+
+        # Narrow headings sometimes need a standard Swedish abbreviation to
+        # fit a fixed-width terminal column.  The final period belongs to the
+        # abbreviation, not to sentence punctuation.
+        swedish_column_abbreviations = frozenset({'Inloggn.'})
+        if trans_punctuation in swedish_column_abbreviations:
+            return
         
         # Allow "..." → "…" mapping
         source_ends_ellipsis = source_punctuation.endswith('...')

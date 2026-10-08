@@ -1432,8 +1432,10 @@ class L10nLinter:
                 context=source[:50]
             ))
         
-        # Check for suspiciously short translation
-        if source and len(source) > 10 and len(translation) < len(source) * 0.2:
+        # Check for suspiciously short translation. Symbolic runtime keys such
+        # as QT_LAYOUT_DIRECTION are identifiers rather than prose.
+        symbolic_key = bool(re.fullmatch(r'[A-Z][A-Z0-9_]+', source.strip()))
+        if source and not symbolic_key and len(source) > 10 and len(translation) < len(source) * 0.2:
             result.add(LintIssue(
                 file=filepath,
                 line=line,
@@ -2242,10 +2244,14 @@ class L10nLinter:
         # only treat it as music when the surrounding source makes that sense.
         # `key` and `scale` are common in font editors; they alone are not
         # sufficient evidence of musical notation.
-        music_keywords = {'note', 'chord', 'tempo', 'clef', 'measure', 'bar'}
+        music_keywords = {'chord', 'tempo', 'clef', 'measure', 'bar'}
         music_staff = re.search(r'\b(?:musical|music|notation|five-line) staff\b|\bstaff (?:notation|lines?)\b', source_lower)
         music_keyword = any(re.search(rf'\b{re.escape(keyword)}\b', source_lower) for keyword in music_keywords)
-        if music_staff or music_keyword:
+        # A generic UI note is not a musical note. Require additional musical
+        # context before classifying a string containing only “note” as music.
+        music_note = bool(re.search(r'\bnote\b', source_lower) and re.search(
+            r'\b(?:music|musical|notation|score|melody|rhythm|chord|tempo|clef|measure|bar)\b', source_lower))
+        if music_staff or music_keyword or music_note:
             return 'music'
 
         # A hardware tracker (for example PS Move Tracker) is not an issue tracker.
@@ -2847,6 +2853,11 @@ class L10nLinter:
         
         source_clean = source.strip()
         trans_clean = translation.strip()
+        # A terminal full stop inside matching markup is still terminal
+        # punctuation, e.g. <em>Sentence.</em>.
+        trailing_tags = re.compile(r'(?:</[A-Za-z][A-Za-z0-9:_-]*>\s*)+$')
+        source_punctuation = trailing_tags.sub('', source_clean).rstrip()
+        trans_punctuation = trailing_tags.sub('', trans_clean).rstrip()
         
         # Skip if source contains common abbreviations  
         abbrev_patterns = [r'\b(Mr|Mrs|Ms|Dr|Prof|etc|vs|e\.g|i\.e)\.']
@@ -2854,12 +2865,12 @@ class L10nLinter:
             if re.search(pattern, source_clean, re.IGNORECASE):
                 return
         
-        source_ends_dot = source_clean.endswith('.')
-        trans_ends_dot = trans_clean.endswith('.')
+        source_ends_dot = source_punctuation.endswith('.')
+        trans_ends_dot = trans_punctuation.endswith('.')
         
         # Allow "..." → "…" mapping
-        source_ends_ellipsis = source_clean.endswith('...')
-        trans_ends_ellipsis = trans_clean.endswith('…') or trans_clean.endswith('...')
+        source_ends_ellipsis = source_punctuation.endswith('...')
+        trans_ends_ellipsis = trans_punctuation.endswith('…') or trans_punctuation.endswith('...')
         
         if source_ends_ellipsis and trans_ends_ellipsis:
             return  # Both have ellipsis - OK
@@ -3082,6 +3093,11 @@ class L10nLinter:
         
         source_clean = source.strip()
         trans_clean = translation.strip()
+        # A terminal full stop inside matching markup is still terminal
+        # punctuation, e.g. <em>Sentence.</em>.
+        trailing_tags = re.compile(r'(?:</[A-Za-z][A-Za-z0-9:_-]*>\s*)+$')
+        source_clean = trailing_tags.sub('', source_clean).rstrip()
+        trans_clean = trailing_tags.sub('', trans_clean).rstrip()
 
         if not source_clean or not trans_clean:
             return

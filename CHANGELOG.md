@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+- Avoid Swedish false positives for generic UI notes, symbolic runtime keys and
+  terminal punctuation enclosed by closing XML/HTML tags.
+
 ## [1.23.0] - 2026-10-04
 
 - Add Dart/Flutter ARB catalog support and document it in the README.

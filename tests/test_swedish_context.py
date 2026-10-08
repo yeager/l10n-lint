@@ -224,3 +224,20 @@ def test_html_entity_apostrophe_is_not_terminal_punctuation():
 def test_slash_separated_ui_actions_are_not_duplicate_words():
     result = lint('Lock/Unlock View', 'Lås/lås upp vy', checks='duplicate-words')
     assert not result.issues
+
+def test_generic_note_is_not_classified_as_music():
+    result = lint('Note: motion input may require configuration.',
+                  'Obs: rörelseinmatning kan kräva konfiguration.',
+                  checks=('domain-terminology',))
+    assert not result.issues
+
+
+def test_symbolic_runtime_key_is_not_suspiciously_short():
+    result = lint('QT_LAYOUT_DIRECTION', 'LTR', checks=('suspicious-length',))
+    assert not result.issues
+
+
+def test_end_stop_inside_matching_markup_is_preserved():
+    result = lint('Choose <em>Default.</em>', 'Välj <em>Standard.</em>',
+                  checks=('end-stop-mismatch',))
+    assert not result.issues

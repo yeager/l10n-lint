@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.23.2] - 2026-10-08
+
+- Accept the established Swedish compound `processstatus` without a typo warning.
+
 - Avoid Swedish false positives for generic UI notes, symbolic runtime keys and
   terminal punctuation enclosed by closing XML/HTML tags.
 - Treat equivalent CRLF and LF line endings as the same escaped newline shape.
@@ -66,7 +70,7 @@
 ## [1.21.4] - 2026-09-19
 
 - Fix CI coverage for JSON placeholder checks and Swedish compound spelling.
-- Preserve title-case Processstatus while flagging the lowercase typo.
+- Add triple-consonant typo checks for Swedish compounds.
 
 ## [1.21.3] - 2026-09-19
 

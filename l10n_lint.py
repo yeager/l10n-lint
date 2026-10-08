@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.1"
+__version__ = "1.23.2"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings'})
@@ -2556,16 +2556,17 @@ class L10nLinter:
 
 
     # Pattern-based typo detection (no external dictionary needed)
-    # Swedish spelling normally reduces a compound boundary with three equal
-    # consecutive consonants to two (process + status → processtatus).  Treat all
-    # triple-letter runs as suspicious; _check_typos exempts intentional
-    # exclamations and format tokens before reporting them.
+    # Swedish spelling usually reduces a compound boundary with three equal
+    # consecutive consonants to two. A small curated set of established words
+    # keeps their triple consonants, such as processstatus.
     _TYPO_DOUBLED_RE = re.compile(
         r'([a-zåäö])\1{2,}'
         r'|([^lnrstdgk])(\2)'  # Doubled consonants that are rare in Swedish (except l,n,r,s,t,d,g,k)
         , re.IGNORECASE
     )
     # Common Swedish misspelling patterns (curated, low false positive)
+    _VALID_TRIPLE_CONSONANT_WORDS = {'processstatus'}
+
     _COMMON_TYPOS = {
         # Doubled characters
         'ogiltligt': 'ogiltigt', 'borttagninngsnivå': 'borttagningsnivå',
@@ -2627,7 +2628,8 @@ class L10nLinter:
             # Unchanged source tokens (IEEE, PPP, pppd, III, www) are
             # technical names, not Swedish compounds. Curated typo checks
             # above still apply, including when the source repeats a typo.
-            if word.lower() in source_words:
+            if (word.lower() in source_words
+                    or word.lower() in self._VALID_TRIPLE_CONSONANT_WORDS):
                 continue
             # yyyy is a year token too; keep the exemption at word boundaries
             # so repeated letters inside actual words still receive diagnostics.

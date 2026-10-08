@@ -35,8 +35,8 @@ def test_hyphenated_placeholder_is_not_an_html_tag():
     assert not issues_for(L10nLinter._check_xml_tags_mismatch, '<your-organization>', '<din-organisation>')
 
 
-def test_triple_consonants_in_swedish_compounds_are_typos():
-    assert issues_for(L10nLinter._check_typos, 'Process Status', 'Processstatus')
+def test_triple_consonants_in_swedish_compounds_are_typos_except_known_words():
+    assert not issues_for(L10nLinter._check_typos, 'Process Status', 'Processstatus')
     assert issues_for(L10nLinter._check_typos, 'Up arrow', 'upppil')
 
 

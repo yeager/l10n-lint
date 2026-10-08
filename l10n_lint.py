@@ -2935,7 +2935,7 @@ class L10nLinter:
     def _check_xml_tags_mismatch(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check that XML/HTML tags match between source and translation."""
         # Combo-box sentinel values like <None> are visible text, not markup.
-        sentinel = r'\s*<[^<>]+>\s*'
+        sentinel = r'\s*\(?<[^<>]+>\)?\s*'
         if re.fullmatch(sentinel, source) and re.fullmatch(sentinel, translation):
             return
         # Extract all tags from both strings

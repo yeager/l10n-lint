@@ -3198,9 +3198,9 @@ class L10nLinter:
 
         def urls(text: str) -> set[str]:
             # Sentence punctuation is not normally part of a URL. Treat a
-            # trailing full stop, comma, colon, semicolon, question mark, or
-            # exclamation mark equally on source and target.
-            return {url.rstrip('.,;:!?') for url in re.findall(url_pattern, text)}
+            # trailing punctuation or a closing quotation mark equally on source
+            # and target. Swedish typography commonly uses curly quotes.
+            return {url.rstrip('.,;:!?)]}\"”’»') for url in re.findall(url_pattern, text)}
 
         source_urls = urls(source)
         trans_urls = urls(translation)

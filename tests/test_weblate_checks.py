@@ -121,6 +121,7 @@ def test_url_preservation():
         ("Download from https://original.com/file", "Ladda ner från https://different.com/file", True),  # Changed URL  
         ("Visit https://example.com", "Besök https://example.com", False),  # URL preserved
         ("Visit https://example.com.", "Besök https://example.com.", False),  # Sentence punctuation is not URL content
+        ('Open "https://vault.passky.org"', 'Öppna ”https://vault.passky.org”', False),  # Swedish quotation marks are not URL content
         ("No URLs here", "Inga URLer här", False),  # No URLs
     ]
     

@@ -207,7 +207,13 @@ def test_swedish_quote_number_percent_and_range_forms_are_reported():
     assert {issue.rule for issue in result.issues} == {
         'quote-style', 'large-number-grouping', 'percent-spacing', 'number-range-dash',
     }
-    assert not lint('Example', '”Exempel” 1 000 000, 8,65 % och 11–12.', checks='quote-style,large-number-grouping,percent-spacing,number-range-dash').issues
+    assert not lint('Example', '”Exempel” 1 000 000, 8,65 % och 11 till 12.', checks='quote-style,large-number-grouping,percent-spacing,number-range-dash').issues
+
+
+def test_swedish_dashes_are_reported():
+    result = lint('Example', 'Röd–grön och en paus — här.', checks='swedish-dash')
+    assert {issue.rule for issue in result.issues} == {'swedish-dash'}
+    assert not lint('Example', 'Röd till grön. En paus här.', checks='swedish-dash').issues
 
 
 def test_ipv4_addresses_are_not_swedish_thousands_grouping():

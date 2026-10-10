@@ -186,7 +186,8 @@ RULES = {
     'quote-style': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Swedish quote style'),
     'large-number-grouping': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Large number grouping'),
     'percent-spacing': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Percent spacing'),
-    'number-range-dash': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Number range dash'),
+    'number-range-dash': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Number range separator'),
+    'swedish-dash': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Dash in Swedish translation'),
     'comma-before-och': RuleSpec('_check_comma_before_och', 'warning', 'sv', 'Comma before och'),
     'currency-localization': RuleSpec('_check_currency_localization', 'info', 'sv', 'Currency localization'),
     'date-format': RuleSpec('_check_date_format', 'warning', 'sv', 'Date format'),
@@ -1174,9 +1175,11 @@ class L10nLinter:
             (r'“', 'quote-style', 'Use Swedish quotation marks ”…”'),
             (r'\b\d{1,3}(?:\.\d{3}){2,}\b', 'large-number-grouping', 'Group large Swedish numbers with spaces, not periods'),
             (r'\b\d+(?:,\d+)?%(?!\w)', 'percent-spacing', 'Insert a space before the percent sign in Swedish'),
-            # Do not mistake a mathematical expression such as ``2/√2 - 1``
-            # for a prose number range.
-            (r'(?<![*/√])\b\d+[ \t]+-[ \t]+\d+\b', 'number-range-dash', 'Use an en dash for a Swedish number range'),
+            # Keep this preference separate from mathematical expressions such as
+            # ``2/√2 - 1``. Swedish project translations use the word ``till``
+            # for numeric ranges instead of a dash.
+            (r'(?<![*/√])\b\d+(?:[ \t]*[-–][ \t]*)\d+\b', 'number-range-dash', 'Use ”till” rather than a dash in a Swedish number range'),
+            (r'[–—]', 'swedish-dash', 'Avoid en and em dashes in Swedish translations; use words or punctuation'),
         )
         # C printf uses %% for a literal percent; it is not Swedish prose.
         # IPv4 addresses use periods as structural separators, not thousands grouping.

@@ -36,8 +36,8 @@ Kör l10n-lint först för katalogstruktur, formatsträngar, markup och URL:er.
 Granska sedan med svlang, hunspell-sv, swedish-foss-terminology och swedish-tm.
 Kontrollera varje träff i dess gränssnittskontext. Svenska regler omfattar ingen
 komma omedelbart före `och`, korrekt skiljeteckensmellanrum, citattecken,
-utelämningstecknet `…`, procentformat, siffergruppering och tankstreck i
-intervall. Crowdin-text före `|` är metadata och får inte synas i måltexten.
+utelämningstecknet `…`, procentformat, siffergruppering och ordet `till` i
+intervall. Tankstreck och långt tankstreck flaggas i svenska måltexter. Crowdin-text före `|` är metadata och får inte synas i måltexten.
 
 Betydelse, tilltal, stilnivå och kontextberoende facktermer kräver alltid
 mänsklig granskning.
@@ -164,7 +164,7 @@ source and target in their product context.
 
 Swedish checks include the project rule against a comma directly before `och`,
 punctuation spacing, Swedish quotation marks, `…` rather than three dots,
-percent formatting, digit grouping and en dashes in ranges. A Crowdin prefix
+percent formatting, digit grouping and the word `till` in ranges. En and em dashes are flagged in Swedish targets. A Crowdin prefix
 before `|` is metadata and must not be translated or retained in visible text.
 Meaning, address, register and context-sensitive terminology always need manual
 review.

@@ -317,3 +317,31 @@ def test_xliff_context_prefix_is_removed_before_source_checks():
     assert [issue.rule for issue in result.issues].count('context-prefix-leak') == 1
     assert all(issue.rule != 'source-equals-translation' for issue in result.issues)
     assert all(issue.rule != 'python-format' for issue in result.issues)
+
+
+def test_json_parser_supports_transifex_message_objects_with_nullable_metadata():
+    content = json.dumps({
+        'project.title': {
+            'string': 'Projekttitel',
+            'context': '',
+            'developer_comment': '',
+            'character_limit': None,
+        },
+    })
+    parser = JSONParser(content, 'sv.json')
+    assert [(entry['source'], entry['translation']) for entry in parser.entries] == [
+        ('project.title', 'Projekttitel'),
+    ]
+    result = L10nLinter().lint_file('sv.json', content)
+    assert result.entries_checked == 1
+    assert rules(result) == []
+
+
+def test_json_parser_supports_transifex_numeric_plural_indexes():
+    content = json.dumps({'items': {
+        'string': {'1': 'En post', '5': '%{count} poster'},
+        'context': '', 'developer_comment': '', 'character_limit': None,
+    }})
+    result = L10nLinter().lint_file('sv.json', content)
+    assert result.entries_checked == 1
+    assert rules(result) == []

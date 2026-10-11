@@ -806,6 +806,24 @@ class JSONParser:
             return
         if not isinstance(value, dict):
             raise ValueError('JSON catalog root must be an object or entry list')
+        # Transifex JSON exports use a message id as the key and store the
+        # translated value in ``string`` alongside context, comments, and nullable
+        # metadata such as ``character_limit``.  Treat the object as one entry;
+        # metadata must not be interpreted as catalog strings.
+        if ('string' in value and isinstance(value.get('string'), (str, dict))
+                and set(value) <= {'string', 'context', 'developer_comment', 'character_limit',
+                                   'comment', 'notes', 'pluralized', 'tags'}):
+            if self.format == 'entries':
+                raise ValueError('JSON format policy only allows explicit entries')
+            key = path[-1] if path else 'string'
+            translation = value['string']
+            if isinstance(translation, dict):
+                categories = () if all(str(key).isdigit() for key in translation) else translation.keys()
+                self._append(key, '', path, value, translations=list(translation.values()),
+                             plural_categories=categories, source_is_key=True)
+            else:
+                self._append(key, translation, path, value, source_is_key=True)
+            return
         # Chromium/WebExtension locale bundles use an object per message, with
         # a translated ``message`` plus optional non-translatable metadata such
         # as ``description`` and ``placeholders``.  Do not mistake an empty

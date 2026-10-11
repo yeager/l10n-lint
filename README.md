@@ -307,6 +307,13 @@ and explicit entries with `source` plus `target`, `translation`, or `value`. Use
 `@locale`, `locale`, `targetLanguage`, or `target_language` for language metadata.
 Entries marked `translate: false` or `translatable: false` are skipped.
 Plural objects with CLDR forms such as `one` and `other` are validated form by form.
+Transifex JSON exports with `string`, `context`, `developer_comment`, nullable
+`character_limit`, and numeric plural indexes are recognized as translation entries;
+metadata is ignored.
+
+Svenska: Transifex-exporter med fälten `string`, `context`,
+`developer_comment`, valfria `character_limit` och numeriska pluralindex behandlas
+som översättningsposter. Metadata granskas inte som översättningstext.
 
 Set `json-format = "nested"` to allow only nested key/value catalogs, or
 `json-format = "entries"` to allow only explicit `source`/`target` entries.

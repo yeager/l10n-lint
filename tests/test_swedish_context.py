@@ -287,3 +287,22 @@ def test_source_equals_translation_allows_platform_shortcut():
     result = lint('⌘ + Backspace', '⌘ + Backspace',
                   checks=('source-equals-translation',))
     assert not any(issue.rule == 'source-equals-translation' for issue in result.issues)
+
+
+def test_source_equals_translation_allows_ctrl_shortcut():
+    result = lint('Ctrl + V', 'Ctrl + V', checks=('source-equals-translation',))
+    assert not any(issue.rule == 'source-equals-translation' for issue in result.issues)
+
+
+def test_same_plural_forms_allow_invariant_swedish_objekt():
+    result = LintResult()
+    L10nLinter()._check_same_plurals(
+        'test.po', 1, 'Object', 'Objects',
+        {'msgstr[0]': '1 objekt', 'msgstr[1]': '2 objekt'}, result)
+    assert not any(issue.rule == 'same-plurals' for issue in result.issues)
+
+
+def test_punctuation_allows_note_colon_to_obs_exclamation():
+    result = lint('Note: No files will be deleted.',
+                  'Obs! Inga filer raderas.', checks=('punctuation-mismatch',))
+    assert not any(issue.rule == 'punctuation-mismatch' for issue in result.issues)

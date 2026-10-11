@@ -2021,7 +2021,7 @@ class L10nLinter:
             return True
         # Keyboard shortcuts deliberately retain their platform key labels,
         # for example "⌘ + Backspace".  They are not untranslated prose.
-        if '+' in s and any(key in s for key in '⌘⌥⌃⇧'):
+        if '+' in s and (any(key in s for key in '⌘⌥⌃⇧') or re.search(r'\b(?:Ctrl|Alt|Shift)\b', s)):
             return True
         if self._FORMAT_ONLY_RE.match(s):
             return True
@@ -3163,9 +3163,10 @@ class L10nLinter:
         if len(set(msgstr_values)) == 1:
             # A few common Swedish nouns retain the same spelling in singular
             # and plural: "1 byte"/"2 byte", "ett träd"/"flera träd",
-            # and "ett resultat"/"flera resultat".  Do not make those
+            # "ett resultat"/"flera resultat", and "ett objekt"/"flera
+            # objekt".  Do not make those
             # grammatically valid forms look suspicious.
-            if re.search(r'\b(?:byte|träd|resultat)\b', msgstr_values[0], re.IGNORECASE):
+            if re.search(r'\b(?:byte|träd|resultat|objekt)\b', msgstr_values[0], re.IGNORECASE):
                 return
             # Exception: if source plural/singular are also identical
             if msgid != msgid_plural:
@@ -3201,6 +3202,11 @@ class L10nLinter:
 
         source_end = source_clean[-1] if source_clean else ''
         trans_end = trans_clean[-1] if trans_clean else ''
+
+        # Swedish technical prose conventionally renders the English cue
+        # "Note:" as "Obs!".  The colon-to-exclamation conversion is a
+        # deliberate localization, not punctuation loss.
+        localized_note_cue = 'Note:' in source_clean and 'Obs!' in trans_clean
         
         # Check each type of punctuation (both end and throughout text)
         for punct in end_punctuation:
@@ -3233,6 +3239,8 @@ class L10nLinter:
             # localized as a dot in Swedish (9:00 am → 9.00). Do not treat
             # that time-format conversion as missing punctuation.
             elif punct == ':' and source_has_any and not trans_has_any:
+                if localized_note_cue:
+                    continue
                 source_times = re.findall(r'\b(\d{1,2}):(\d{2})(?:\s*([AaPp][Mm]))?\b', source_clean)
                 source_without_times = re.sub(r'\b\d{1,2}:\d{2}(?:\s*[AaPp][Mm])?\b', '', source_clean)
                 def normalized_clock(hour: str, minute: str, suffix: str) -> str:

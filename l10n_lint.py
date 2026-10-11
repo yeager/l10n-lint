@@ -628,7 +628,7 @@ class StringsParser:
     _ENTRY = re.compile(r'^\s*("(?:\\.|[^"\\])*")\s*=\s*("(?:\\.|[^"\\])*");\s*$')
     # Xcode can export opaque six-character string identifiers such as
     # ``0jWfGg``.  They are context keys, not English source text.
-    _OPAQUE_XCODE_ID = re.compile(r'^(?:(?=.*\d)|(?=(?:.*[A-Z]){2}))[A-Za-z0-9]{6}$')
+    _OPAQUE_XCODE_ID = re.compile(r'^(?:(?=.*\d)|(?=(?:.*[A-Z]){2})|[a-z][a-z]*[A-Z])[A-Za-z0-9]{6}$')
 
     def __init__(self, content: str, filename: str = '<unknown>'):
         self.entries = []

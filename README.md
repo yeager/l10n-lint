@@ -42,6 +42,8 @@ Invarianta svenska pluraler som `byte`, `träd` och `resultat` flaggas inte som
 fel bara för att singular och plural har samma form.
 Plattformsspecifika kortkommandon som `⌘ + Backspace` behandlas som syntax och
 flaggar inte som oöversatt text.
+Även `objekt` godtas som invariant plural, och den svenska skrivningen
+`Obs!` godtas för engelska `Note:`.
 
 Betydelse, tilltal, stilnivå och kontextberoende facktermer kräver alltid
 mänsklig granskning.
@@ -57,6 +59,8 @@ The identical-plural diagnostic accepts common invariant Swedish forms such as
 `byte`, `träd`, and `resultat`.
 Platform keyboard shortcuts such as `⌘ + Backspace` are treated as syntax,
 not untranslated prose.
+`objekt` is also accepted as an invariant plural, and Swedish `Obs!` is
+accepted for the English cue `Note:`.
 
 [Download 1.23.0](https://github.com/yeager/l10n-lint/releases/tag/v1.23.0)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)

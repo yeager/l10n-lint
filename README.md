@@ -38,6 +38,8 @@ Kontrollera varje träff i dess gränssnittskontext. Svenska regler omfattar ing
 komma omedelbart före `och`, korrekt skiljeteckensmellanrum, citattecken,
 utelämningstecknet `…`, procentformat, siffergruppering och ordet `till` i
 intervall. Tankstreck och långt tankstreck flaggas i svenska måltexter. Crowdin-text före `|` är metadata och får inte synas i måltexten.
+Invarianta svenska pluraler som `byte`, `träd` och `resultat` flaggas inte som
+fel bara för att singular och plural har samma form.
 
 Betydelse, tilltal, stilnivå och kontextberoende facktermer kräver alltid
 mänsklig granskning.
@@ -49,6 +51,8 @@ invalid syntax, placeholder mismatches, plural errors and inconsistent formattin
 executable DocBook content such as code, commands, filenames, function names and identifiers.
 Use the command line in CI or the GTK4 desktop interface for interactive review.
 Swedish-specific checks cover spelling patterns, terminology and localization conventions.
+The identical-plural diagnostic accepts common invariant Swedish forms such as
+`byte`, `träd`, and `resultat`.
 
 [Download 1.23.0](https://github.com/yeager/l10n-lint/releases/tag/v1.23.0)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)

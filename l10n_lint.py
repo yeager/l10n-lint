@@ -626,6 +626,9 @@ class StringsParser:
     """
 
     _ENTRY = re.compile(r'^\s*("(?:\\.|[^"\\])*")\s*=\s*("(?:\\.|[^"\\])*");\s*$')
+    # Xcode can export opaque six-character string identifiers such as
+    # ``0jWfGg``.  They are context keys, not English source text.
+    _OPAQUE_XCODE_ID = re.compile(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{6}$')
 
     def __init__(self, content: str, filename: str = '<unknown>'):
         self.entries = []
@@ -641,7 +644,7 @@ class StringsParser:
                 source, translation = (json.loads(value) for value in match.groups())
             except json.JSONDecodeError as exc:
                 raise ValueError(f'Line {line_number}: invalid .strings escape: {exc.msg}') from exc
-            source_is_key = bool(SYMBOLIC_MESSAGE_KEY.fullmatch(source))
+            source_is_key = bool(SYMBOLIC_MESSAGE_KEY.fullmatch(source) or self._OPAQUE_XCODE_ID.fullmatch(source))
             self.entries.append({
                 '_id': source, '_context': '', '_line': line_number,
                 '_language': self.language, 'source': source,

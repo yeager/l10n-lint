@@ -281,3 +281,9 @@ def test_same_plural_forms_allow_invariant_swedish_resultat():
         'test.po', 1, 'Result', 'Results',
         {'msgstr[0]': 'Visa 1 resultat', 'msgstr[1]': 'Visa 2 resultat'}, result)
     assert not any(issue.rule == 'same-plurals' for issue in result.issues)
+
+
+def test_source_equals_translation_allows_platform_shortcut():
+    result = lint('⌘ + Backspace', '⌘ + Backspace',
+                  checks=('source-equals-translation',))
+    assert not any(issue.rule == 'source-equals-translation' for issue in result.issues)

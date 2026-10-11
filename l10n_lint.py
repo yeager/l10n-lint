@@ -2019,6 +2019,10 @@ class L10nLinter:
             return True
         if not any(c.isalpha() for c in s):
             return True
+        # Keyboard shortcuts deliberately retain their platform key labels,
+        # for example "⌘ + Backspace".  They are not untranslated prose.
+        if '+' in s and any(key in s for key in '⌘⌥⌃⇧'):
+            return True
         if self._FORMAT_ONLY_RE.match(s):
             return True
         if self._PATH_RE.match(s):

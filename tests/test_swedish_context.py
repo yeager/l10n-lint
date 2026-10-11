@@ -273,3 +273,11 @@ def test_same_plural_forms_allow_invariant_swedish_trad():
         'test.po', 1, 'Tree', 'Trees',
         {'msgstr[0]': 'Ta bort träd', 'msgstr[1]': 'Ta bort träd'}, result)
     assert not any(issue.rule == 'same-plurals' for issue in result.issues)
+
+
+def test_same_plural_forms_allow_invariant_swedish_resultat():
+    result = LintResult()
+    L10nLinter()._check_same_plurals(
+        'test.po', 1, 'Result', 'Results',
+        {'msgstr[0]': 'Visa 1 resultat', 'msgstr[1]': 'Visa 2 resultat'}, result)
+    assert not any(issue.rule == 'same-plurals' for issue in result.issues)

@@ -1508,7 +1508,7 @@ class L10nLinter:
         trans_stripped = unescape(translation).rstrip()
         # Standard abbreviations used as fixed-width Swedish column headings
         # carry a period as part of the abbreviation.
-        if trans_stripped in frozenset({'Inloggn.'}):
+        if trans_stripped in frozenset({'Inloggn.'}) or re.search(r'\b\d+\s+[A-Z]\.[A-Z]\.$', trans_stripped):
             return
         if (source_stripped.endswith('...') and trans_stripped.endswith('\u2026')) or \
            (source_stripped.endswith('\u2026') and trans_stripped.endswith('...')):
@@ -2949,7 +2949,7 @@ class L10nLinter:
         # fit a fixed-width terminal column.  The final period belongs to the
         # abbreviation, not to sentence punctuation.
         swedish_column_abbreviations = frozenset({'Inloggn.'})
-        if trans_punctuation in swedish_column_abbreviations:
+        if trans_punctuation in swedish_column_abbreviations or re.search(r'\b\d+\s+[A-Z]\.[A-Z]\.$', trans_punctuation):
             return
         
         # Allow "..." → "…" mapping

@@ -408,3 +408,9 @@ def test_ts_fix_preview_apply_preservation_and_idempotence(tmp_path):
     assert applied.returncode in (0, 1, 2)
     assert '<translation>Vänta…</translation>' in p.read_text()
     assert preview_fixes(p, {'whitespace', 'ellipsis'})[2] == ''
+
+
+def test_swedish_24_hour_strftime_pattern_is_not_a_printf_mismatch():
+    content = po('today at %-I:%M %p', 'idag klockan %H.%M')
+    result = lint(content, config={'language': 'sv'})
+    assert not [issue for issue in result.issues if issue.rule == 'placeholder-mismatch']

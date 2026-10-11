@@ -1381,8 +1381,20 @@ class L10nLinter:
             rule = 'python-format' if kind == 'python' else 'placeholder-mismatch'
             try:
                 explicit = bool(flags & {'c-format', 'python-format'})
-                before = placeholder_signature(python_source if kind == 'python' else source, kind, explicit=explicit)
-                after = placeholder_signature(python_translation if kind == 'python' else translation, kind, explicit=explicit)
+                source_for_signature = python_source if kind == 'python' else source
+                translation_for_signature = python_translation if kind == 'python' else translation
+                # Swedish dates use a 24-hour clock.  A source pattern such as
+                # ``%-I:%M %p`` therefore correctly becomes ``%H.%M``: %I and
+                # %H refer to the same time argument, while %p has no Swedish
+                # equivalent.  Compare the remaining contract after normalizing
+                # that locale-specific representation.
+                if (kind == 'printf' and self._current_lang.lower().startswith('sv')
+                        and re.search(r'%(?:-)?I', source_for_signature)
+                        and re.search(r'%(?:-)?H', translation_for_signature)):
+                    source_for_signature = re.sub(r'%(?:-)?I', '%H', source_for_signature)
+                    source_for_signature = re.sub(r'\s*%p', '', source_for_signature)
+                before = placeholder_signature(source_for_signature, kind, explicit=explicit)
+                after = placeholder_signature(translation_for_signature, kind, explicit=explicit)
                 if kind == 'printf' and not explicit and before != after:
                     # msgunfmt usually loses format flags. Literal suffixes
                     # such as %iHz, %uth and Swedish %ss (genitive) can then

@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+- Do not flag Swedish dashes that must be preserved because the source uses the
+  same character as syntax or layout.
+
 ## [1.23.3] - 2026-10-14
 
 - Preserve an ASCII ellipsis when the source string uses one, avoiding a false Swedish typography warning for source-constrained UI labels.

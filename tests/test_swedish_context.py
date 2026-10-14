@@ -216,6 +216,11 @@ def test_swedish_dashes_are_reported():
     assert not lint('Example', 'Röd till grön. En paus här.', checks='swedish-dash').issues
 
 
+def test_swedish_dash_required_by_source_is_allowed():
+    result = lint('Command — description', 'Kommando — beskrivning', checks='swedish-dash')
+    assert not result.issues
+
+
 def test_ipv4_addresses_are_not_swedish_thousands_grouping():
     result = lint('Network range', 'Använd 192.168.1.0/255.255.255.0.', checks='large-number-grouping')
     assert not result.issues

@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.4"
+__version__ = "1.23.5"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings'})
@@ -1206,12 +1206,20 @@ class L10nLinter:
         # IPv4 addresses use periods as structural separators, not thousands grouping.
         style_text = re.sub(r'%%', '', translation)
         ipv4_spans = [match.span() for match in re.finditer(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', style_text)]
+        iso_date_spans = [match.span() for match in re.finditer(r'\b\d{4}-\d{2}-\d{2}\b', style_text)]
         for pattern, rule, message in checks:
             matches = re.finditer(pattern, style_text)
             if rule == 'large-number-grouping':
                 matches = (match for match in matches if not any(
                     start <= match.start() and match.end() <= end
                     for start, end in ipv4_spans
+                ))
+            # ISO 8601 dates use hyphens structurally. A submatch such as
+            # ``1970-01`` is not a Swedish numeric range and must be kept.
+            if rule == 'number-range-dash':
+                matches = (match for match in matches if not any(
+                    start <= match.start() and match.end() <= end
+                    for start, end in iso_date_spans
                 ))
             # Some legacy PHP catalogs encode a literal percentage as ``% of``.
             # PHP's format parser treats the `o` as a conversion specifier, so

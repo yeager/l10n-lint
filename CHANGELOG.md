@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.23.5] - 2026-10-14
+
+- Do not mistake ISO 8601 dates such as `1970-01-01` for Swedish numeric ranges.
+
 - Do not flag Swedish dashes that must be preserved because the source uses the
   same character as syntax or layout.
 

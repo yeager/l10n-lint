@@ -311,3 +311,8 @@ def test_punctuation_allows_note_colon_to_obs_exclamation():
     result = lint('Note: No files will be deleted.',
                   'Obs! Inga filer raderas.', checks=('punctuation-mismatch',))
     assert not any(issue.rule == 'punctuation-mismatch' for issue in result.issues)
+
+
+def test_iso_dates_are_not_swedish_number_ranges():
+    result = lint('Date', 'Gäller från 1970-01-01 till 2026-10-14.', checks='number-range-dash')
+    assert not result.issues

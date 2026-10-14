@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.5"
+__version__ = "1.23.6"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings'})
@@ -3278,6 +3278,15 @@ class L10nLinter:
                 converted = {normalized_clock(*clock) for clock in source_times}
                 translated_times = set(re.findall(r'\b\d{1,2}\.\d{2}\b', trans_clean))
                 if ':' not in source_without_times and converted <= translated_times:
+                    continue
+                # strftime patterns are also localized: Swedish commonly uses
+                # dots between time fields and a comma before fractional seconds.
+                strftime_pattern = r'%[HIlkMSp](?::%[HIlkMSp])+(?:\.%f)?'
+                source_strftime = set(re.findall(strftime_pattern, source_clean))
+                source_without_strftime = re.sub(strftime_pattern, '', source_clean)
+                translated_strftime = set(re.findall(r'%[HIlkMSp](?:\.%[HIlkMSp])+(?:,%f)?', trans_clean))
+                localized_strftime = {value.replace(':', '.').replace('.%f', ',%f') for value in source_strftime}
+                if ':' not in source_without_strftime and localized_strftime and localized_strftime <= translated_strftime:
                     continue
                 result.add(LintIssue(
                     file=filepath,

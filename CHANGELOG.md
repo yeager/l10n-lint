@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.23.6] - 2026-10-14
+
+- Accept Swedish `strftime` time punctuation such as `%H.%M.%S,%f` for an English `%H:%M:%S.%f` source.
+
 ## [1.23.5] - 2026-10-14
 
 - Do not mistake ISO 8601 dates such as `1970-01-01` for Swedish numeric ranges.

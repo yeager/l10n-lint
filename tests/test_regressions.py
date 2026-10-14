@@ -414,3 +414,8 @@ def test_swedish_24_hour_strftime_pattern_is_not_a_printf_mismatch():
     content = po('today at %-I:%M %p', 'idag klockan %H.%M')
     result = lint(content, config={'language': 'sv'})
     assert not [issue for issue in result.issues if issue.rule == 'placeholder-mismatch']
+
+
+def test_swedish_strftime_time_punctuation_is_not_a_mismatch():
+    result = lint(po('Timestamp: %H:%M:%S.%f', 'Tidsstämpel: %H.%M.%S,%f'), checks=['punctuation-mismatch'])
+    assert not result.issues

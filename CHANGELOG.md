@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.23.3] - 2026-10-14
+
+- Preserve an ASCII ellipsis when the source string uses one, avoiding a false Swedish typography warning for source-constrained UI labels.
+
 ## [1.23.2] - 2026-10-08
 
 - Accept the established Swedish compound `processstatus` without a typo warning.

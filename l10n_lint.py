@@ -2980,7 +2980,10 @@ class L10nLinter:
 
     def _check_ellipsis(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
         """Check for proper ellipsis usage (... should be …)."""
-        if '...' in translation:
+        # Preserve an ASCII ellipsis when the source uses one.  This is common
+        # in fixed UI labels and command output, and agrees with the fixer
+        # contract documented in README.md.
+        if '...' in translation and '...' not in source:
             result.add(LintIssue(
                 file=filepath,
                 line=line,

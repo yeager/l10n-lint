@@ -64,6 +64,7 @@ def test_ellipsis():
     test_cases = [
         # (source, translation, should_trigger)
         ("Please wait", "Vänta...", True),  # Three dots should be ellipsis
+        ("Loading...", "Laddar...", False),  # Preserve source ASCII ellipsis
         ("Loading", "Laddar…", False),  # Already ellipsis
         ("Normal text", "Normal text", False),  # No ellipsis
     ]

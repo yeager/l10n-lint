@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.23.7] - 2026-10-14
+
+- Preserve a standalone CLI `?` metavariable when the source uses the same syntax.
+
+
 ## [1.23.6] - 2026-10-14
 
 - Accept Swedish `strftime` time punctuation such as `%H.%M.%S,%f` for an English `%H:%M:%S.%f` source.

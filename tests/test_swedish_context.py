@@ -193,6 +193,11 @@ def test_source_preserved_cli_spacing_is_not_swedish_punctuation_error():
                   checks=('space-before-punctuation',))
     assert not result.issues
 
+def test_source_preserved_cli_question_metavariable_is_not_punctuation_error():
+    result = lint('Use ? for MIME types.', 'Använd ? för MIME-typer.',
+                  checks=('space-before-punctuation',))
+    assert not result.issues
+
 
 def test_symbolic_ipp_keys_are_context_not_english_source_prose():
     content = ('msgid ""\nmsgstr "Language: sv\\n"\n\n'

@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.6"
+__version__ = "1.23.7"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings'})
@@ -1246,6 +1246,9 @@ class L10nLinter:
             # ``[argument ...] ;``.  Preserve it when the exact structural
             # fragment is present in the source as well.
             and match.group() not in source
+            # A standalone question mark can be a CLI metavariable. Preserve
+            # it only when the source uses the same space-delimited syntax.
+            and not (match.group().endswith('?') and ' ? ' in source)
             for match in spacing_matches
         )
         if (has_spacing_error

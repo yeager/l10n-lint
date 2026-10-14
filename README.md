@@ -37,7 +37,7 @@ Granska sedan med svlang, hunspell-sv, swedish-foss-terminology och swedish-tm.
 Kontrollera varje träff i dess gränssnittskontext. Svenska regler omfattar ingen
 komma omedelbart före `och`, korrekt skiljeteckensmellanrum, citattecken,
 utelämningstecknet `…`, procentformat, siffergruppering och ordet `till` i
-intervall. Tankstreck och långt tankstreck flaggas i svenska måltexter när de
+intervall. Tankstreck flaggas i svenska måltexter när de
 inte måste bevaras från källans syntax eller layout. Crowdin-text före `|` är metadata och får inte synas i måltexten.
 Invarianta svenska pluraler som `byte`, `träd` och `resultat` flaggas inte som
 fel bara för att singular och plural har samma form.
@@ -177,7 +177,7 @@ source and target in their product context.
 
 Swedish checks include the project rule against a comma directly before `och`,
 punctuation spacing, Swedish quotation marks, `…` rather than three dots,
-percent formatting, digit grouping and the word `till` in ranges. En and em dashes are flagged in Swedish targets unless the source syntax or layout requires the same character. A Crowdin prefix
+percent formatting, digit grouping and the word `till` in ranges. Em dashes are flagged in Swedish targets unless the source syntax or layout requires the same character. A Crowdin prefix
 before `|` is metadata and must not be translated or retained in visible text.
 Meaning, address, register and context-sensitive terminology always need manual
 review.

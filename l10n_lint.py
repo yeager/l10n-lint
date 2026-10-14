@@ -1200,7 +1200,7 @@ class L10nLinter:
             # ``2/√2 - 1``. Swedish project translations use the word ``till``
             # for numeric ranges instead of a dash.
             (r'(?<![*/√])\b\d+(?:[ \t]*[-–][ \t]*)\d+\b', 'number-range-dash', 'Use ”till” rather than a dash in a Swedish number range'),
-            (r'[–—]', 'swedish-dash', 'Avoid en and em dashes in Swedish translations unless the source syntax requires the same character'),
+            (r'—', 'swedish-dash', 'Avoid em dashes in Swedish translations unless the source syntax requires the same character'),
         )
         # C printf uses %% for a literal percent; it is not Swedish prose.
         # IPv4 addresses use periods as structural separators, not thousands grouping.
@@ -1222,8 +1222,8 @@ class L10nLinter:
                 ))
             # A dash that is part of the source syntax or layout must be
             # preserved. Only report Swedish dashes introduced by the target.
-            if rule == 'swedish-dash':
-                matches = (match for match in matches if match.group() not in source)
+            if rule == 'swedish-dash' and style_text.count('—') <= source.count('—'):
+                continue
             if next(matches, None):
                 result.add(LintIssue(filepath, line, Severity.WARNING, rule, message, source))
 

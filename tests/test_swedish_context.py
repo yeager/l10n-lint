@@ -211,9 +211,9 @@ def test_swedish_quote_number_percent_and_range_forms_are_reported():
 
 
 def test_swedish_dashes_are_reported():
-    result = lint('Example', 'Röd–grön och en paus — här.', checks='swedish-dash')
+    result = lint('Example', 'En paus — här.', checks='swedish-dash')
     assert {issue.rule for issue in result.issues} == {'swedish-dash'}
-    assert not lint('Example', 'Röd till grön. En paus här.', checks='swedish-dash').issues
+    assert not lint('Example', 'Röd–grön. En paus här.', checks='swedish-dash').issues
 
 
 def test_swedish_dash_required_by_source_is_allowed():

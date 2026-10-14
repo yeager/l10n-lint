@@ -1390,7 +1390,14 @@ class L10nLinter:
             kinds = ['python']
         else:
             kinds = ['printf']
-            if self.PYTHON_BRACE_FORMAT.search(python_source) or self.PYTHON_BRACE_FORMAT.search(python_translation):
+            # A lone braced UI label such as ``{All}`` is common in font and
+            # layout tools. Without an explicit python-brace-format flag it
+            # is literal notation, not a runtime placeholder. Keep automatic
+            # detection for actual format-bearing prose while avoiding that
+            # false positive.
+            lone_braced_label = re.fullmatch(r'\{[A-Za-z][A-Za-z0-9 _-]*\}', python_source.strip())
+            if ((self.PYTHON_BRACE_FORMAT.search(python_source) or self.PYTHON_BRACE_FORMAT.search(python_translation))
+                    and not lone_braced_label):
                 kinds.append('python')
             if re.search(r'%L?(?:[1-9]\d?|n)(?![\w.$])', source + ' ' + translation):
                 kinds.append('qt')

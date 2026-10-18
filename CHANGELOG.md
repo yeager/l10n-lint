@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.23.8] - 2026-10-18
+
+- Add regression coverage for CLI handling of connection reset errors.
+
 ## [1.23.7] - 2026-10-14
 
 - Preserve a standalone CLI `?` metavariable when the source uses the same syntax.

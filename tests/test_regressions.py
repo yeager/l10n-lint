@@ -287,6 +287,23 @@ def test_url_content_is_linted_not_local_filename():
     assert not any(i.rule == 'file-read-error' for i in result.issues)
 
 
+def test_cli_connection_reset_is_reported_without_traceback(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, 'argv', ['l10n-lint', 'https://example.org/sv.po'])
+
+    def reset_connection(_url):
+        raise ConnectionResetError('connection reset by peer')
+
+    with patch.object(core, 'fetch_url_file', side_effect=reset_connection):
+        exit_code = core.main()
+
+    captured = capsys.readouterr()
+    assert exit_code == 2
+    assert 'url-fetch-error' in captured.out
+    assert 'connection reset by peer' in captured.out
+    assert 'Traceback' not in captured.err
+
+
 def test_github_default_branch_and_pinned_revision():
     requests = []
     def fetch(request, timeout):
@@ -334,7 +351,7 @@ def test_gtk_runner_uses_shared_pipeline():
 
 
 def test_python_only_selection_and_unmatched_literal_braces():
-    assert lint(po('{name}', '{other}'), checks=['python-format']).error_count == 1
+    assert lint(po('{name}', '{other}', flags='python-brace-format'), checks=['python-format']).error_count == 1
     assert not lint(po('Insert { here', 'Infoga { här'), checks=['placeholders']).issues
     assert lint(po('%1', '%2'), checks=['placeholders']).error_count == 1
 

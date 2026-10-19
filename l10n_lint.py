@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.9"
+__version__ = "1.23.10"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings'})
@@ -1111,10 +1111,11 @@ class L10nLinter:
                         # gettext validates every translated plural form against
                         # msgid_plural. A few upstream catalogs use incompatible
                         # printf conversions in msgid and msgid_plural, such as
-                        # %i versus %u. In that case matching msgstr[0] to the
-                        # singular source produces a false positive and an
-                        # output that msgfmt rejects. Use the plural contract,
-                        # which is what gettext enforces for plural msgstrs.
+                        # %i versus %u. When both forms consume the same number of
+                        # arguments, matching msgstr[0] to the singular source
+                        # produces a false positive and an output that msgfmt
+                        # rejects. Use the plural contract in that narrow case;
+                        # different argument counts are ordinary plural syntax.
                         if (key.startswith('msgstr[') and msgid_plural
                                 and set(flags) & {'c-format', 'python-format'}):
                             from l10n_project import placeholder_signature
@@ -1123,7 +1124,7 @@ class L10nLinter:
                                 plural = placeholder_signature(msgid_plural, 'printf', explicit=True)
                             except ValueError:
                                 singular = plural = ()
-                            if singular != plural:
+                            if singular and plural and len(singular) == len(plural) and singular != plural:
                                 source = msgid_plural
                         self._check_translation(filepath, line, source, value, result)
             finally:

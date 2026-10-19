@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.23.10] - 2026-10-19
+
+- Keep singular and plural format contracts separate when they use different numbers of placeholders.
+
 ## [1.23.9] - 2026-10-19
 
 - Use the plural source format contract when an upstream PO entry has incompatible singular and plural printf conversions.

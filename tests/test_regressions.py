@@ -119,6 +119,21 @@ def test_plural_printf_contract_uses_plural_source_when_upstream_disagrees():
                 if issue.rule == 'placeholder-mismatch']
 
 
+def test_plural_printf_contract_keeps_a_placeholder_free_singular_form():
+    text = (HEADER + '#, c-format\nmsgid "one photo"\nmsgid_plural "%d photos"\n'
+            'msgstr[0] "en bild"\nmsgstr[1] "%d bilder"\n')
+    assert not [issue for issue in lint(text, checks=['placeholders']).issues
+                if issue.rule == 'placeholder-mismatch']
+
+
+def test_plural_printf_contract_keeps_different_arity_per_form():
+    text = (HEADER + '#, c-format\nmsgid "one tag %s"\n'
+            'msgid_plural "%s on %d photos"\n'
+            'msgstr[0] "en tagg %s"\nmsgstr[1] "%s på %d bilder"\n')
+    assert not [issue for issue in lint(text, checks=['placeholders']).issues
+                if issue.rule == 'placeholder-mismatch']
+
+
 def test_boundary_characters_are_reviewed_but_typographic_quotes_are_equivalent():
     trailing = lint(po(' (%s bytes)', ' (%s byte) '), checks=['punctuation'])
     assert any(i.rule == 'boundary-character-mismatch' for i in trailing.issues)

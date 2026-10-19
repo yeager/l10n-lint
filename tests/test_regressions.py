@@ -112,6 +112,13 @@ def test_plural_all_forms_receive_shared_rules():
     assert any(i.rule == 'url-preservation' for i in lint(text).issues)
 
 
+def test_plural_printf_contract_uses_plural_source_when_upstream_disagrees():
+    text = (HEADER + '#, c-format\nmsgid "%i app"\nmsgid_plural "%u apps"\n'
+            'msgstr[0] "%u app"\nmsgstr[1] "%u appar"\n')
+    assert not [issue for issue in lint(text, checks=['placeholders']).issues
+                if issue.rule == 'placeholder-mismatch']
+
+
 def test_boundary_characters_are_reviewed_but_typographic_quotes_are_equivalent():
     trailing = lint(po(' (%s bytes)', ' (%s byte) '), checks=['punctuation'])
     assert any(i.rule == 'boundary-character-mismatch' for i in trailing.issues)

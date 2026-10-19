@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.23.9] - 2026-10-19
+
+- Use the plural source format contract when an upstream PO entry has incompatible singular and plural printf conversions.
+
 ## [1.23.8] - 2026-10-18
 
 - Add regression coverage for CLI handling of connection reset errors.

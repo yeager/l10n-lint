@@ -170,6 +170,18 @@ def test_reported_messages_have_no_errors_with_default_rules():
         assert result.error_count == 0, result.issues
 
 
+def test_php_format_enforces_percent_placeholder_contract():
+    source = 'Used %d %% of storage'
+    target = 'Använde %d % av lagringsutrymmet'
+    assert any(issue.rule == 'placeholder-mismatch' for issue in issues(source, target, 'php-format'))
+
+
+def test_php_format_accepts_escaped_literal_percent():
+    source = 'Used %d %% of storage'
+    target = 'Använde %d %% av lagringsutrymmet'
+    assert not issues(source, target, 'php-format')
+
+
 def test_explicit_c_format_ignores_percentage_prose_with_space_flag_shape():
     source = 'One unit is roughly a 2% change in camera distance.'
     target = 'En enhet motsvarar ungefär en ändring på 2 % av kamerans avstånd.'

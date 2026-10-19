@@ -33,8 +33,11 @@ Description: Linter for localization files
  Includes both CLI and GTK GUI interfaces.
 EOF
 
-install -m 755 "$SRCDIR/debian/postinst" "$DEST/DEBIAN/postinst"
-install -m 755 "$SRCDIR/debian/prerm" "$DEST/DEBIAN/prerm"
+for maintscript in postinst prerm; do
+    if [ -f "$SRCDIR/debian/$maintscript" ]; then
+        install -m 755 "$SRCDIR/debian/$maintscript" "$DEST/DEBIAN/$maintscript"
+    fi
+done
 
 # Binaries
 install -m 755 "$SRCDIR/l10n_lint.py" "$DEST/usr/bin/l10n-lint"

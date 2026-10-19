@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.23.11] - 2026-10-19
+
+- Enforce PHP printf placeholder contracts, including escaped literal percent signs.
+
+
 ## [1.23.10] - 2026-10-19
 
 - Keep singular and plural format contracts separate when they use different numbers of placeholders.

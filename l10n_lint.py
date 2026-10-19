@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.10"
+__version__ = "1.23.11"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings'})
@@ -1441,7 +1441,7 @@ class L10nLinter:
         for kind in kinds:
             rule = 'python-format' if kind == 'python' else 'placeholder-mismatch'
             try:
-                explicit = bool(flags & {'c-format', 'python-format'})
+                explicit = bool(flags & {'c-format', 'python-format', 'php-format'})
                 source_for_signature = python_source if kind == 'python' else source
                 translation_for_signature = python_translation if kind == 'python' else translation
                 # Swedish dates use a 24-hour clock.  A source pattern such as

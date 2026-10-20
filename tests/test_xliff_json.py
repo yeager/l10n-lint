@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from l10n_lint import AndroidXMLParser, JSONParser, L10nLinter, PropertiesParser, StringsParser, XLIFFParser, find_l10n_files, lint_inputs
+from l10n_lint import AndroidXMLParser, JSONParser, L10nLinter, PropertiesParser, ResxParser, StringsParser, XLIFFParser, find_l10n_files, lint_inputs
 
 
 XLIFF_12 = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -345,3 +345,16 @@ def test_json_parser_supports_transifex_numeric_plural_indexes():
     result = L10nLinter().lint_file('sv.json', content)
     assert result.entries_checked == 1
     assert rules(result) == []
+
+
+def test_resx_parser_reads_localized_string_values_and_skips_binary_resources():
+    content = """<?xml version=\"1.0\"?><root>
+      <data name=\"save\"><value>Spara</value></data>
+      <data name=\"missing\"><value></value></data>
+      <data name=\"icon\" mimetype=\"application/x-microsoft.net.object.bytearray.base64\"><value>AA==</value></data>
+    </root>"""
+    parser = ResxParser(content, 'messages-sv.resx')
+    assert [(entry['_id'], entry['translation']) for entry in parser.entries] == [('save', 'Spara'), ('missing', '')]
+    result = L10nLinter({'language': 'sv'}).lint_file('messages-sv.resx', content)
+    assert result.entries_checked == 2
+    assert rules(result) == ['missing-translation']

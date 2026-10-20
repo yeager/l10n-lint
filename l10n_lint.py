@@ -39,7 +39,7 @@ if __name__ == '__main__':
 __version__ = "1.23.11"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
-L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings'})
+L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings', '.resx'})
 
 # IPP/CUPS catalogs use technical identifiers (for example
 # ``transmission-status.3``) as msgids and store the human-readable English
@@ -617,6 +617,59 @@ class XLIFFParser:
                 })
 
 
+class ResxParser:
+    """Extract target-only strings from Microsoft .resx resource files.
+
+    Localized ResX files normally contain only translated ``data/value``
+    values. Resource names are context, not English source text, so the parser
+    runs target-only checks just like Android XML and properties files.
+    Non-string resources use ``type`` or ``mimetype`` and are excluded.
+    """
+
+    def __init__(self, content: str, filename: str = '<unknown>'):
+        self.content = content
+        self.filename = filename
+        self.language = 'sv' if re.search(r'[-_.]s(?:v|e)(?:[-_.]|$)', filename, re.IGNORECASE) else ''
+        self.entries = []
+        self._parse()
+
+    def _parse(self):
+        import xml.etree.ElementTree as ET
+        from xml.parsers import expat
+        root = ET.fromstring(self.content)
+        if root.tag.rsplit('}', 1)[-1] != 'root':
+            raise ValueError('Expected a ResX resources document')
+        lines = []
+        parser = expat.ParserCreate()
+
+        def start(name, attrs):
+            if name == 'data':
+                lines.append(parser.CurrentLineNumber)
+
+        parser.StartElementHandler = start
+        parser.Parse(self.content, True)
+        line_iter = iter(lines)
+        for node in root:
+            if node.tag.rsplit('}', 1)[-1] != 'data':
+                continue
+            line = next(line_iter, 1)
+            if node.get('type') or node.get('mimetype'):
+                continue
+            name = node.get('name')
+            value = next((child for child in node if child.tag.rsplit('}', 1)[-1] == 'value'), None)
+            if not name or value is None:
+                continue
+            text = ''.join(value.itertext())
+            self.entries.append({
+                '_context': name, '_id': name, '_line': line,
+                '_language': self.language, '_source_is_key': True,
+                'source': name, 'translation': text, '_translations': [text],
+                '_type': '',
+            })
+        if not self.entries:
+            raise ValueError('ResX catalog contains no translatable string entries')
+
+
 class StringsParser:
     """Parse CUPS ``.strings`` catalogs.
 
@@ -1009,6 +1062,8 @@ class L10nLinter:
                     self._lint_properties(filepath, content, result)
                 elif ext == '.strings':
                     self._lint_strings(filepath, content, result)
+                elif ext == '.resx':
+                    self._lint_resx(filepath, content, result)
                 else:
                     self._lint_json(filepath, content, result)
             except (ValueError, SyntaxError) as exc:
@@ -1342,6 +1397,9 @@ class L10nLinter:
 
     def _lint_strings(self, filepath: str, content: str, result: LintResult):
         self._lint_external_entries(filepath, StringsParser(content, filepath), result)
+
+    def _lint_resx(self, filepath: str, content: str, result: LintResult):
+        self._lint_external_entries(filepath, ResxParser(content, filepath), result)
 
     def _lint_external_entries(self, filepath, parser, result):
         """Run the shared checks for XLIFF and JSON source/target entries."""

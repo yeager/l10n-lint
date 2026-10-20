@@ -120,8 +120,8 @@ jobs:
           Section: devel
           Priority: optional
           Homepage: https://github.com/yeager/${PKG}
-          Description: Linter for localization files (.po, .ts, .xlf/.xliff, .json, .arb)
-           l10n-lint checks gettext .po, Qt .ts, XLIFF, JSON and ARB localization files for
+          Description: Linter for localization files (.po, .ts, .xlf/.xliff, .json, .arb, .resx)
+           l10n-lint checks gettext .po, Qt .ts, XLIFF, JSON, ARB and ResX localization files for
            common issues: missing translations, fuzzy entries, placeholder
            mismatches, and more.
           EOF

@@ -1,6 +1,6 @@
 # l10n-lint
 
-[![Version](https://img.shields.io/badge/version-1.23.11-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.23.11)
+[![Version](https://img.shields.io/badge/version-1.23.12-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.23.12)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -63,7 +63,7 @@ not untranslated prose.
 `objekt` is also accepted as an invariant plural, and Swedish `Obs!` is
 accepted for the English cue `Note:`.
 
-[Download 1.23.11](https://github.com/yeager/l10n-lint/releases/tag/v1.23.11)
+[Download 1.23.12](https://github.com/yeager/l10n-lint/releases/tag/v1.23.12)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
 Version **1.23.0** adds Dart/Flutter ARB catalogs, protects more DocBook content and improves Swedish time checks. Version **1.22.6** recognizes Swedish idiomatic number equivalents and localized grouped thousands. Version **1.22.1** accepts Swedish cardinal words through
@@ -72,9 +72,9 @@ number-format diagnostics.
 
 ## Features
 
-- Validate PO/TS/XLIFF/JSON/ARB/`.strings` syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
+- Validate PO/TS/XLIFF/JSON/ARB/ResX/`.strings` syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
 - Share diagnostic IDs and input handling between the CLI and GTK4 interface.
-- Scan local files, directories, remote PO/TS/XLIFF/JSON/ARB/`.strings` URLs and GitHub repositories.
+- Scan local files, directories, remote PO/TS/XLIFF/JSON/ARB/ResX/`.strings` URLs and GitHub repositories.
 - Select individual rules or groups, configure severities and load custom TSV glossaries.
 - Store project settings in `pyproject.toml` and baseline existing findings.
 - Compare translations with a source catalog to find missing or obsolete entries.
@@ -85,7 +85,7 @@ number-format diagnostics.
 
 ### Install the current release
 
-[Release 1.23.11](https://github.com/yeager/l10n-lint/releases/tag/v1.23.11)
+[Release 1.23.12](https://github.com/yeager/l10n-lint/releases/tag/v1.23.12)
 records the current annotated tag and release notes. Build from the checked-out
 source below to use this exact revision. Package repositories and PyPI can lag
 behind the GitHub release.

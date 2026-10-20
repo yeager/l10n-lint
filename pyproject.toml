@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "l10n-lint"
-version = "1.23.11"
-description = "Linter for localization files (.po, .ts, .xlf/.xliff, .json, .arb)"
+version = "1.23.12"
+description = "Linter for localization files (.po, .ts, .xlf/.xliff, .json, .arb, .resx)"
 license = "GPL-3.0-or-later"
 authors = [
     {name = "Daniel Nylander", email = "daniel@danielnylander.se"},

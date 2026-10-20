@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.23.12] - 2026-10-20
+
 - Add Microsoft ResX support for target-only Swedish checks, including empty values and line-accurate diagnostics.
 
 ## [1.23.11] - 2026-10-19

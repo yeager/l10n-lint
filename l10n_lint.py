@@ -1957,6 +1957,15 @@ class L10nLinter:
                 return ' '
 
             text = re.sub(clock_pattern, clock, text)
+            # Some technical sources list protocol versions as ``v.1,2``.
+            # This is a version list, not the decimal value 1,2; Swedish
+            # naturally writes it as ``v1, v2``. Split the source form before
+            # extracting numbers so equivalent version lists compare equal.
+            text = re.sub(
+                r'\bv\.(\d+(?:,\d+)+)',
+                lambda match: ' '.join(f"v{part}" for part in match.group(1).split(',')),
+                text,
+            )
             grouped_pattern = r'\b\d{1,3}(?:[ ,]\d{3})+\b'
             grouped = re.findall(grouped_pattern, text)
             values = clock_values | {number.replace(',', '').replace(' ', '') for number in grouped}

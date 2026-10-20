@@ -321,3 +321,12 @@ def test_punctuation_allows_note_colon_to_obs_exclamation():
 def test_iso_dates_are_not_swedish_number_ranges():
     result = lint('Date', 'Gäller från 1970-01-01 till 2026-10-14.', checks='number-range-dash')
     assert not result.issues
+
+
+def test_numeric_version_list_v_dot_one_two_is_not_decimal():
+    result = lint(
+        'Prepare SNMP v.1,2 or v3 credential first.',
+        'Förbered först en SNMP v1-, v2- eller v3-inloggningsuppgift.',
+        checks=('numeric-mismatch',),
+    )
+    assert not result.issues

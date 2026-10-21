@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.12"
+__version__ = "1.23.13"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings', '.resx'})
@@ -1111,6 +1111,10 @@ class L10nLinter:
             
             entries_count += 1
             
+            # Weblate and gettext catalogs can carry read-only source keys
+            # whose empty target is intentional. They are not missing work.
+            read_only = 'read-only' in flags
+
             # Check: Missing translation (handle plural forms)
             if msgid_plural:
                 # Plural form: check msgstr[0], msgstr[1], etc.
@@ -1119,7 +1123,7 @@ class L10nLinter:
                     if key.startswith('msgstr[') and entry[key]:
                         has_translation = True
                         break
-                if not has_translation:
+                if not has_translation and not read_only:
                     result.add(LintIssue(
                         file=filepath,
                         line=line,
@@ -1133,7 +1137,7 @@ class L10nLinter:
                 
                 # Check: Same plurals
                 self._check_same_plurals(filepath, line, msgid, msgid_plural, entry, result)
-            elif not msgstr:
+            elif not msgstr and not read_only:
                 result.add(LintIssue(
                     file=filepath,
                     line=line,

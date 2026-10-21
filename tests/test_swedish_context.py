@@ -330,3 +330,13 @@ def test_numeric_version_list_v_dot_one_two_is_not_decimal():
         checks=('numeric-mismatch',),
     )
     assert not result.issues
+
+
+def test_read_only_po_key_is_not_reported_as_missing_translation():
+    text = ('msgid ""\nmsgstr "Language: sv\\n"\n\n'
+            '#, read-only\n'
+            'msgid "workflow.yml"\n'
+            'msgstr ""\n')
+    result = L10nLinter().lint_file('sv.po', text)
+    assert result.entries_checked == 1
+    assert 'missing-translation' not in [issue.rule for issue in result.issues]

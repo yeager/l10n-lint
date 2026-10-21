@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.13] - 2026-10-21
+
+### Fixed
+
+- Do not report intentionally empty `read-only` PO entries as missing translations.
+
 ## [Unreleased]
 
 ## [1.23.12] - 2026-10-20

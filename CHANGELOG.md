@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.18] - 2026-10-23
+
+### Fixed
+
+- Recognize Swedish invariant plurals `ord` and `tecken`.
+
 ## [1.23.17] - 2026-10-23
 
 ### Fixed

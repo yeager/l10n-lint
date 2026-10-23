@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.17] - 2026-10-23
+
+### Fixed
+
+- Recognize common Swedish invariant plural nouns such as `projekt` and `användare`.
+
 ## [1.23.16] - 2026-10-23
 
 ### Fixed

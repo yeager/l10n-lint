@@ -285,6 +285,13 @@ def test_same_plural_forms_allow_invariant_swedish_trad():
     assert not any(issue.rule == 'same-plurals' for issue in result.issues)
 
 
+def test_same_plural_forms_allow_invariant_swedish_project_and_user():
+    for text in ('1 projekt', '1 användare', '1 underhållare'):
+        result = LintResult()
+        L10nLinter()._check_same_plurals('test.po', 1, 'One', 'Many', {'msgstr[0]': text, 'msgstr[1]': text}, result)
+        assert not any(issue.rule == 'same-plurals' for issue in result.issues)
+
+
 def test_same_plural_forms_allow_invariant_swedish_resultat():
     result = LintResult()
     L10nLinter()._check_same_plurals(

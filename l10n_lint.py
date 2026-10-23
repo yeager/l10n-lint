@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.15"
+__version__ = "1.23.16"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
@@ -1372,6 +1372,21 @@ class L10nLinter:
         style_text = re.sub(r'%%', '', translation)
         ipv4_spans = [match.span() for match in re.finditer(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', style_text)]
         iso_date_spans = [match.span() for match in re.finditer(r'\b\d{4}-\d{2}-\d{2}\b', style_text)]
+        # CUPS PPD diagnostics end with a source-defined ``REF: Pages 16-17``
+        # reference line. The range is part of the diagnostic format and must
+        # remain a page citation, rather than Swedish running prose.
+        ppd_reference_spans = []
+        for reference in re.finditer(
+                r'(?m)^[ \t]*REF:[ \t]+(?:Sida|Sidor)[ \t]+(\d+(?:[ \t]*[-–][ \t]*\d+)+),[ \t]+avsnitt[ \t]+\d+(?:\.\d+)*\.[ \t]*$',
+                style_text):
+            page_range = reference.group(1)
+            source_reference = (
+                r'(?m)^[ \t]*REF:[ \t]+Pages?[ \t]+'
+                + re.escape(page_range)
+                + r',[ \t]+section[ \t]+\d+(?:\.\d+)*\.[ \t]*$'
+            )
+            if re.search(source_reference, source):
+                ppd_reference_spans.append(reference.span(1))
         for pattern, rule, message in checks:
             matches = re.finditer(pattern, style_text)
             if rule == 'large-number-grouping':
@@ -1384,7 +1399,7 @@ class L10nLinter:
             if rule == 'number-range-dash':
                 matches = (match for match in matches if not any(
                     start <= match.start() and match.end() <= end
-                    for start, end in iso_date_spans
+                    for start, end in iso_date_spans + ppd_reference_spans
                 ))
             # Some legacy PHP catalogs encode a literal percentage as ``% of``.
             # PHP's format parser treats the `o` as a conversion specifier, so

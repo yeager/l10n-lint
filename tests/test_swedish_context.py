@@ -323,6 +323,15 @@ def test_iso_dates_are_not_swedish_number_ranges():
     assert not result.issues
 
 
+def test_ppd_reference_ranges_are_not_swedish_number_ranges():
+    result = lint(
+        '        REF: Pages 16-17, section 3.2.',
+        '        REF: Sidor 16-17, avsnitt 3.2.',
+        checks='number-range-dash',
+    )
+    assert not result.issues
+
+
 def test_numeric_version_list_v_dot_one_two_is_not_decimal():
     result = lint(
         'Prepare SNMP v.1,2 or v3 credential first.',

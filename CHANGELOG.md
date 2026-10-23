@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.16] - 2026-10-23
+
+### Fixed
+
+- Preserve source-defined PPD `REF:` page references, including their numeric range punctuation.
+
 ## [1.23.15] - 2026-10-23
 
 ### Fixed

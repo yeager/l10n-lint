@@ -3389,7 +3389,7 @@ class L10nLinter:
             # "ett resultat"/"flera resultat", and "ett objekt"/"flera
             # objekt".  Do not make those
             # grammatically valid forms look suspicious.
-            if re.search(r'\b(?:byte|träd|resultat|objekt|projekt|användare|underhållare|organisationsägare|klassificerare|tecken|ord)\b', msgstr_values[0], re.IGNORECASE):
+            if re.search(r'\b(?:byte|träd|resultat|objekt|projekt|användare|underhållare|organisationsägare|klassificerare|tecken|ord|förslag)\b', msgstr_values[0], re.IGNORECASE):
                 return
             # Exception: if source plural/singular are also identical
             if msgid != msgid_plural:

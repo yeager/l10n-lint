@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.20] - 2026-10-23
+
+### Fixed
+
+- Recognize the invariant Swedish plurals `fel` and `språk`.
+
 ## [1.23.19] - 2026-10-23
 
 ### Fixed

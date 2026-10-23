@@ -306,7 +306,7 @@ def test_same_plural_forms_allow_invariant_swedish_project_and_user():
 
 
 def test_same_plural_forms_allow_invariant_swedish_fel_and_sprak():
-    for text in ('1 fel', '2 fel', '1 språk', '2 språk', '1 aviseringsspråk', '2 aviseringsspråk', '1 tillägg', '2 tillägg'):
+    for text in ('1 fel', '2 fel', '1 språk', '2 språk', '1 aviseringsspråk', '2 aviseringsspråk', '1 tillägg', '2 tillägg', '1 översättare', '2 översättare'):
         result = LintResult()
         L10nLinter()._check_same_plurals(
             'test.po', 1, 'One', 'Many',

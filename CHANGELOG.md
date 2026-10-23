@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.24] - 2026-10-23
+
+### Fixed
+
+- Recognize the invariant Swedish plural `översättare`.
+
 ## [1.23.23] - 2026-10-23
 
 ### Fixed

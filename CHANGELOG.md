@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.22] - 2026-10-23
+
+### Fixed
+
+- Recognize the invariant Swedish plural `tillägg` and ISO encoding identifiers such as `ISO-8859-1`.
+
 ## [1.23.21] - 2026-10-23
 
 ### Fixed

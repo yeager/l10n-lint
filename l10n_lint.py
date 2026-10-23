@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.21"
+__version__ = "1.23.22"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
@@ -1372,6 +1372,14 @@ class L10nLinter:
         style_text = re.sub(r'%%', '', translation)
         ipv4_spans = [match.span() for match in re.finditer(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', style_text)]
         iso_date_spans = [match.span() for match in re.finditer(r'\b\d{4}-\d{2}-\d{2}\b', style_text)]
+        # Encoding names such as ISO-8859-1 are identifiers. Their hyphens are
+        # structural syntax, not Swedish prose number ranges.
+        encoding_identifier_spans = [
+            match.span() for match in re.finditer(
+                r'\b(?:ISO|IEC|UTF)-\d+(?:-\d+)+(?:[-+][A-Za-z0-9.]+)?\b',
+                style_text, re.IGNORECASE
+            )
+        ]
         # CUPS PPD diagnostics end with a source-defined ``REF: Pages 16-17``
         # reference line. The range is part of the diagnostic format and must
         # remain a page citation, rather than Swedish running prose.
@@ -1399,7 +1407,7 @@ class L10nLinter:
             if rule == 'number-range-dash':
                 matches = (match for match in matches if not any(
                     start <= match.start() and match.end() <= end
-                    for start, end in iso_date_spans + ppd_reference_spans
+                    for start, end in iso_date_spans + encoding_identifier_spans + ppd_reference_spans
                 ))
             # Some legacy PHP catalogs encode a literal percentage as ``% of``.
             # PHP's format parser treats the `o` as a conversion specifier, so
@@ -3389,7 +3397,7 @@ class L10nLinter:
             # "ett resultat"/"flera resultat", and "ett objekt"/"flera
             # objekt".  Do not make those
             # grammatically valid forms look suspicious.
-            if re.search(r'\b(?:byte|träd|resultat|objekt|projekt|användare|underhållare|organisationsägare|klassificerare|tecken|ord|förslag|fel|[\wåäö]*språk)\b', msgstr_values[0], re.IGNORECASE):
+            if re.search(r'\b(?:byte|träd|resultat|objekt|projekt|användare|underhållare|organisationsägare|klassificerare|tecken|ord|förslag|fel|tillägg|[\wåäö]*språk)\b', msgstr_values[0], re.IGNORECASE):
                 return
             # Exception: if source plural/singular are also identical
             if msgid != msgid_plural:

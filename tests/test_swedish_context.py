@@ -293,7 +293,7 @@ def test_same_plural_forms_allow_invariant_swedish_project_and_user():
 
 
 def test_same_plural_forms_allow_invariant_swedish_fel_and_sprak():
-    for text in ('1 fel', '2 fel', '1 språk', '2 språk', '1 aviseringsspråk', '2 aviseringsspråk'):
+    for text in ('1 fel', '2 fel', '1 språk', '2 språk', '1 aviseringsspråk', '2 aviseringsspråk', '1 tillägg', '2 tillägg'):
         result = LintResult()
         L10nLinter()._check_same_plurals(
             'test.po', 1, 'One', 'Many',
@@ -336,6 +336,11 @@ def test_punctuation_allows_note_colon_to_obs_exclamation():
 
 def test_iso_dates_are_not_swedish_number_ranges():
     result = lint('Date', 'Gäller från 1970-01-01 till 2026-10-14.', checks='number-range-dash')
+    assert not result.issues
+
+
+def test_iso_encoding_identifier_is_not_a_swedish_number_range():
+    result = lint('Encoding', 'ISO-8859-1', checks='number-range-dash')
     assert not result.issues
 
 

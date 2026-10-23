@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.22"
+__version__ = "1.23.23"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
@@ -293,6 +293,8 @@ class POParser:
                     finish()
                 if line.startswith('#,'):
                     current.setdefault('_flags', []).extend(f.strip() for f in line[2:].split(','))
+                elif line.startswith('#.'):
+                    current.setdefault('_translator_comments', []).append(line[2:].strip())
                 continue
             match = token.fullmatch(line)
             if match:
@@ -3392,6 +3394,13 @@ class L10nLinter:
         
         # Check if all plural forms are identical
         if len(set(msgstr_values)) == 1:
+            # A translator comment can explicitly guarantee that the singular
+            # runtime form is never used, for example a count that is always
+            # at least 100. In that case identical Swedish forms are the
+            # deliberate reachable behavior, not a plural defect.
+            comments = ' '.join(entry.get('_translator_comments', ()))
+            if re.search(r'\b(?:always|never)\b.*\b(?:least|singular)\b', comments, re.IGNORECASE):
+                return
             # A few common Swedish nouns retain the same spelling in singular
             # and plural: "1 byte"/"2 byte", "ett träd"/"flera träd",
             # "ett resultat"/"flera resultat", and "ett objekt"/"flera

@@ -277,6 +277,19 @@ def test_crlf_and_lf_have_equivalent_escape_counts():
     assert not result.issues
 
 
+def test_same_plural_forms_allow_unreachable_singular_with_translator_comment():
+    text = (
+        'msgid ""\nmsgstr "Language: sv\\n"\n\n'
+        '#. Translators: the count will be always at least 100\n'
+        'msgid "Only some of the %(count)s occurrence is shown."\n'
+        'msgid_plural "Only some of the %(count)s occurrences are shown."\n'
+        'msgstr[0] "Endast några av de %(count)s förekomsterna visas."\n'
+        'msgstr[1] "Endast några av de %(count)s förekomsterna visas."\n'
+    )
+    result = L10nLinter().lint_file('sv.po', text)
+    assert not any(issue.rule == 'same-plurals' for issue in result.issues)
+
+
 def test_same_plural_forms_allow_invariant_swedish_trad():
     result = LintResult()
     L10nLinter()._check_same_plurals(

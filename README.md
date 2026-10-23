@@ -1,6 +1,6 @@
 # l10n-lint
 
-[![Version](https://img.shields.io/badge/version-1.23.22-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.23.22)
+[![Version](https://img.shields.io/badge/version-1.23.23-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.23.23)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -63,7 +63,7 @@ not untranslated prose.
 `objekt` is also accepted as an invariant plural, and Swedish `Obs!` is
 accepted for the English cue `Note:`.
 
-[Download 1.23.22](https://github.com/yeager/l10n-lint/releases/tag/v1.23.22)
+[Download 1.23.23](https://github.com/yeager/l10n-lint/releases/tag/v1.23.23)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
 Version **1.23.0** adds Dart/Flutter ARB catalogs, protects more DocBook content and improves Swedish time checks. Version **1.22.6** recognizes Swedish idiomatic number equivalents and localized grouped thousands. Version **1.22.1** accepts Swedish cardinal words through
@@ -85,7 +85,7 @@ number-format diagnostics.
 
 ### Install the current release
 
-[Release 1.23.22](https://github.com/yeager/l10n-lint/releases/tag/v1.23.22)
+[Release 1.23.23](https://github.com/yeager/l10n-lint/releases/tag/v1.23.23)
 records the current annotated tag and release notes. Build from the checked-out
 source below to use this exact revision. Package repositories and PyPI can lag
 behind the GitHub release.

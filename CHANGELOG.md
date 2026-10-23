@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.23] - 2026-10-23
+
+### Fixed
+
+- Honor translator comments that guarantee an unreachable singular plural form.
+
 ## [1.23.22] - 2026-10-23
 
 ### Fixed

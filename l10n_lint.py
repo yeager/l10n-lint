@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.14"
+__version__ = "1.23.15"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
@@ -978,13 +978,13 @@ class FluentCatalogParser:
             if isinstance(element, ast.TextElement):
                 parts.append(element.value)
             elif isinstance(element, ast.Placeable):
-                # Fluent variables and references are runtime syntax. Keep a
-                # neutral visible token between surrounding text to avoid
-                # manufacturing punctuation errors (for example ``fel: :``).
+                # Fluent variables and references are runtime syntax. The
+                # linter treats Fluent identifiers as source keys, so it runs
+                # only target-only checks and does not need a prose stand-in.
+                # Keeping a repeated synthetic word here made messages with
+                # multiple placeholders look like a Swedish repeated-word bug.
                 if isinstance(element.expression, ast.StringLiteral):
                     parts.append(element.expression.value)
-                else:
-                    parts.append('värde')
         return ''.join(parts)
 
     def _append(self, identifier: str, pattern, ast, span) -> None:

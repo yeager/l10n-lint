@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.15] - 2026-10-23
+
+### Fixed
+
+- Do not turn Fluent runtime placeholders into synthetic repeated words during target-only checks.
+
 ## [1.23.14] - 2026-10-23
 
 ### Added

@@ -372,10 +372,17 @@ def test_fluent_catalog_parses_messages_attributes_and_missing_values():
     parser = FluentCatalogParser(FLUENT, 'app-sv.ftl')
     assert parser.language == 'sv'
     assert [entry['_id'] for entry in parser.entries] == ['hello', 'empty', 'message', 'message.tooltip']
-    assert parser.entries[0]['translation'] == 'Hej värde'
+    assert parser.entries[0]['translation'] == 'Hej '
     result = L10nLinter().lint_file('app-sv.ftl', FLUENT)
     assert result.entries_checked == 4
     assert rules(result) == ['missing-translation']
+
+
+def test_fluent_placeholders_do_not_create_repeated_swedish_words():
+    content = 'message = extra argument { $operand }\n    { $usage }\n'
+    result = L10nLinter().lint_file('app-sv.ftl', content)
+    assert result.entries_checked == 1
+    assert not result.issues
 
 
 def test_fluent_catalog_is_discovered_and_rejects_invalid_syntax(tmp_path):

@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.20"
+__version__ = "1.23.21"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
@@ -3389,7 +3389,7 @@ class L10nLinter:
             # "ett resultat"/"flera resultat", and "ett objekt"/"flera
             # objekt".  Do not make those
             # grammatically valid forms look suspicious.
-            if re.search(r'\b(?:byte|träd|resultat|objekt|projekt|användare|underhållare|organisationsägare|klassificerare|tecken|ord|förslag|fel|språk)\b', msgstr_values[0], re.IGNORECASE):
+            if re.search(r'\b(?:byte|träd|resultat|objekt|projekt|användare|underhållare|organisationsägare|klassificerare|tecken|ord|förslag|fel|[\wåäö]*språk)\b', msgstr_values[0], re.IGNORECASE):
                 return
             # Exception: if source plural/singular are also identical
             if msgid != msgid_plural:

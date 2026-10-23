@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.21] - 2026-10-23
+
+### Fixed
+
+- Recognize invariant Swedish plurals ending in `språk`, including compounds such as `aviseringsspråk`.
+
 ## [1.23.20] - 2026-10-23
 
 ### Fixed

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.19] - 2026-10-23
+
+### Fixed
+
+- Recognize the invariant Swedish plural `förslag`.
+
 ## [1.23.18] - 2026-10-23
 
 ### Fixed

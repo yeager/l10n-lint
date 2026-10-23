@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from l10n_lint import AndroidXMLParser, JSONParser, L10nLinter, PropertiesParser, ResxParser, StringsParser, XLIFFParser, find_l10n_files, lint_inputs
+from l10n_lint import AndroidXMLParser, FluentCatalogParser, JSONParser, L10nLinter, PropertiesParser, ResxParser, StringsParser, XLIFFParser, find_l10n_files, lint_inputs
 
 
 XLIFF_12 = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -358,3 +358,28 @@ def test_resx_parser_reads_localized_string_values_and_skips_binary_resources():
     result = L10nLinter({'language': 'sv'}).lint_file('messages-sv.resx', content)
     assert result.entries_checked == 2
     assert rules(result) == ['missing-translation']
+
+
+FLUENT = '''
+hello = Hej { $name }
+empty = { "" }
+message = Välkommen
+    .tooltip = Visa detaljer
+'''
+
+
+def test_fluent_catalog_parses_messages_attributes_and_missing_values():
+    parser = FluentCatalogParser(FLUENT, 'app-sv.ftl')
+    assert parser.language == 'sv'
+    assert [entry['_id'] for entry in parser.entries] == ['hello', 'empty', 'message', 'message.tooltip']
+    assert parser.entries[0]['translation'] == 'Hej värde'
+    result = L10nLinter().lint_file('app-sv.ftl', FLUENT)
+    assert result.entries_checked == 4
+    assert rules(result) == ['missing-translation']
+
+
+def test_fluent_catalog_is_discovered_and_rejects_invalid_syntax(tmp_path):
+    path = tmp_path / 'app-sv.ftl'
+    path.write_text('hello = Hej\n', encoding='utf-8')
+    assert list(find_l10n_files(tmp_path)) == [str(path)]
+    assert L10nLinter().lint_file('broken.ftl', 'hello = {\n').issues[0].rule == 'syntax-error'

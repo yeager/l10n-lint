@@ -36,10 +36,10 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.13"
+__version__ = "1.23.14"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
-L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.rc', '.properties', '.xml', '.strings', '.resx'})
+L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
 
 # IPP/CUPS catalogs use technical identifiers (for example
 # ``transmission-status.3``) as msgids and store the human-readable English
@@ -942,6 +942,92 @@ class JSONParser:
                 raise ValueError(f'JSON translation at {".".join(child_path)} must be a string, object, or entry list')
 
 
+class FluentCatalogParser:
+    """Parse target strings from Fluent (.ftl) localization catalogs.
+
+    Fluent target catalogs normally contain message identifiers and translated
+    patterns only. The identifiers are context, not English source prose, so
+    source-dependent checks are intentionally skipped while target-only checks
+    still cover untranslated messages, whitespace, punctuation and Swedish
+    language rules.
+    """
+
+    def __init__(self, content: str, filename: str = '<unknown>'):
+        self.content = content
+        self.filename = filename
+        self.entries = []
+        self.language = self._language_from_filename(filename)
+        self._parse()
+
+    @staticmethod
+    def _language_from_filename(filename: str) -> str:
+        stem = Path(filename).stem.lower()
+        match = re.search(r'(?:^|[-_.])(sv(?:[-_][a-z]{2})?)(?:$|[-_.])', stem)
+        return match.group(1).replace('-', '_') if match else ''
+
+    @staticmethod
+    def _line(content: str, offset: int) -> int:
+        return content.count('\\n', 0, offset) + 1
+
+    @staticmethod
+    def _pattern_text(pattern, ast) -> str:
+        if pattern is None:
+            return ''
+        parts = []
+        for element in pattern.elements:
+            if isinstance(element, ast.TextElement):
+                parts.append(element.value)
+            elif isinstance(element, ast.Placeable):
+                # Fluent variables and references are runtime syntax. Keep a
+                # neutral visible token between surrounding text to avoid
+                # manufacturing punctuation errors (for example ``fel: :``).
+                if isinstance(element.expression, ast.StringLiteral):
+                    parts.append(element.expression.value)
+                else:
+                    parts.append('värde')
+        return ''.join(parts)
+
+    def _append(self, identifier: str, pattern, ast, span) -> None:
+        text = self._pattern_text(pattern, ast)
+        line = self._line(self.content, getattr(span, 'start', 0))
+        self.entries.append({
+            '_id': identifier,
+            '_context': identifier,
+            '_line': line,
+            '_language': self.language,
+            '_source_is_key': True,
+            'source': identifier,
+            'translation': text,
+            '_translations': [text],
+            '_type': '',
+        })
+
+    def _parse(self):
+        try:
+            from fluent.syntax import FluentParser, ast
+        except ImportError as exc:
+            raise ValueError('Fluent support requires the fluent.syntax package') from exc
+        resource = FluentParser(with_spans=True).parse(self.content)
+        for entry in resource.body:
+            if isinstance(entry, ast.Junk):
+                annotation = entry.annotations[0] if entry.annotations else None
+                offset = getattr(getattr(annotation, 'span', None), 'start', 0)
+                message = getattr(annotation, 'message', 'invalid Fluent syntax')
+                raise ValueError(f'Line {self._line(self.content, offset)}: {message}')
+            if isinstance(entry, ast.Message):
+                if entry.value is not None:
+                    self._append(entry.id.name, entry.value, ast, entry.span)
+                for attribute in entry.attributes:
+                    self._append(f'{entry.id.name}.{attribute.id.name}', attribute.value, ast, attribute.span)
+            elif isinstance(entry, ast.Term):
+                if entry.value is not None:
+                    self._append(f'-{entry.id.name}', entry.value, ast, entry.span)
+                for attribute in entry.attributes:
+                    self._append(f'-{entry.id.name}.{attribute.id.name}', attribute.value, ast, attribute.span)
+        if not self.entries:
+            raise ValueError('No Fluent messages found')
+
+
 class L10nLinter:
     """Main linter class."""
     
@@ -1052,6 +1138,8 @@ class L10nLinter:
                     self._lint_po(filepath, content, result)
                 elif ext == '.ts':
                     self._lint_ts(filepath, content, result)
+                elif ext == '.ftl':
+                    self._lint_fluent(filepath, content, result)
                 elif ext == '.xml':
                     self._lint_android_xml(filepath, content, result)
                 elif ext in ('.xlf', '.xliff'):
@@ -1386,6 +1474,9 @@ class L10nLinter:
 
     def _lint_android_xml(self, filepath: str, content: str, result: LintResult):
         self._lint_external_entries(filepath, AndroidXMLParser(content, filepath), result)
+
+    def _lint_fluent(self, filepath: str, content: str, result: LintResult):
+        self._lint_external_entries(filepath, FluentCatalogParser(content, filepath), result)
 
     def _lint_xliff(self, filepath: str, content: str, result: LintResult):
         self._lint_external_entries(filepath, XLIFFParser(content, filepath), result)

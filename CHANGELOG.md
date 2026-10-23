@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.14] - 2026-10-23
+
+### Added
+
+- Add Fluent (`.ftl`) catalog support with target-only checks for localized message values and attributes.
+
 ## [1.23.13] - 2026-10-21
 
 ### Fixed

@@ -858,9 +858,16 @@ class JSONParser:
     def _walk(self, value, path):
         if isinstance(value, list):
             for index, item in enumerate(value):
-                if not isinstance(item, dict):
-                    raise ValueError(f'JSON catalog entry {index} must be an object')
-                self._walk(item, path + (str(index),))
+                item_path = path + (str(index),)
+                if isinstance(item, (dict, list)):
+                    self._walk(item, item_path)
+                elif isinstance(item, str):
+                    # Nested UI catalogs can use string lists for suggestions,
+                    # examples, or explanatory text. Treat each member as a
+                    # target-only entry so language checks still apply.
+                    self._append(item_path[-1], item, item_path, source_is_key=True)
+                elif item is not None:
+                    raise ValueError(f'JSON catalog entry {index} must be an object, string, or null')
             return
         if not isinstance(value, dict):
             raise ValueError('JSON catalog root must be an object or entry list')
@@ -929,10 +936,15 @@ class JSONParser:
             if key.startswith('@') or key.lower() in self._METADATA:
                 continue
             child_path = path + (key,)
-            if isinstance(child, str) or child is None:
+            if isinstance(child, str):
                 if self.format == 'entries':
                     raise ValueError('JSON format policy only allows explicit entries')
-                self._append(key, child or '', child_path, source_is_key=True)
+                self._append(key, child, child_path, source_is_key=True)
+            elif child is None:
+                # In nested JSON, null commonly represents optional schema
+                # metadata rather than an untranslated UI string. Explicit
+                # source/target entries above still treat null targets as empty.
+                continue
             elif isinstance(child, dict) and child and set(child) <= self._PLURAL_FORMS:
                 if self.format == 'entries':
                     raise ValueError('JSON format policy only allows explicit entries')

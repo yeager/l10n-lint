@@ -136,6 +136,20 @@ def test_json_parser_supports_nested_key_value_and_explicit_entries():
     assert rules(result) == ['missing-translation']
 
 
+def test_json_nested_catalog_supports_string_lists_and_optional_nulls():
+    content = json.dumps({
+        'agent': {'suggestedPrompts': ['Skapa en bild', 'Förbättra bilden']},
+        'node': {'tooltip': None, 'label': 'Nod'},
+    })
+    parser = JSONParser(content, 'sv.json')
+    assert [(entry['_id'], entry['translation']) for entry in parser.entries] == [
+        ('agent.suggestedPrompts.0', 'Skapa en bild'),
+        ('agent.suggestedPrompts.1', 'Förbättra bilden'),
+        ('node.label', 'Nod'),
+    ]
+    assert not L10nLinter().lint_file('sv.json', content).issues
+
+
 def test_json_nested_catalog_allows_source_as_a_regular_key():
     content = json.dumps({'common': {'source': 'Källa', 'target': 'Mål', 'other': 'Övrigt'}})
     result = L10nLinter().lint_file('sv.json', content)

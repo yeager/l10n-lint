@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.23.26] - 2026-10-24
+
+### Fixed
+
+- Support nested JSON string lists and optional null metadata without masking translation checks.
+
+
 ## [1.23.24] - 2026-10-23
 
 ### Fixed

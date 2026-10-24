@@ -244,6 +244,11 @@ def test_math_subtraction_is_not_a_swedish_number_range():
     assert not result.issues
 
 
+def test_regular_expression_class_is_not_a_swedish_number_range():
+    result = lint('Mode syntax', 'Ange ett intervall som [0-7]+.', checks='number-range-dash')
+    assert not result.issues
+
+
 def test_html_entity_apostrophe_is_not_terminal_punctuation():
     result = lint('Mode &apos;custom&apos;', 'Läge ”custom”', checks='inconsistent-punctuation')
     assert not result.issues

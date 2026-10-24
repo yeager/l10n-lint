@@ -1561,6 +1561,14 @@ class L10nLinter:
                     and not source.strip()
                     and all(not value.strip() for value in translations)):
                 continue
+            # A nested JSON catalog can include an intentionally blank key as
+            # a category or sentinel.  With no source text and no target text
+            # there is nothing for a translator to supply.
+            if (isinstance(parser, JSONParser)
+                    and entry.get('_source_is_key', False)
+                    and not source.strip()
+                    and all(not value.strip() for value in translations)):
+                continue
             result.entries_checked += 1
             self._current_lang = self.config.get('language') or entry.get('_language') or default_language
             self._message_context = entry.get('_context', '')

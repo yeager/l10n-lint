@@ -412,3 +412,9 @@ def test_fluent_catalog_is_discovered_and_rejects_invalid_syntax(tmp_path):
     path.write_text('hello = Hej\n', encoding='utf-8')
     assert list(find_l10n_files(tmp_path)) == [str(path)]
     assert L10nLinter().lint_file('broken.ftl', 'hello = {\n').issues[0].rule == 'syntax-error'
+
+
+def test_json_intentionally_blank_nested_key_is_not_missing_translation():
+    result = L10nLinter().lint_file('sv.json', json.dumps({'categories': {'': ''}}))
+    assert result.entries_checked == 0
+    assert not result.issues

@@ -136,6 +136,14 @@ def test_json_parser_supports_nested_key_value_and_explicit_entries():
     assert rules(result) == ['missing-translation']
 
 
+def test_json_nested_catalog_allows_string_named_nested_keys():
+    content = json.dumps({'node': {'inputs': {'string': {'name': 'text'}}}})
+    parser = JSONParser(content, 'sv.json')
+    assert [(entry['_id'], entry['translation']) for entry in parser.entries] == [
+        ('node.inputs.string.name', 'text'),
+    ]
+
+
 def test_json_nested_catalog_supports_string_lists_and_optional_nulls():
     content = json.dumps({
         'agent': {'suggestedPrompts': ['Skapa en bild', 'Förbättra bilden']},

@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.26"
+__version__ = "1.23.27"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
@@ -875,7 +875,12 @@ class JSONParser:
         # translated value in ``string`` alongside context, comments, and nullable
         # metadata such as ``character_limit``.  Treat the object as one entry;
         # metadata must not be interpreted as catalog strings.
-        if ('string' in value and isinstance(value.get('string'), (str, dict))
+        transifex_string = value.get('string')
+        transifex_plural = (isinstance(transifex_string, dict)
+                             and (not transifex_string
+                                  or all(str(key).isdigit() for key in transifex_string)
+                                  or set(transifex_string) <= self._PLURAL_FORMS))
+        if ('string' in value and (isinstance(transifex_string, str) or transifex_plural)
                 and set(value) <= {'string', 'context', 'developer_comment', 'character_limit',
                                    'comment', 'notes', 'pluralized', 'tags'}):
             if self.format == 'entries':

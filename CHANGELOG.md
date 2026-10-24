@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.23.27] - 2026-10-24
+
+### Fixed
+
+- Distinguish nested JSON keys named `string` from Transifex plural entries.
+
+
 ## [1.23.26] - 2026-10-24
 
 ### Fixed

@@ -36,6 +36,11 @@ py-modules = ["l10n_lint", "l10n_lint_gtk", "l10n_project", "print_helper"]
 [tool.setuptools.package-data]
 "*" = ["locale/**/*", "man/**/*", "docs/**/*"]
 
+[tool.setuptools.data-files]
+"share/l10n-lint/locale/sv/LC_MESSAGES" = ["locale/sv/LC_MESSAGES/l10n-lint.mo"]
+"share/man/en/man1" = ["man/en/l10n-lint.1", "man/en/l10n-lint-gtk.1"]
+"share/man/sv/man1" = ["man/sv/l10n-lint.1", "man/sv/l10n-lint-gtk.1"]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]

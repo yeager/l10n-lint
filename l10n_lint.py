@@ -52,6 +52,7 @@ DOMAIN = "l10n-lint"
 # Look for locale in multiple places
 _possible_locale_dirs = [
     Path(__file__).parent / "locale",  # Development / pip install -e
+    Path(sys.prefix) / "share/l10n-lint/locale",  # pip data-files install
     Path("/usr/share/l10n-lint/locale"),  # System install (Debian)
     Path("/usr/share/locale"),  # Standard system locale (RPM/Fedora)
 ]

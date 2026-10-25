@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.23.29] - 2026-10-25
+
+### Packaging
+
+- Include the Swedish gettext catalog and localized man pages in PyPI wheels.
+- Load the installed catalog from the active Python environment.
+
+
 ## [1.23.27] - 2026-10-24
 
 ### Fixed

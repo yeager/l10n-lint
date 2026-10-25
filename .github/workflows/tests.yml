@@ -19,6 +19,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install GNU gettext
         run: sudo apt-get update && sudo apt-get install -y gettext
+      - name: Compile the Swedish catalog
+        run: mkdir -p locale/sv/LC_MESSAGES && msgfmt -o locale/sv/LC_MESSAGES/l10n-lint.mo po/sv.po
       - run: python -m pip install '.[test]'
       - run: python -m pytest -q
       - name: Lint localization files changed by this pull request

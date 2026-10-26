@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.23.30] - 2026-10-26
+
+### Fixed
+
+- Flag three identical consonants in Swedish compounds, including processstatus and adressspecifika.
+- Keep hyphenated compounds and technical tokens exempt.
+
 ## [1.23.29] - 2026-10-25
 
 ### Packaging

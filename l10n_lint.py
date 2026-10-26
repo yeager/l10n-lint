@@ -2856,16 +2856,14 @@ class L10nLinter:
 
 
     # Pattern-based typo detection (no external dictionary needed)
-    # Swedish spelling usually reduces a compound boundary with three equal
-    # consecutive consonants to two. A small curated set of established words
-    # keeps their triple consonants, such as processstatus.
+    # Swedish spelling reduces three identical consecutive consonants at a
+    # compound boundary to two (Språkrådets frågelåda).
     _TYPO_DOUBLED_RE = re.compile(
         r'([a-zåäö])\1{2,}'
         r'|([^lnrstdgk])(\2)'  # Doubled consonants that are rare in Swedish (except l,n,r,s,t,d,g,k)
         , re.IGNORECASE
     )
     # Common Swedish misspelling patterns (curated, low false positive)
-    _VALID_TRIPLE_CONSONANT_WORDS = {'processstatus'}
 
     _COMMON_TYPOS = {
         # Doubled characters
@@ -2928,8 +2926,7 @@ class L10nLinter:
             # Unchanged source tokens (IEEE, PPP, pppd, III, www) are
             # technical names, not Swedish compounds. Curated typo checks
             # above still apply, including when the source repeats a typo.
-            if (word.lower() in source_words
-                    or word.lower() in self._VALID_TRIPLE_CONSONANT_WORDS):
+            if word.lower() in source_words:
                 continue
             # yyyy is a year token too; keep the exemption at word boundaries
             # so repeated letters inside actual words still receive diagnostics.

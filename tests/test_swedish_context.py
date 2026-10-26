@@ -140,9 +140,12 @@ def test_technical_url_with_www_is_not_a_triple_consonant_compound():
     assert not any(issue.rule == 'typo' for issue in result.issues)
 
 @pytest.mark.parametrize('word,warning', [
-    ('processstatus', False),
-    ('Processstatus', False),
+    ('processstatus', True),
+    ('Processstatus', True),
+    ('adressspecifika', True),
+    ('adresspecifika', False),
     ('upppil', True),
+    ('glass-skål', False),
     ('neeej', False),
     ('processtatus', False),
 ])

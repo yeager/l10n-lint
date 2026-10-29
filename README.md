@@ -1,6 +1,6 @@
 # l10n-lint
 
-[![Version](https://img.shields.io/badge/version-1.23.30-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.23.30)
+[![Version](https://img.shields.io/badge/version-1.23.31-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.23.31)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
@@ -41,11 +41,12 @@ alternativ och `l10n-lint --list-rules` för regelidentifierare och nivåer.
 
 Kör l10n-lint först för katalogstruktur, formatsträngar, markup och URL:er.
 Granska sedan med svlang, hunspell-sv, swedish-foss-terminology och swedish-tm.
-Kontrollera varje träff i dess gränssnittskontext. Svenska regler omfattar ingen
-komma omedelbart före `och`, korrekt skiljeteckensmellanrum, citattecken,
-utelämningstecknet `…`, procentformat, siffergruppering och ordet `till` i
-intervall. Tankstreck flaggas i svenska måltexter när de
-inte måste bevaras från källans syntax eller layout. Crowdin-text före `|` är metadata och får inte synas i måltexten.
+Kontrollera varje träff i dess gränssnittskontext. Svenska kontroller omfattar
+skiljeteckensmellanrum, citattecken, procentformat, siffergruppering och
+felaktig bindestrecksskrivning i talintervall. Ett sammanhållet ellipstecken
+(`…`) erbjuds som en typografisk variant av tre punkter. Komma före `och` och
+tankstreck bedöms i sitt sammanhang. Crowdin-text före `|` är metadata och får inte
+synas i måltexten.
 Invarianta svenska pluraler som `byte`, `träd` och `resultat` flaggas inte som
 fel bara för att singular och plural har samma form.
 Plattformsspecifika kortkommandon som `⌘ + Backspace` behandlas som syntax och
@@ -70,7 +71,7 @@ not untranslated prose.
 `objekt` is also accepted as an invariant plural, and Swedish `Obs!` is
 accepted for the English cue `Note:`.
 
-[Download 1.23.30](https://github.com/yeager/l10n-lint/releases/tag/v1.23.30)
+[Download 1.23.31](https://github.com/yeager/l10n-lint/releases/tag/v1.23.31)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
 Version **1.23.0** adds Dart/Flutter ARB catalogs, protects more DocBook content and improves Swedish time checks. Version **1.22.6** recognizes Swedish idiomatic number equivalents and localized grouped thousands. Version **1.22.1** accepts Swedish cardinal words through
@@ -92,7 +93,7 @@ number-format diagnostics.
 
 ### Install the current release
 
-[Release 1.23.30](https://github.com/yeager/l10n-lint/releases/tag/v1.23.30)
+[Release 1.23.31](https://github.com/yeager/l10n-lint/releases/tag/v1.23.31)
 records the current annotated tag and release notes. Build from the checked-out
 source below to use this exact revision. Package repositories and PyPI can lag
 behind the GitHub release.
@@ -182,9 +183,10 @@ for established terms and [swedish-tm](https://github.com/yeager/swedish-tm)
 for context-aware suggestions. Never accept an automatic finding without reading
 source and target in their product context.
 
-Swedish checks include the project rule against a comma directly before `och`,
-punctuation spacing, Swedish quotation marks, `…` rather than three dots,
-percent formatting, digit grouping and the word `till` in ranges. Em dashes are flagged in Swedish targets unless the source syntax or layout requires the same character. A Crowdin prefix
+Swedish checks include punctuation spacing, Swedish quotation marks, percent
+formatting, digit grouping and numeric ranges. A single ellipsis character is
+offered as an optional typographic alternative to three dots. Commas before
+`och` and dashes are assessed in context. A Crowdin prefix
 before `|` is metadata and must not be translated or retained in visible text.
 Meaning, address, register and context-sensitive terminology always need manual
 review.

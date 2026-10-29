@@ -174,10 +174,12 @@ def test_swedish_month_labels_use_lowercase(source, translation):
     assert not result.issues
 
 
-def test_comma_before_och_is_reported_for_swedish_targets():
-    result = lint('Open the file, and save it.', 'Öppna filen, och spara den.', checks=('comma-before-och',))
-    assert [issue.rule for issue in result.issues] == ['comma-before-och']
-    assert not lint('Open the file and save it.', 'Öppna filen och spara den.', checks=('comma-before-och',)).issues
+def test_comma_before_och_is_not_a_context_free_error():
+    # Isof recommends commas between coordinated main clauses; this surface
+    # pattern needs syntax and discourse context to judge safely.
+    assert not lint("The tourists visited Denmark, and Sweden saw the fewest.",
+                    "Turisterna besökte Danmark, och Sverige hade det lägsta antalet.",
+                    checks=("punctuation",)).issues
 
 
 def test_personal_is_not_music_terminology_for_staff_meetings():
@@ -211,22 +213,16 @@ def test_symbolic_ipp_keys_are_context_not_english_source_prose():
 
 
 def test_swedish_quote_number_percent_and_range_forms_are_reported():
-    result = lint('Example', '“Exempel” 1.000.000, 8,65% och 11 - 12.', checks='quote-style,large-number-grouping,percent-spacing,number-range-dash')
+    result = lint('Example', '“Exempel” 1.000.000, 8,65% och 11-12.', checks='quote-style,large-number-grouping,percent-spacing,number-range-dash')
     assert {issue.rule for issue in result.issues} == {
         'quote-style', 'large-number-grouping', 'percent-spacing', 'number-range-dash',
     }
     assert not lint('Example', '”Exempel” 1 000 000, 8,65 % och 11 till 12.', checks='quote-style,large-number-grouping,percent-spacing,number-range-dash').issues
+    assert not lint('Example', 'Gäller 11–12 och 13 - 14.', checks='number-range-dash').issues
 
 
-def test_swedish_dashes_are_reported():
-    result = lint('Example', 'En paus — här.', checks='swedish-dash')
-    assert {issue.rule for issue in result.issues} == {'swedish-dash'}
-    assert not lint('Example', 'Röd–grön. En paus här.', checks='swedish-dash').issues
-
-
-def test_swedish_dash_required_by_source_is_allowed():
-    result = lint('Command — description', 'Kommando — beskrivning', checks='swedish-dash')
-    assert not result.issues
+def test_swedish_dash_is_allowed_as_contextual_punctuation():
+    assert not lint("A pause — here.", "En paus — här.", checks="punctuation").issues
 
 
 def test_ipv4_addresses_are_not_swedish_thousands_grouping():

@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.30"
+__version__ = "1.23.31"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
@@ -188,8 +188,6 @@ RULES = {
     'large-number-grouping': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Large number grouping'),
     'percent-spacing': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Percent spacing'),
     'number-range-dash': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Number range separator'),
-    'swedish-dash': RuleSpec('_check_swedish_style_forms', 'warning', 'sv', 'Dash in Swedish translation'),
-    'comma-before-och': RuleSpec('_check_comma_before_och', 'warning', 'sv', 'Comma before och'),
     'currency-localization': RuleSpec('_check_currency_localization', 'info', 'sv', 'Currency localization'),
     'date-format': RuleSpec('_check_date_format', 'warning', 'sv', 'Date format'),
     'newline-mismatch': RuleSpec('_check_newline_mismatch', 'warning', '', 'Newline mismatch'),
@@ -1381,11 +1379,12 @@ class L10nLinter:
             (r'“', 'quote-style', 'Use Swedish quotation marks ”…”'),
             (r'\b\d{1,3}(?:\.\d{3}){2,}\b', 'large-number-grouping', 'Group large Swedish numbers with spaces, not periods'),
             (r'\b\d+(?:,\d+)?%(?!\w)', 'percent-spacing', 'Insert a space before the percent sign in Swedish'),
-            # Keep this preference separate from mathematical expressions such as
-            # ``2/√2 - 1``. Swedish project translations use the word ``till``
-            # for numeric ranges instead of a dash.
-            (r'(?<![*/√])\b\d+(?:[ \t]*[-–][ \t]*)\d+\b', 'number-range-dash', 'Use ”till” rather than a dash in a Swedish number range'),
-            (r'—', 'swedish-dash', 'Avoid em dashes in Swedish translations unless the source syntax requires the same character'),
+            # Swedish uses an unspaced en dash in ranges (11–12). If a plain
+            # hyphen has to stand in for a dash, Svenska skrivregler says to
+            # put spaces around it (11 - 12). Catch ASCII hyphens without
+            # spaces on both sides; allow valid en-dash ranges and the spaced
+            # hyphen fallback.
+            (r'(?<![*/√])\b\d+(?:-\d+|-[ \t]+\d+|[ \t]+-\d+)\b', 'number-range-dash', 'Use tankstreck (11–12) or a spaced hyphen in a Swedish number range'),
         )
         # C printf uses %% for a literal percent; it is not Swedish prose.
         # IPv4 addresses use periods as structural separators, not thousands grouping.
@@ -1443,10 +1442,6 @@ class L10nLinter:
                 matches = (match for match in matches if not re.match(
                     r'\d+(?:,\d+)?% of\b', style_text[match.start():]
                 ))
-            # A dash that is part of the source syntax or layout must be
-            # preserved. Only report Swedish dashes introduced by the target.
-            if rule == 'swedish-dash' and style_text.count('—') <= source.count('—'):
-                continue
             if next(matches, None):
                 result.add(LintIssue(filepath, line, Severity.WARNING, rule, message, source))
 
@@ -1473,14 +1468,6 @@ class L10nLinter:
             result.add(LintIssue(
                 filepath, line, Severity.WARNING, 'space-before-punctuation',
                 'Remove the space before Swedish punctuation', source,
-            ))
-
-    def _check_comma_before_och(self, filepath, line, source, translation, result):
-        """Flag the English comma-before-and pattern in Swedish targets."""
-        if re.search(r',\s+och\b', translation, re.IGNORECASE):
-            result.add(LintIssue(
-                filepath, line, Severity.WARNING, 'comma-before-och',
-                'Remove the comma before “och” in Swedish', source,
             ))
 
     def _check_unicode_integrity(self, filepath, line, source, translation, result):
@@ -3236,7 +3223,7 @@ class L10nLinter:
             ))
 
     def _check_ellipsis(self, filepath: str, line: int, source: str, translation: str, result: LintResult):
-        """Check for proper ellipsis usage (... should be …)."""
+        """Offer a typographic ellipsis as an optional style suggestion."""
         # Preserve an ASCII ellipsis when the source uses one.  This is common
         # in fixed UI labels and command output, and agrees with the fixer
         # contract documented in README.md.
@@ -3246,7 +3233,7 @@ class L10nLinter:
                 line=line,
                 severity=Severity.INFO,
                 rule="ellipsis",
-                message=_("Use typographic ellipsis (…) instead of three dots (...)"),
+                message=_("A single ellipsis character (…) is an optional typographic alternative to three dots (...)"),
                 context=translation[:50]
             ))
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.23.31] - 2026-10-29
+
+### Fixed
+
+- Accept Swedish comma use before *och* when sentence structure calls for it.
+- Accept tankstreck and properly spaced hyphens in numeric ranges; flag only malformed hyphen ranges.
+- Treat the single-character ellipsis as an optional typographic alternative to three dots.
+- Stop treating em dashes as errors in Swedish text.
+
 ## [1.23.30] - 2026-10-26
 
 ### Fixed

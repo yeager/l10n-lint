@@ -330,7 +330,11 @@ class POParser:
                 return raw.decode('utf-8')
             except UnicodeDecodeError as exc:
                 raise ValueError(f"Invalid UTF-8 PO hex escape: {match.group(0)}") from exc
-        s = re.sub(r'(?:\\x[0-9A-Fa-f]{2})+', decode_hex, s)
+        # Do not decode a hex-looking sequence whose backslash is itself
+        # escaped in the PO source.  Blender, for example, documents literal
+        # ``\\xC2\\xB0`` bytes in source strings; in a PO literal those appear
+        # as ``\\\\xC2\\\\xB0`` and must remain literal after unescaping.
+        s = re.sub(r'(?<!\\)(?:\\x[0-9A-Fa-f]{2})+', decode_hex, s)
         escapes = {'n': '\n', 't': '\t', 'r': '\r', 'b': '\b', 'f': '\f',
                    'v': '\v', 'a': '\a', '"': '"', '\\': '\\'}
         def decode(match):

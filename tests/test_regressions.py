@@ -70,6 +70,11 @@ def test_po_utf8_hex_escapes_are_decoded_as_one_sequence():
     assert entries[0]['msgstr'] == '90°'
 
 
+def test_po_literal_hex_escapes_are_not_decoded():
+    entries = POParser('msgid "Angle"\nmsgstr "90\\\\xC2\\\\xB0"\n').entries
+    assert entries[0]['msgstr'] == r'90\xC2\xB0'
+
+
 @pytest.mark.parametrize('source,target,flags,trigger', [
     ('%1$s', '%1$d', 'c-format', True),
     ('Hello', 'Hej %s', 'c-format', True),

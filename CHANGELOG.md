@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.23.32] - 2026-11-04
+
+### Fixed
+
+- Preserve literal PO byte-escape notation such as `\\xC2\\xB0` instead of
+  mistaking it for an invalid UTF-8 sequence. Consecutive real UTF-8 byte
+  escapes remain decoded as one Unicode character.
+
 ## [1.23.31] - 2026-10-29
 
 ### Fixed

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from l10n_lint import AndroidXMLParser, FluentCatalogParser, JSONParser, L10nLinter, PropertiesParser, ResxParser, StringsParser, XLIFFParser, find_l10n_files, lint_inputs
+from l10n_lint import AndroidXMLParser, FluentCatalogParser, JSONParser, L10nLinter, PropertiesParser, ResxParser, StringsParser, TOMLParser, XLIFFParser, find_l10n_files, lint_inputs
 
 
 XLIFF_12 = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -239,6 +239,48 @@ def test_xliff_and_json_are_discovered_in_directories_and_by_input_pipeline(tmp_
     assert result.files_checked == 3
     assert result.entries_checked == 6
     assert rules(result).count('missing-translation') == 2
+
+
+def test_toml_catalog_parses_nested_strings_arrays_and_empty_translations():
+    content = '''locale = "sv-SE"
+version = 1
+
+[admin.settings]
+label = "Autentiseringsläge"
+description = ""
+options = ["OAuth", "API-nyckel"]
+enabled = true
+'''
+    parser = TOMLParser(content, 'sv-SE.toml')
+    assert parser.language == 'sv_SE'
+    assert [(entry['_id'], entry['_line'], entry['translation']) for entry in parser.entries] == [
+        ('admin.settings.label', 5, 'Autentiseringsläge'),
+        ('admin.settings.description', 6, ''),
+        ('admin.settings.options.0', 7, 'OAuth'),
+        ('admin.settings.options.1', 7, 'API-nyckel'),
+    ]
+    result = L10nLinter({'language': 'sv'}).lint_file('sv-SE.toml', content)
+    assert result.entries_checked == 4
+    assert rules(result) == ['missing-translation']
+
+
+def test_toml_catalog_reports_syntax_errors_and_is_discovered(tmp_path):
+    broken = L10nLinter().lint_file('sv.toml', '[section\nlabel = "Hej"')
+    assert rules(broken) == ['syntax-error']
+    (tmp_path / 'sv.toml').write_text('title = "Titel"\n', encoding='utf-8')
+    assert {Path(path).name for path in find_l10n_files(tmp_path)} == {'sv.toml'}
+    result = lint_inputs([str(tmp_path)])
+    assert result.files_checked == 1
+    assert result.entries_checked == 1
+
+
+def test_toml_reference_comparison_uses_toml_paths(tmp_path):
+    source = tmp_path / 'en.toml'
+    target = tmp_path / 'sv.toml'
+    source.write_text('[menu]\nsave = "Save"\nclose = "Close"\n', encoding='utf-8')
+    target.write_text('[menu]\nsave = "Spara"\n', encoding='utf-8')
+    result = L10nLinter({'reference': str(source)}).lint_file(str(target))
+    assert rules(result) == ['catalog-missing']
 
 
 def test_arb_catalogs_are_discovered_and_use_json_metadata_rules(tmp_path):

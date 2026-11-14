@@ -1,13 +1,13 @@
 # l10n-lint
 
-[![Version](https://img.shields.io/badge/version-1.23.32-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.23.32)
+[![Version](https://img.shields.io/badge/version-1.23.33-blue)](https://github.com/yeager/l10n-lint/releases/tag/v1.23.33)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 
 ## Svenska
 
 l10n-lint granskar gettext-PO, Qt-TS, Fluent, XLIFF 1.2/2.x, JSON-kataloger,
-Dart/Flutter-ARB-filer, Microsoft ResX-filer och CUPS/libcups `.strings`-kataloger. Det
+Dart/Flutter-ARB-filer, TOML-kataloger, Microsoft ResX-filer och CUPS/libcups `.strings`-kataloger. Det
 hittar tomma översättningar, syntaxfel, skillnader i platshållare och pluraler,
 felaktig formatering, brutna taggar och URL:er. Kod, kommandon, filnamn,
 funktionsnamn och identifierliknande variabelnamn i DocBook-markup kontrolleras
@@ -59,7 +59,7 @@ mänsklig granskning.
 
 ## English reference
 
-l10n-lint checks gettext PO, Qt TS, Fluent, XLIFF 1.2/2.x, JSON translation catalogs, Dart/Flutter ARB files, Microsoft ResX files, and CUPS/libcups `.strings` catalogs for missing translations,
+l10n-lint checks gettext PO, Qt TS, Fluent, XLIFF 1.2/2.x, JSON translation catalogs, Dart/Flutter ARB files, TOML localization catalogs, Microsoft ResX files, and CUPS/libcups `.strings` catalogs for missing translations,
 invalid syntax, placeholder mismatches, plural errors and inconsistent formatting. It also preserves
 executable DocBook content such as code, commands, filenames, function names and identifiers.
 Use the command line in CI or the GTK4 desktop interface for interactive review.
@@ -71,7 +71,7 @@ not untranslated prose.
 `objekt` is also accepted as an invariant plural, and Swedish `Obs!` is
 accepted for the English cue `Note:`.
 
-[Download 1.23.32](https://github.com/yeager/l10n-lint/releases/tag/v1.23.32)
+[Download 1.23.33](https://github.com/yeager/l10n-lint/releases/tag/v1.23.33)
 · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/yeager/l10n-lint/issues)
 
 Version **1.23.0** adds Dart/Flutter ARB catalogs, protects more DocBook content and improves Swedish time checks. Version **1.22.6** recognizes Swedish idiomatic number equivalents and localized grouped thousands. Version **1.22.1** accepts Swedish cardinal words through
@@ -80,9 +80,9 @@ number-format diagnostics.
 
 ## Features
 
-- Validate PO/TS/Fluent/XLIFF/JSON/ARB/ResX/`.strings` syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
+- Validate PO/TS/Fluent/XLIFF/JSON/ARB/TOML/ResX/`.strings` syntax, plural forms, printf/Python/Qt placeholders, tags, whitespace and URLs.
 - Share diagnostic IDs and input handling between the CLI and GTK4 interface.
-- Scan local files, directories, remote PO/TS/Fluent/XLIFF/JSON/ARB/ResX/`.strings` URLs and GitHub repositories.
+- Scan local files, directories, remote PO/TS/Fluent/XLIFF/JSON/ARB/TOML/ResX/`.strings` URLs and GitHub repositories.
 - Select individual rules or groups, configure severities and load custom TSV glossaries.
 - Store project settings in `pyproject.toml` and baseline existing findings.
 - Compare translations with a source catalog to find missing or obsolete entries.
@@ -93,7 +93,7 @@ number-format diagnostics.
 
 ### Install the current release
 
-[Release 1.23.32](https://github.com/yeager/l10n-lint/releases/tag/v1.23.32)
+[Release 1.23.33](https://github.com/yeager/l10n-lint/releases/tag/v1.23.33)
 records the current annotated tag and release notes. Build from the checked-out
 source below to use this exact revision. Package repositories and PyPI can lag
 behind the GitHub release.
@@ -314,11 +314,11 @@ glossary = "error"
 Operational errors (invalid syntax, unreadable/missing paths, incomplete
 network fetches and invalid references) cannot be disabled. An empty scan also
 fails, including when exclusions remove every input. Repeated local paths are
-deduplicated. Directory discovery accepts `.po`, `.ts`, `.xlf`, `.xliff`, `.json`
-and `.strings`
+deduplicated. Directory discovery accepts `.po`, `.ts`, `.xlf`, `.xliff`, `.json`,
+`.arb`, `.toml` and `.strings`
 case-insensitively.
 
-## XLIFF, JSON and CUPS strings catalogs
+## XLIFF, JSON, TOML and CUPS strings catalogs
 
 XLIFF support covers XLIFF 1.2 `trans-unit` elements and XLIFF 2.x `unit`/`segment`
 elements. The linter reads the target language, skips units marked `translate="no"`,
@@ -328,6 +328,10 @@ JSON support accepts nested key/value catalogs, where the leaf key is the source
 and explicit entries with `source` plus `target`, `translation`, or `value`. Use
 `@locale`, `locale`, `targetLanguage`, or `target_language` for language metadata.
 Entries marked `translate: false` or `translatable: false` are skipped.
+
+TOML locale files are target-only catalogs. Strings in nested tables and string
+lists are checked; table/key names supply context, while numeric and boolean
+configuration values are ignored.
 Plural objects with CLDR forms such as `one` and `other` are validated form by form.
 Transifex JSON exports with `string`, `context`, `developer_comment`, nullable
 `character_limit`, and numeric plural indexes are recognized as translation entries;
@@ -402,6 +406,7 @@ l10n-lint --reference messages.pot po/sv.po
 l10n-lint --reference source.ts translations/sv.ts
 l10n-lint --reference source.xlf translations/sv.xlf
 l10n-lint --reference app_en.arb app_sv.arb
+l10n-lint --reference locales/en.toml locales/sv.toml
 ```
 
 PO comparison keys include `msgctxt` and `msgid`; Qt keys use explicit IDs or
@@ -409,7 +414,7 @@ context, disambiguation comment and source text. Missing entries, entries absent
 from the reference, and changed plural/source definitions are reported separately.
 Obsolete PO and vanished/obsolete Qt entries are excluded. One reference applies
 to every input in the command; use separate runs for different domains. Reference
-and target formats must match (`.pot`/`.po`, `.ts`, `.xlf`/`.xliff`, or `.json`).
+and target formats must match (`.pot`/`.po`, `.ts`, `.xlf`/`.xliff`, `.json`, or `.toml`).
 
 ## Preview and apply conservative fixes
 

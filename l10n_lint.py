@@ -4,7 +4,7 @@
 # l10n-lint - Linter for localization files
 # Copyright (C) 2026 Daniel Nylander <daniel@danielnylander.se>
 """
-l10n-lint - Linter for localization files (.po, .ts, .xlf/.xliff, .json/.arb)
+l10n-lint - Linter for localization files (.po, .ts, .xlf/.xliff, .json/.arb, .toml)
 
 Checks for:
 - Missing translations (empty msgstr)
@@ -36,10 +36,20 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.32"
+__version__ = "1.23.33"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
-L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
+L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.toml', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
+# Project manifests are TOML, but they are configuration rather than locale
+# catalogs.  Avoid treating them as translations during directory and GitHub
+# discovery; callers can still lint an explicit TOML file when appropriate.
+NON_L10N_TOML_FILENAMES = frozenset({'pyproject.toml', 'cargo.toml'})
+
+
+def is_l10n_path(path) -> bool:
+    path = Path(path)
+    return (path.suffix.lower() in L10N_EXTENSIONS
+            and not (path.suffix.lower() == '.toml' and path.name.lower() in NON_L10N_TOML_FILENAMES))
 
 # IPP/CUPS catalogs use technical identifiers (for example
 # ``transmission-status.3``) as msgids and store the human-readable English
@@ -964,6 +974,108 @@ class JSONParser:
                 raise ValueError(f'JSON translation at {".".join(child_path)} must be a string, object, or entry list')
 
 
+class TOMLParser:
+    """Extract target-only strings from TOML localization catalogs.
+
+    TOML locale files normally contain only translated values, so table and
+    key names are context rather than English source text.  This intentionally
+    mirrors the target-only handling used for Fluent, Android XML and nested
+    JSON catalogs.  Strings in arrays are included because they commonly hold
+    translated choice labels or examples; numeric and boolean settings are
+    configuration, not translatable text.
+    """
+
+    _METADATA = frozenset({'locale', 'language', 'targetlanguage', 'target_language', 'version'})
+
+    def __init__(self, content: str, filename: str = '<unknown>'):
+        self.content = content
+        self.filename = filename
+        self.entries = []
+        self.language = self._language_from_filename(filename)
+        self._parse()
+
+    @staticmethod
+    def _language_from_filename(filename: str) -> str:
+        stem = Path(filename).stem.lower()
+        match = re.search(r'(?:^|[-_.])(sv(?:[-_][a-z]{2})?)(?:$|[-_.])', stem)
+        if not match:
+            return ''
+        language = match.group(1).replace('-', '_')
+        return language[:2] + language[2:].upper()
+
+    def _locations(self):
+        """Return the declaration line for ordinary TOML key paths.
+
+        Parsing remains delegated to ``tomllib``; this small scanner only
+        keeps diagnostics on the key declaration rather than line one.
+        Complex keys that cannot be mapped still receive a safe line-one
+        diagnostic.
+        """
+        locations, table = {}, ()
+        for number, raw in enumerate(self.content.splitlines(), 1):
+            line = raw.strip()
+            if not line or line.startswith('#'):
+                continue
+            section = re.fullmatch(r'\[([A-Za-z0-9_.-]+)\]', line)
+            if section:
+                table = tuple(section.group(1).split('.'))
+                continue
+            key = re.match(r'([A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*)\s*=', line)
+            if key:
+                locations[table + tuple(key.group(1).split('.'))] = number
+        return locations
+
+    def _append(self, path, value):
+        entry_id = '.'.join(path)
+        self.entries.append({
+            '_id': entry_id,
+            '_context': '.'.join(path[:-1]),
+            '_line': self._line_map.get(path, self._line_map.get(path[:-1], 1)),
+            '_language': self.language,
+            '_source_is_key': True,
+            'source': path[-1],
+            'translation': value,
+            '_translations': [value],
+            '_type': '',
+        })
+
+    def _walk(self, value, path=()):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                key = str(key)
+                if not path and key.lower() in self._METADATA:
+                    if key.lower() in ('locale', 'language', 'targetlanguage', 'target_language') and not self.language:
+                        self.language = str(child).replace('-', '_')
+                    continue
+                self._walk(child, path + (key,))
+        elif isinstance(value, str):
+            self._append(path, value)
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                if isinstance(child, str):
+                    self._append(path + (str(index),), child)
+                elif isinstance(child, dict):
+                    self._walk(child, path + (str(index),))
+
+    def _parse(self):
+        try:
+            import tomllib
+        except ImportError:  # Python 3.9 and 3.10
+            import tomli as tomllib
+        try:
+            document = tomllib.loads(self.content)
+        except tomllib.TOMLDecodeError as exc:
+            match = re.search(r'(?:line|at)\s+(\d+)', str(exc), re.IGNORECASE)
+            line = f'Line {match.group(1)}: ' if match else ''
+            raise ValueError(f'{line}invalid TOML: {exc}') from exc
+        if not isinstance(document, dict) or not document:
+            raise ValueError('TOML catalog must contain a non-empty table')
+        self._line_map = self._locations()
+        self._walk(document)
+        if not self.entries:
+            raise ValueError('TOML catalog contains no translation strings')
+
+
 class FluentCatalogParser:
     """Parse target strings from Fluent (.ftl) localization catalogs.
 
@@ -1174,6 +1286,8 @@ class L10nLinter:
                     self._lint_strings(filepath, content, result)
                 elif ext == '.resx':
                     self._lint_resx(filepath, content, result)
+                elif ext == '.toml':
+                    self._lint_toml(filepath, content, result)
                 else:
                     self._lint_json(filepath, content, result)
             except (ValueError, SyntaxError) as exc:
@@ -1524,6 +1638,9 @@ class L10nLinter:
 
     def _lint_json(self, filepath: str, content: str, result: LintResult):
         self._lint_external_entries(filepath, JSONParser(content, filepath, self.config.get('json_format', 'auto')), result)
+
+    def _lint_toml(self, filepath: str, content: str, result: LintResult):
+        self._lint_external_entries(filepath, TOMLParser(content, filepath), result)
 
     def _lint_rc(self, filepath: str, content: str, result: LintResult):
         self._lint_external_entries(filepath, RCParser(content, filepath), result)
@@ -3598,14 +3715,14 @@ def find_l10n_files(path: str, recursive: bool = True) -> Generator[str, None, N
     if not path.exists():
         raise FileNotFoundError(f"Path does not exist: {path}")
     if path.is_file():
-        if path.suffix.lower() not in L10N_EXTENSIONS:
+        if not is_l10n_path(path):
             raise ValueError(f"Unsupported translation file: {path}")
         yield str(path)
         return
     if not path.is_dir():
         raise ValueError(f"Not a file or directory: {path}")
     files = sorted(p for p in (path.rglob('*') if recursive else path.glob('*'))
-                   if p.is_file() and p.suffix.lower() in L10N_EXTENSIONS)
+                   if p.is_file() and is_l10n_path(p))
     yield from (str(p) for p in files)
 
 
@@ -3628,7 +3745,7 @@ def fetch_github_files(repo_url: str, path_filter: str = "") -> Generator[tuple[
     revision = data['sha']
     for item in data.get('tree', []):
         filepath = item['path']
-        if item.get('type') != 'blob' or Path(filepath).suffix.lower() not in L10N_EXTENSIONS:
+        if item.get('type') != 'blob' or not is_l10n_path(filepath):
             continue
         if path_filter and not (filepath == path_filter.rstrip('/') or filepath.startswith(path_filter.rstrip('/') + '/')):
             continue
@@ -3697,7 +3814,7 @@ def fetch_url_file(url: str) -> tuple[str, str]:
     Fetch a single l10n file from a URL.
     
     Args:
-        url: HTTP(S) URL to a .po, .ts, .xlf/.xliff, or .json file
+        url: HTTP(S) URL to a supported localization file
     
     Returns:
         (filename, content) tuple
@@ -3714,8 +3831,8 @@ def fetch_url_file(url: str) -> tuple[str, str]:
     
     # Validate file extension
     ext = Path(filename).suffix.lower()
-    if ext not in L10N_EXTENSIONS:
-        raise ValueError(_("URL must point to a .po, .ts, .xlf/.xliff, or .json file, got: {ext}").format(ext=ext))
+    if not is_l10n_path(filename):
+        raise ValueError(_("URL must point to a supported localization file, got: {ext}").format(ext=ext))
     
     # Fetch content
     req = urllib.request.Request(url, headers={
@@ -3999,7 +4116,7 @@ def main():
     preliminary = argparse.ArgumentParser(add_help=False)
     preliminary.add_argument('--config')
     known, _unused = preliminary.parse_known_args()
-    parser = argparse.ArgumentParser(description=_('Linter for PO, Qt TS, XLIFF, and JSON localization files'))
+    parser = argparse.ArgumentParser(description=_('Linter for PO, Qt TS, XLIFF, JSON, and TOML localization files'))
     parser.add_argument('paths', nargs='*')
     parser.add_argument('--config', help='Project TOML file (default: nearest pyproject.toml)')
     parser.add_argument('--github', '-g', metavar='REPO')
@@ -4030,7 +4147,7 @@ def main():
     parser.add_argument('--exclude', action='append', default=[], help='Project-relative glob, repeatable')
     parser.add_argument('--baseline', help='Report only findings absent from this baseline')
     parser.add_argument('--write-baseline', metavar='FILE', help='Save current findings before baseline filtering')
-    parser.add_argument('--reference', help='Compare with a .pot/.po, .ts, .xlf/.xliff, or .json source catalog')
+    parser.add_argument('--reference', help='Compare with a .pot/.po, .ts, .xlf/.xliff, .json, or .toml source catalog')
     parser.add_argument('--fix', metavar='RULES', help='Preview local PO or Qt TS fixes: whitespace,ellipsis (diff on stderr)')
     parser.add_argument('--apply', action='store_true', help='Apply the fixes requested by --fix, then lint again')
     parser.add_argument('--verbose', '-V', action='store_true')
@@ -4083,7 +4200,7 @@ def main():
                     ['git', 'diff', '--name-only', f'{args.changed}...HEAD'], text=True, cwd=root).splitlines()
             except subprocess.CalledProcessError as exc:
                 raise ValueError(f'Cannot determine changed files from {args.changed}: {exc}') from exc
-            args.paths.extend(str(root / path) for path in changed if Path(path).suffix.lower() in L10N_EXTENSIONS)
+            args.paths.extend(str(root / path) for path in changed if is_l10n_path(path))
             if not args.paths and not args.github:
                 return 0
         if not args.paths and not args.github:

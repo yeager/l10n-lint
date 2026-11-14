@@ -299,7 +299,7 @@ def filter_baseline(result, path, root):
 
 
 def compare_catalog(filepath, content, reference_path, result):
-    from l10n_lint import JSONParser, POParser, TSParser, XLIFFParser, LintIssue, Severity
+    from l10n_lint import JSONParser, POParser, TOMLParser, TSParser, XLIFFParser, LintIssue, Severity
     def entries(path, text):
         if Path(path).suffix.lower() in ('.po', '.pot'):
             return {('po', e.get('msgctxt', ''), e['msgid']): (e.get('msgid_plural', ''), e['_line'])
@@ -314,7 +314,10 @@ def compare_catalog(filepath, content, reference_path, result):
         if Path(path).suffix.lower() in ('.json', '.arb'):
             return {('json', e['_id'] or e['_context'], e['source']): ((e['source'], False), e['_line'])
                     for e in JSONParser(text, path).entries}
-        raise ValueError('Reference must be .pot, .po, .ts, .xlf/.xliff, .json, or .arb')
+        if Path(path).suffix.lower() == '.toml':
+            return {('toml', e['_id'] or e['_context'], e['source']): ((e['source'], False), e['_line'])
+                    for e in TOMLParser(text, path).entries}
+        raise ValueError('Reference must be .pot, .po, .ts, .xlf/.xliff, .json, .arb, or .toml')
     formats = {'.po': 'po', '.pot': 'po', '.xlf': 'xliff', '.xliff': 'xliff', '.arb': 'json'}
     target_format = formats.get(Path(filepath).suffix.lower(), Path(filepath).suffix.lower())
     reference_format = formats.get(Path(reference_path).suffix.lower(), Path(reference_path).suffix.lower())

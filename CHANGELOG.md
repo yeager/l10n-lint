@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.23.33] - 2026-11-14
+
+### Added
+
+- Support TOML localization catalogs, including nested tables and string lists.
+  TOML target-only catalogs receive the same missing-translation and Swedish
+  quality checks as other target-only formats, and TOML references can be
+  compared by key path.
+
 ## [1.23.32] - 2026-11-04
 
 ### Fixed

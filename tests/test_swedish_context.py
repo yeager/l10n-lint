@@ -221,6 +221,24 @@ def test_swedish_quote_number_percent_and_range_forms_are_reported():
     assert not lint('Example', 'Gäller 11–12 och 13 - 14.', checks='number-range-dash').issues
 
 
+def test_iec_standard_identifier_is_not_a_swedish_number_range():
+    result = lint(
+        'sRGB IEC 61966-2-1 compound (piece-wise) encoding',
+        'sRGB IEC 61966-2-1-kodning (styckvis)',
+        checks='number-range-dash',
+    )
+    assert not result.issues
+
+
+def test_real_range_after_standard_identifier_is_still_reported():
+    result = lint(
+        'IEC standard and range',
+        'IEC 61966-2-1 gäller för värden 11-12.',
+        checks='number-range-dash',
+    )
+    assert [issue.rule for issue in result.issues] == ['number-range-dash']
+
+
 def test_swedish_dash_is_allowed_as_contextual_punctuation():
     assert not lint("A pause — here.", "En paus — här.", checks="punctuation").issues
 

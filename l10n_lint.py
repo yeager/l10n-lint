@@ -1518,6 +1518,15 @@ class L10nLinter:
                 style_text, re.IGNORECASE
             )
         ]
+        # IEC standard identifiers may put the first number before the first
+        # hyphen (for example IEC 61966-2-1). Protect the complete
+        # identifier so its suffix cannot be mistaken for a number range.
+        standard_identifier_spans = [
+            match.span() for match in re.finditer(
+                r'\b(?:IEC|ISO)\s+\d+(?:-\d+)+\b',
+                style_text, re.IGNORECASE
+            )
+        ]
         # CUPS PPD diagnostics end with a source-defined ``REF: Pages 16-17``
         # reference line. The range is part of the diagnostic format and must
         # remain a page citation, rather than Swedish running prose.
@@ -1545,7 +1554,7 @@ class L10nLinter:
             if rule == 'number-range-dash':
                 matches = (match for match in matches if not any(
                     start <= match.start() and match.end() <= end
-                    for start, end in iso_date_spans + encoding_identifier_spans + ppd_reference_spans
+                    for start, end in iso_date_spans + encoding_identifier_spans + standard_identifier_spans + ppd_reference_spans
                 ))
                 # Character classes such as ``[0-7]`` describe command syntax,
                 # not a Swedish numeric range.

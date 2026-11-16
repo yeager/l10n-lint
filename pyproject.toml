@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "l10n-lint"
-version = "1.23.33"
+version = "1.23.34"
 description = "Linter for localization files (.po, .ts, .xlf/.xliff, .json, .arb, .toml, .ftl, .resx)"
 license = "GPL-3.0-or-later"
 authors = [

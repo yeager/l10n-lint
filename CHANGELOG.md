@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.23.34] - 2026-11-16
+
+### Fixed
+
+- Ignore IEC/ISO standard identifiers such as `IEC 61966-2-1` in Swedish number-range checks.
+
+
 ## [1.23.33] - 2026-11-14
 
 ### Added

@@ -38,7 +38,7 @@ _possible_module_paths = [
 try:
     from l10n_lint import (
         JSONParser, L10nLinter, LintResult, LintIssue, Severity, XLIFFParser,
-        find_l10n_files, fetch_url_file, is_url, RULES, resolve_rules, lint_inputs,
+        L10N_EXTENSIONS, generate_html_report, is_l10n_path, is_url, RULES, resolve_rules, lint_inputs,
         __version__ as LINT_VERSION
     )
 except ImportError:
@@ -47,12 +47,12 @@ except ImportError:
             sys.path.insert(0, str(path))
     from l10n_lint import (
         JSONParser, L10nLinter, LintResult, LintIssue, Severity, XLIFFParser,
-        find_l10n_files, fetch_url_file, is_url, RULES, resolve_rules, lint_inputs,
+        L10N_EXTENSIONS, generate_html_report, is_l10n_path, is_url, RULES, resolve_rules, lint_inputs,
         __version__ as LINT_VERSION
     )
 
 __version__ = LINT_VERSION
-APP_ID = "se.danielnylander.l10n-lint"
+APP_ID = "io.github.yeager.l10n-lint"
 
 # Translation setup - use same domain and locale as CLI
 DOMAIN = "l10n-lint"
@@ -600,6 +600,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
         
         self.settings = load_settings()
         self.current_result = None
+        self._lint_running = False
         self.all_issues = []
         self.history = []
         self._setup_ui()
@@ -633,10 +634,11 @@ class L10nLintWindow(Adw.ApplicationWindow):
         header.pack_start(self.lint_btn)
         
         # Export button
-        export_btn = Gtk.Button(icon_name="document-save-symbolic")
-        export_btn.set_tooltip_text(_("Export report"))
-        export_btn.connect("clicked", self._on_export_clicked)
-        header.pack_end(export_btn)
+        self.export_btn = Gtk.Button(icon_name="document-save-symbolic")
+        self.export_btn.set_tooltip_text(_("Export report"))
+        self.export_btn.set_sensitive(False)
+        self.export_btn.connect("clicked", self._on_export_clicked)
+        header.pack_end(self.export_btn)
         
         # Menu button
         menu_btn = Gtk.MenuButton(icon_name="open-menu-symbolic")
@@ -824,7 +826,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
             path = value.get_path()
             if path:
                 # Check if it's a supported file type
-                if path.lower().endswith(('.po', '.ts', '.xlf', '.xliff', '.json')) or os.path.isdir(path):
+                if is_l10n_path(path) or os.path.isdir(path):
                     self.path_entry.set_text(path)
                     self.remove_css_class("drop-target")
                     # Show metadata immediately
@@ -836,7 +838,7 @@ class L10nLintWindow(Adw.ApplicationWindow):
                     GLib.idle_add(self._on_lint_clicked, None)
                     return True
                 else:
-                    self.status_label.set_text(_("Unsupported file type. Use PO, TS, XLIFF, or JSON files."))
+                    self.status_label.set_text(_("Unsupported localization file type."))
                     self.remove_css_class("drop-target")
         return False
     
@@ -910,14 +912,14 @@ class L10nLintWindow(Adw.ApplicationWindow):
             path.startswith("http") or
             "/" in path  # GitHub repo
         )
-        self.lint_btn.set_sensitive(valid)
+        self.lint_btn.set_sensitive(valid and not self._lint_running)
         
         # Show metadata for single file
         if valid and Path(path).is_file():
             metadata = FileMetadata(path)
             self.metadata_panel.update(metadata)
             self.metadata_panel.set_visible(True)
-        elif not valid or Path(path).is_dir():
+        else:
             self.metadata_panel.set_visible(False)
     
     def _on_open_clicked(self, button):
@@ -928,12 +930,9 @@ class L10nLintWindow(Adw.ApplicationWindow):
         filter_store = Gio.ListStore.new(Gtk.FileFilter)
         
         l10n_filter = Gtk.FileFilter()
-        l10n_filter.set_name(_("Localization files (*.po, *.ts, *.xlf, *.xliff, *.json)"))
-        l10n_filter.add_pattern("*.po")
-        l10n_filter.add_pattern("*.ts")
-        l10n_filter.add_pattern("*.xlf")
-        l10n_filter.add_pattern("*.xliff")
-        l10n_filter.add_pattern("*.json")
+        l10n_filter.set_name(_("Localization files"))
+        for extension in sorted(L10N_EXTENSIONS):
+            l10n_filter.add_suffix(extension[1:])
         filter_store.append(l10n_filter)
         
         all_filter = Gtk.FileFilter()
@@ -966,12 +965,18 @@ class L10nLintWindow(Adw.ApplicationWindow):
             pass
     
     def _on_lint_clicked(self, button):
-        self.settings = load_settings()
-        path = self.path_entry.get_text()
-        if not path:
+        path = self.path_entry.get_text().strip()
+        if not path or self._lint_running:
             return
         
+        self.settings = load_settings()
+        self._lint_running = True
+        self.current_result = None
+        self.all_issues.clear()
+        self.export_btn.set_sensitive(False)
         self.lint_btn.set_sensitive(False)
+        self.summary_label.set_text("")
+        self.count_label.set_text("")
         self.progress.set_visible(True)
         self.progress.set_fraction(0)
         self.status_label.set_text(_("Linting {path}...").format(path=path))
@@ -991,7 +996,10 @@ class L10nLintWindow(Adw.ApplicationWindow):
             self.results_box.remove(child)
         
         # Add to history
-        self._add_to_history(path)
+        try:
+            self._add_to_history(path)
+        except OSError:
+            pass
         
         # Run lint in background thread
         thread = threading.Thread(target=self._run_lint, args=(path,))
@@ -1038,8 +1046,10 @@ class L10nLintWindow(Adw.ApplicationWindow):
     def _show_results(self, result: LintResult):
         self.current_result = result
         self.all_issues = result.issues.copy()
+        self._lint_running = False
         self.progress.set_visible(False)
-        self.lint_btn.set_sensitive(True)
+        self.export_btn.set_sensitive(True)
+        self._on_path_changed(self.path_entry)
         
         # Update filter bar with found rules
         found_rules = [issue.rule for issue in result.issues]
@@ -1215,51 +1225,8 @@ class L10nLintWindow(Adw.ApplicationWindow):
         Path(path).write_text(json.dumps(data, indent=2, ensure_ascii=False))
     
     def _export_html(self, path):
-        html = f"""<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>l10n-lint Report</title>
-<style>
-body {{ font-family: system-ui; max-width: 1200px; margin: 0 auto; padding: 20px; }}
-.stats {{ display: flex; gap: 20px; margin-bottom: 20px; }}
-.stat {{ background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center; }}
-.stat-value {{ font-size: 24px; font-weight: bold; }}
-.issue {{ border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 8px; }}
-.error {{ border-left: 4px solid #e74c3c; }}
-.warning {{ border-left: 4px solid #f39c12; }}
-.info {{ border-left: 4px solid #3498db; }}
-.severity {{ font-weight: bold; text-transform: uppercase; }}
-.location {{ color: #666; }}
-.rule {{ background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 12px; }}
-.context {{ background: #f9f9f9; padding: 8px; margin-top: 8px; font-family: monospace; }}
-</style>
-</head>
-<body>
-<h1>l10n-lint Report</h1>
-<p>Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+        Path(path).write_text(generate_html_report(self.current_result), encoding="utf-8")
 
-<div class="stats">
-<div class="stat"><div class="stat-value">{self.current_result.files_checked}</div>Files</div>
-<div class="stat"><div class="stat-value">{len(self.current_result.issues)}</div>Issues</div>
-<div class="stat"><div class="stat-value" style="color:#e74c3c">{self.current_result.error_count}</div>Errors</div>
-<div class="stat"><div class="stat-value" style="color:#f39c12">{self.current_result.warning_count}</div>Warnings</div>
-</div>
-
-<h2>Issues ({len(self.current_result.issues)})</h2>
-"""
-        for issue in self.current_result.issues:
-            html += f"""<div class="issue {issue.severity.value}">
-<span class="severity" style="color:{'#e74c3c' if issue.severity == Severity.ERROR else '#f39c12' if issue.severity == Severity.WARNING else '#3498db'}">{issue.severity.value}</span>
-<span class="location">{issue.file}:{issue.line}</span>
-<span class="rule">{issue.rule}</span>
-<p>{issue.message}</p>
-{"<div class='context'>" + issue.context + "</div>" if issue.context else ""}
-</div>
-"""
-        html += "</body></html>"
-        Path(path).write_text(html)
-    
     def _export_text(self, path):
         lines = [
             f"l10n-lint Report - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
@@ -1412,6 +1379,12 @@ class L10nLintApp(Adw.Application):
             self.set_accels_for_action(f"app.{name}", shortcuts)
     
     def do_activate(self):
+        display = Gdk.Display.get_default()
+        if display is not None:
+            theme = Gtk.IconTheme.get_for_display(display)
+            for directory in (_script_dir / "data/icons", Path(sys.prefix) / "share/icons"):
+                if directory.is_dir() and str(directory) not in theme.get_search_path():
+                    theme.add_search_path(str(directory))
         win = self.props.active_window
         if not win:
             win = L10nLintWindow(self)

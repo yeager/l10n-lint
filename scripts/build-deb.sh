@@ -52,6 +52,9 @@ install -m 644 "$SRCDIR/l10n_project.py" "$SRCDIR/print_helper.py" "$SRCDIR/l10n
 # Desktop file
 install -m 644 "$SRCDIR/io.github.yeager.l10n-lint.desktop" "$DEST/usr/share/applications/"
 
+install -Dm644 "$SRCDIR/data/icons/hicolor/256x256/apps/io.github.yeager.l10n-lint.png" \
+    "$DEST/usr/share/icons/hicolor/256x256/apps/io.github.yeager.l10n-lint.png"
+
 # Metainfo
 if [ -f "$SRCDIR/io.github.yeager.l10n-lint.metainfo.xml" ]; then
     install -m 644 "$SRCDIR/io.github.yeager.l10n-lint.metainfo.xml" "$DEST/usr/share/metainfo/"

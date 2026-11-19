@@ -2,7 +2,7 @@ app-id: io.github.yeager.l10n-lint
 runtime: org.gnome.Platform
 runtime-version: '46'
 sdk: org.gnome.Sdk
-command: l10n-lint
+command: l10n-lint-gtk
 
 finish-args:
   - --share=ipc
@@ -29,7 +29,8 @@ modules:
       - install -Dm755 l10n_lint_gtk.py /app/bin/l10n-lint-gtk
       - install -Dm644 io.github.yeager.l10n-lint.desktop /app/share/applications/io.github.yeager.l10n-lint.desktop
       - install -Dm644 io.github.yeager.l10n-lint.metainfo.xml /app/share/metainfo/io.github.yeager.l10n-lint.metainfo.xml
+      - install -Dm644 data/icons/hicolor/256x256/apps/io.github.yeager.l10n-lint.png /app/share/icons/hicolor/256x256/apps/io.github.yeager.l10n-lint.png
     sources:
       - type: git
         url: https://github.com/yeager/l10n-lint.git
-        tag: v1.21.1
+        tag: v1.23.35

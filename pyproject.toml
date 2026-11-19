@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "l10n-lint"
-version = "1.23.34"
+version = "1.23.35"
 description = "Linter for localization files (.po, .ts, .xlf/.xliff, .json, .arb, .toml, .ftl, .resx)"
 license = "GPL-3.0-or-later"
 authors = [
@@ -37,6 +37,9 @@ py-modules = ["l10n_lint", "l10n_lint_gtk", "l10n_project", "print_helper"]
 "*" = ["locale/**/*", "man/**/*", "docs/**/*"]
 
 [tool.setuptools.data-files]
+"share/applications" = ["io.github.yeager.l10n-lint.desktop"]
+"share/metainfo" = ["io.github.yeager.l10n-lint.metainfo.xml"]
+"share/icons/hicolor/256x256/apps" = ["data/icons/hicolor/256x256/apps/io.github.yeager.l10n-lint.png"]
 "share/l10n-lint/locale/sv/LC_MESSAGES" = ["locale/sv/LC_MESSAGES/l10n-lint.mo"]
 "share/man/en/man1" = ["man/en/l10n-lint.1", "man/en/l10n-lint-gtk.1"]
 "share/man/sv/man1" = ["man/sv/l10n-lint.1", "man/sv/l10n-lint-gtk.1"]

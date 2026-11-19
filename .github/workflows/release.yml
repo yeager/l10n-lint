@@ -36,7 +36,7 @@ jobs:
           mkdir -p ${ROOT}/usr/lib/python3/dist-packages
           mkdir -p ${ROOT}/usr/share/applications
           mkdir -p ${ROOT}/usr/share/metainfo
-          mkdir -p ${ROOT}/usr/share/icons/hicolor/scalable/apps
+          mkdir -p ${ROOT}/usr/share/icons/hicolor/256x256/apps
           mkdir -p ${ROOT}/usr/share/${PKG}/locale
           mkdir -p ${ROOT}/usr/share/man/man1
 
@@ -65,7 +65,7 @@ jobs:
           # Desktop + metainfo + icons
           cp io.github.yeager.l10n-lint.desktop ${ROOT}/usr/share/applications/
           cp io.github.yeager.l10n-lint.metainfo.xml ${ROOT}/usr/share/metainfo/
-          cp -r data/icons/hicolor/scalable/apps/*.svg ${ROOT}/usr/share/icons/hicolor/scalable/apps/ 2>/dev/null || true
+          install -m 644 data/icons/hicolor/256x256/apps/io.github.yeager.l10n-lint.png ${ROOT}/usr/share/icons/hicolor/256x256/apps/
 
           # Compile and install locale
           for po in po/*.po; do

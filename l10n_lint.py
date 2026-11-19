@@ -17,7 +17,7 @@ Checks for:
 
 import argparse
 import gettext
-from html import unescape
+from html import escape, unescape
 import json
 import locale
 import os
@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     sys.modules.setdefault('l10n_lint', sys.modules[__name__])
 
-__version__ = "1.23.34"
+__version__ = "1.23.35"
 # ARB is Dart's Application Resource Bundle format.  It is JSON with
 # ``@key`` metadata members, which JSONParser already understands.
 L10N_EXTENSIONS = frozenset({'.po', '.ts', '.xlf', '.xliff', '.json', '.arb', '.toml', '.ftl', '.rc', '.properties', '.xml', '.strings', '.resx'})
@@ -3882,7 +3882,7 @@ def generate_html_report(result: LintResult, title: str = "l10n-lint Report") ->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title}</title>
+    <title>{escape(title)}</title>
     <style>
         :root {{
             --bg: #1a1a2e;
@@ -3960,7 +3960,7 @@ def generate_html_report(result: LintResult, title: str = "l10n-lint Report") ->
 </head>
 <body>
     <div class="container">
-        <h1>🔍 {title}</h1>
+        <h1>🔍 {escape(title)}</h1>
         <p>Generated: {time.strftime("%Y-%m-%d %H:%M")}</p>
         
         <div class="summary">
@@ -3993,7 +3993,7 @@ def generate_html_report(result: LintResult, title: str = "l10n-lint Report") ->
         total = len(result.issues)
         for rule, count in sorted(rule_counts.items(), key=lambda x: -x[1]):
             pct = (count / total * 100) if total > 0 else 0
-            html += f'            <tr><td>{rule}</td><td>{count}</td><td>{pct:.1f}%</td></tr>\n'
+            html += f'            <tr><td>{escape(rule)}</td><td>{count}</td><td>{pct:.1f}%</td></tr>\n'
         html += '        </table>\n'
     
     # Issues by file
@@ -4004,7 +4004,7 @@ def generate_html_report(result: LintResult, title: str = "l10n-lint Report") ->
             <tr><th>File</th><th>Issues</th></tr>
 '''
         for filepath, count in sorted(file_counts.items(), key=lambda x: -x[1])[:20]:
-            html += f'            <tr><td>{filepath}</td><td>{count}</td></tr>\n'
+            html += f'            <tr><td>{escape(filepath)}</td><td>{count}</td></tr>\n'
         html += '        </table>\n'
     
     # All issues
@@ -4017,13 +4017,13 @@ def generate_html_report(result: LintResult, title: str = "l10n-lint Report") ->
         for issue in sorted(result.issues, key=lambda x: (x.file, x.line)):
             sev_class = f"severity-{issue.severity.value}"
             sev_icon = "❌" if issue.severity == Severity.ERROR else "⚠️" if issue.severity == Severity.WARNING else "ℹ️"
-            ctx = f'<br><span class="issue-context">{issue.context}...</span>' if issue.context else ''
+            ctx = f'<br><span class="issue-context">{escape(issue.context)}...</span>' if issue.context else ''
             html += f'''            <tr>
-                <td>{issue.file}</td>
+                <td>{escape(issue.file)}</td>
                 <td>{issue.line}</td>
                 <td class="{sev_class}">{sev_icon} {issue.severity.value}</td>
-                <td>{issue.rule}</td>
-                <td>{issue.message}{ctx}</td>
+                <td>{escape(issue.rule)}</td>
+                <td>{escape(issue.message)}{ctx}</td>
             </tr>
 '''
         html += '        </table>\n'

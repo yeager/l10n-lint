@@ -4,3 +4,5 @@ recursive-include tests *.py *.po *.ts
 recursive-include man *.1
 recursive-include po *.po *.pot
 recursive-include locale *.pot *.mo
+include io.github.yeager.l10n-lint.desktop io.github.yeager.l10n-lint.metainfo.xml
+recursive-include data/icons *.png

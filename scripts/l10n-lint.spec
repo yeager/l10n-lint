@@ -1,5 +1,5 @@
 Name:           l10n-lint
-Version:        1.21.6
+Version:        1.23.35
 Release:        1%{?dist}
 Summary:        Linter for localization files
 License:        GPL-3.0-or-later
@@ -49,8 +49,8 @@ mkdir -p %{buildroot}%{_datadir}/applications
 install -m 644 io.github.yeager.l10n-lint.desktop %{buildroot}%{_datadir}/applications/
 mkdir -p %{buildroot}%{_datadir}/metainfo
 install -m 644 io.github.yeager.l10n-lint.metainfo.xml %{buildroot}%{_datadir}/metainfo/
-mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
-install -m 644 data/icons/hicolor/scalable/apps/*.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/
+mkdir -p %{buildroot}%{_datadir}/icons/hicolor/256x256/apps
+install -m 644 data/icons/hicolor/256x256/apps/io.github.yeager.l10n-lint.png %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/
 mkdir -p %{buildroot}%{_mandir}/man1
 install -m 644 l10n-lint.1.gz %{buildroot}%{_mandir}/man1/
 cp -r locale %{buildroot}%{_datadir}/%{name}/
@@ -67,7 +67,7 @@ update-desktop-database /usr/share/applications 2>/dev/null || true
 %{_datadir}/%{name}/
 %{_datadir}/applications/io.github.yeager.l10n-lint.desktop
 %{_datadir}/metainfo/io.github.yeager.l10n-lint.metainfo.xml
-%{_datadir}/icons/hicolor/scalable/apps/*.svg
+%{_datadir}/icons/hicolor/256x256/apps/io.github.yeager.l10n-lint.png
 %{_mandir}/man1/l10n-lint.1.gz
 %doc README.md CHANGELOG.md
 %license LICENSE

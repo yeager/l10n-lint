@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.23.35] - 2026-11-19
+
+- Add a GTK app icon and use the same app ID in the launcher and About dialog.
+- Accept all supported catalog types across desktop file entry points.
+- Prevent overlapping GTK lint runs and stale report export.
+- Escape catalog text in HTML reports.
+
 ## [1.23.34] - 2026-11-16
 
 ### Fixed

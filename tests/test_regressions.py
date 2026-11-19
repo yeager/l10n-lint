@@ -463,3 +463,14 @@ def test_swedish_24_hour_strftime_pattern_is_not_a_printf_mismatch():
 def test_swedish_strftime_time_punctuation_is_not_a_mismatch():
     result = lint(po('Timestamp: %H:%M:%S.%f', 'Tidsstämpel: %H.%M.%S,%f'), checks=['punctuation-mismatch'])
     assert not result.issues
+
+
+def test_html_report_preserves_catalog_text():
+    result = core.LintResult()
+    result.add(core.LintIssue('menu<sv>.po', 1, core.Severity.WARNING,
+                              'placeholder-mismatch', 'File & folder', 'Open <document>'))
+    html = core.generate_html_report(result, 'Report <sv>')
+    assert 'Report &lt;sv&gt;' in html
+    assert html.count('menu&lt;sv&gt;.po') == 2
+    assert 'File &amp; folder' in html
+    assert 'Open &lt;document&gt;' in html

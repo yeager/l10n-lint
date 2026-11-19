@@ -48,6 +48,9 @@
   <url type="vcs-browser">https://github.com/yeager/l10n-lint</url>
 
   <releases>
+    <release version="1.23.35" date="2026-11-19">
+      <description><p>Add a GTK app icon and improve report export and file handling.</p></description>
+    </release>
     <release version="1.23.34" date="2026-11-16">
       <description><p>Ignore IEC and ISO standard identifiers in Swedish number-range checks.</p></description>
     </release>
